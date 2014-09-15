@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project( opencv-example-opflow )
+find_package( OpenCV REQUIRED )
+add_executable( opencv-example-opflow opencv-example-opflow.cpp )
+target_link_libraries( opencv-example-opflow ${OpenCV_LIBS} )
