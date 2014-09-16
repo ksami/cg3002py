@@ -35,5 +35,7 @@ if __name__ == '__main__':
 	response = urllib2.urlopen(baseurl + query)
 	jsondata = response.read()
 	nodes = json.loads(jsondata)
-	print repr(nodes)
+	mapInfo = MapInfo(jsondata)
+	print mapInfo.shortestPath(1, 7)
+	#print repr(nodes)
 
