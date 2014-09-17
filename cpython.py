@@ -3,7 +3,7 @@
 import subprocess
 import sys
 
-def execute(command):
+def execute(cameraqueue,command):
 	process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 	# Poll process for new output until finished
@@ -11,10 +11,11 @@ def execute(command):
 		nextline = process.stdout.readline()
 		if nextline == '' and process.poll() != None:
 			break
-			
+
 		#print nextline
-		sys.stdout.write(nextline)
-		sys.stdout.flush()
+		#sys.stdout.write(nextline)
+		#sys.stdout.flush()
+		cameraqueue.put(nextline)
 
 	output = process.communicate()[0]
 	exitCode = process.returncode
