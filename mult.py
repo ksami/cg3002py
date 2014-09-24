@@ -18,6 +18,7 @@ if __name__ == "__main__":
 
 	cameraConsume = multiprocessing.Process(target=proc.consume, args=(cameraqueue,))
 	camera = multiprocessing.Process(target=cpython.execute, args=(cameraqueue,cameraExe))
+	camera2 = multiprocessing.Process(target=cpython.execute, args=(cameraqueue,cameraExe))
 	alarm = multiprocessing.Process(target=timer.xseconds, args=(q,1))
 	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(mapqueue, mapName, mapFloor))
 	pro = multiprocessing.Process(target=proc.produce, args=(q,))
@@ -27,6 +28,7 @@ if __name__ == "__main__":
 	# start processes
 	cameraConsume.start()
 	camera.start()
+	camera2.start()
 	alarm.start()
 	pro.start()
 	pro2.start()
@@ -45,6 +47,7 @@ if __name__ == "__main__":
 	# wait for processes to end
 	cameraConsume.join()
 	camera.join()
+	camera2.join()
 	alarm.join()
 	pro.join()
 	pro2.join()
