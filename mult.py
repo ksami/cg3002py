@@ -7,7 +7,7 @@ import timer
 import smwmap
 import cpython
 
-cameraExe = "cprocess.o"
+cameraExe = "./cprocess.o"
 mapName = "DemoBuilding"
 mapFloor = "2"
 
