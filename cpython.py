@@ -3,7 +3,7 @@
 import subprocess
 import sys
 
-def execute(command):
+def execute(q_cam, command):
 	process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 	# Poll process for new output until finished
@@ -12,9 +12,10 @@ def execute(command):
 		if nextline == '' and process.poll() != None:
 			break
 
-		print nextline
+		#print nextline
 		#sys.stdout.write(nextline)
 		#sys.stdout.flush()
+		q_cam.put(nextline)
 
 	output = process.communicate()[0]
 	exitCode = process.returncode

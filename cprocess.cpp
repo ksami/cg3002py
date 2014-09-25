@@ -13,6 +13,6 @@ int main(void){
 			timer++;
 		}
 		timer = 0;
-		cout << "cprocess" << i << endl;
+		cout << "hello " << i << endl;
 	}
 }

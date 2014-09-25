@@ -6,20 +6,24 @@ import time
 import timer
 import smwmap
 import cpython
+import audio.textspeech
 
 cameraExe = "./cprocess.o"
 mapName = "COM1"
 mapFloor = "2"
 
 if __name__ == "__main__":
+	q_cam = multiprocessing.Queue()
 	q_map = multiprocessing.Queue()
 
-	camera = multiprocessing.Process(target=cpython.execute, args=(cameraExe,))
+	camera = multiprocessing.Process(target=cpython.execute, args=(q_cam, cameraExe))
+	texttospeech = multiprocessing.Process(target=audio.textspeech.speakq, args=(q_cam,))
 	alarm = multiprocessing.Process(target=timer.alarm, args=(4,))
 	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
 	# start processes
 	camera.start()
+	texttospeech.start()
 	alarm.start()
 	getmap.start()
 
@@ -34,5 +38,6 @@ if __name__ == "__main__":
 
 	# wait for processes to end
 	camera.join()
+	texttospeech.join()
 	alarm.join()
 	getmap.join()
