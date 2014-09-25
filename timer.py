@@ -3,10 +3,10 @@
 import time
 
 # Raises a flag when x seconds are up
-# params: queue, num of seconds
-def xseconds(timequeue,x):
+# params: num of seconds
+def alarm(x):
 	time.sleep(x)
-	timequeue.put("timer up!!")
+	print "timer up!!"
 
 # For testing:
 # Run in command line using

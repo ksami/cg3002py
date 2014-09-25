@@ -2,54 +2,37 @@
 
 import multiprocessing
 import time
-import proc
+
 import timer
 import smwmap
 import cpython
 
 cameraExe = "./cprocess.o"
-mapName = "DemoBuilding"
+mapName = "COM1"
 mapFloor = "2"
 
 if __name__ == "__main__":
-	q = multiprocessing.Queue()
-	mapqueue = multiprocessing.Queue()
-	cameraqueue = multiprocessing.Queue()
+	q_map = multiprocessing.Queue()
 
-	cameraConsume = multiprocessing.Process(target=proc.consume, args=(cameraqueue,))
-	camera = multiprocessing.Process(target=cpython.execute, args=(cameraqueue,cameraExe))
-	camera2 = multiprocessing.Process(target=cpython.execute, args=(cameraqueue,cameraExe))
-	alarm = multiprocessing.Process(target=timer.xseconds, args=(q,1))
-	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(mapqueue, mapName, mapFloor))
-	pro = multiprocessing.Process(target=proc.produce, args=(q,))
-	pro2 = multiprocessing.Process(target=proc.produce2, args=(q,))
-	con = multiprocessing.Process(target=proc.consume, args=(q,))
+	camera = multiprocessing.Process(target=cpython.execute, args=(cameraExe,))
+	alarm = multiprocessing.Process(target=timer.alarm, args=(4,))
+	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
 	# start processes
-	cameraConsume.start()
 	camera.start()
-	camera2.start()
 	alarm.start()
-	pro.start()
-	pro2.start()
-	con.start()
 	getmap.start()
 
 	# timer seconds since processes started
-	for x in range(1,6):
+	for x in range(1,10):
 		time.sleep(1)
 		print str(x)
 	
 	# get data from mapqueue
-	mapinfo = mapqueue.get()
+	mapinfo = q_map.get()
 	print repr(mapinfo)
 
 	# wait for processes to end
-	cameraConsume.join()
 	camera.join()
-	camera2.join()
 	alarm.join()
-	pro.join()
-	pro2.join()
-	con.join()
 	getmap.join()
