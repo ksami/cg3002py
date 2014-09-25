@@ -3,11 +3,9 @@ import sys,os,time
 def speakq(q_string):
 	while True:
 		myString = q_string.get()
-		command = 'espeak -s 155 "'+myString+'"'
+		print myString
+		command = 'espeak -s 155 "'+myString+'" > /dev/null 2>&1'
 		os.system(command)
-
-		#wait for system to finish speaking
-		time.sleep(1)
 
 def speak(myString):
 	command = 'espeak -s 155 "'+myString+'"'
