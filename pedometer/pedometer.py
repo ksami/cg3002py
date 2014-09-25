@@ -1,0 +1,153 @@
+import smbus
+import math
+import time
+import sys
+from accelerometer import Accelerometer
+
+SAMPLE_SIZE = 50
+PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
+TIME_WINDOW = 0.5
+
+MAX_ACCEL_VALUE = 32767
+MIN_ACCEL_VALUE = 31128
+
+MAX_STATIONARY_ACCEL = Accelerometer(MAX_ACCEL_VALUE, MAX_ACCEL_VALUE, MAX_ACCEL_VALUE)
+MIN_STATIONARY_ACCEL = Accelerometer(MIN_ACCEL_VALUE, MIN_ACCEL_VALUE, MIN_ACCEL_VALUE)
+
+# Power management registers
+power_mgmt_1 = 0x6b
+
+# MPU6050 i2c address
+address = 0x68 
+
+# we can compare two accelerometer values by this axis
+most_active_axis = 2 # axis z
+
+def read_byte(adr):
+    return bus.read_byte_data(address, adr)
+
+def read_word(adr):
+    high = bus.read_byte_data(address, adr)
+    low = bus.read_byte_data(address, adr+1)
+    val = (high << 8) + low
+    return val
+
+def read_word_2c(adr):
+    val = read_word(adr)
+    if (val >= 0x8000):
+        return -((65535 - val) + 1)
+    else:
+        return val
+
+def compare(accel_1, accel_2):
+
+    if( most_active_axis == 0 ) :
+        return accel_1.accel_x - accel_2.accel_x
+    
+    if( most_active_axis == 1 ) :
+        return accel_1.accel_y - accel_2.accel_y
+    
+    if( most_active_axis == 2 ) :
+        return accel_1.accel_z - accel_2.accel_z
+
+bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
+
+# Now wake the 6050 up as it starts in sleep mode
+bus.write_byte_data(address, power_mgmt_1, 0)
+
+accel_max = Accelerometer(0, 0, 0)
+accel_min = Accelerometer(sys.maxint, sys.maxint, sys.maxint)
+dynamic_threshold = Accelerometer(0, 0, 0) # the moving average of 50 accelerometer data
+moving_index = 0
+sample_size = 0
+accel_filter_list = []
+sample_old = Accelerometer(0, 0, 0)
+sample_new = Accelerometer(0, 0, 0)
+num_steps = 0
+time_window = 0
+total_distance = 0
+
+# initialization stage
+
+accel_xout = read_word_2c(0x3b)
+accel_yout = read_word_2c(0x3d)
+accel_zout = read_word_2c(0x3f)
+
+max_axis = accel_zout
+if(max_axis < accel_xout):
+    max_axis = accel_xout
+    most_active_axis = 0
+if(max_axis < accel_yout):
+    max_axis = accel_xout
+    most_axis_axis = 1
+
+
+for i in range(3) :
+    accel_xout = read_word_2c(0x3b)
+    accel_yout = read_word_2c(0x3d)
+    accel_zout = read_word_2c(0x3f)
+
+    accel_val = Accelerometer(accel_xout, accel_yout, accel_zout)
+    accel_filter_list.append(accel_val)
+
+first_time = True
+
+print "TIME_WINDOW: ", TIME_WINDOW
+print "PRECISION: " , PRECISION
+
+while(True):
+
+    if(sample_size == 50):
+        sample_size = 0
+       # print "--------------------------------- finished 50 samples \n"
+
+        dynamic_threshold.accel_x = (accel_max.accel_x + accel_min.accel_x) / 2
+        dynamic_threshold.accel_y = (accel_max.accel_y + accel_min.accel_y) / 2
+        dynamic_threshold.accel_z = (accel_max.accel_z + accel_min.accel_z) / 2
+
+        accel_max = Accelerometer(0, 0, 0)
+        accel_min = Accelerometer(sys.maxint, sys.maxint, sys.maxint)
+
+        first_time = False
+
+    accel_xout = read_word_2c(0x3b)
+    accel_yout = read_word_2c(0x3d)
+    accel_zout = read_word_2c(0x3f)
+
+    accel_val = Accelerometer(accel_xout, accel_yout, accel_zout)
+
+    accel_val.accel_x = (accel_filter_list[0].accel_x + accel_filter_list[1].accel_x + accel_filter_list[2].accel_x + accel_val.accel_x) / 4
+    accel_val.accel_y = (accel_filter_list[0].accel_y + accel_filter_list[1].accel_y + accel_filter_list[2].accel_y + accel_val.accel_y) / 4
+    accel_val.accel_z = (accel_filter_list[0].accel_z + accel_filter_list[1].accel_z + accel_filter_list[2].accel_z + accel_val.accel_z) / 4
+    
+    accel_filter_list.insert(moving_index, accel_val)
+    moving_index = (moving_index + 1) % 3;
+    sample_size += 1    
+
+    # finding maximum, minimum
+    if(compare(accel_max, accel_val) < 0):
+        accel_max = accel_val
+    if(compare(accel_min, accel_val) > 0):
+        accel_min = accel_val
+
+    if(not first_time):
+        sample_old = sample_new
+	
+	#Sif( compare(accel_val, MAX_STATIONARY_ACCEL) < 0 and compare(accel_val, MIN_STATIONARY_ACCEL) > 0):
+        if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
+	        #  print "------------- get sample_new value\n "
+            sample_new = accel_val
+
+            if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
+                # check time window()
+        	if(time_window == 0 or time.time() - time_window > 5):
+        	    time_window = time.time()
+        	    num_steps += 1
+                print "num steps: ", num_steps
+            elif( time.time() - time_window > TIME_WINDOW):
+                time_window = time.time()
+                num_steps += 1
+                print "num steps: ", num_steps
+
+    else:
+	   sample_new = accel_val
