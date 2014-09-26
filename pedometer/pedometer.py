@@ -7,6 +7,7 @@ from accelerometer import Accelerometer
 SAMPLE_SIZE = 50
 PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
 TIME_WINDOW = 0.5
+HEIGHT = 1.77 # in meters
 
 MAX_ACCEL_VALUE = 32767
 MIN_ACCEL_VALUE = 31128
@@ -64,6 +65,9 @@ accel_filter_list = []
 sample_old = Accelerometer(0, 0, 0)
 sample_new = Accelerometer(0, 0, 0)
 num_steps = 0
+steps_per_two_s = 0
+two_seconds_elapsed = 0
+distance_per_two_s = 0
 time_window = 0
 total_distance = 0
 
@@ -82,7 +86,7 @@ if(max_axis < accel_yout):
     most_axis_axis = 1
 
 
-for i in range(3) :
+for i in range(4) :
     accel_xout = read_word_2c(0x3b)
     accel_yout = read_word_2c(0x3d)
     accel_zout = read_word_2c(0x3f)
@@ -94,6 +98,8 @@ first_time = True
 
 print "TIME_WINDOW: ", TIME_WINDOW
 print "PRECISION: " , PRECISION
+
+two_seconds_elapsed = time.time()
 
 while(True):
 
@@ -116,12 +122,12 @@ while(True):
 
     accel_val = Accelerometer(accel_xout, accel_yout, accel_zout)
 
-    accel_val.accel_x = (accel_filter_list[0].accel_x + accel_filter_list[1].accel_x + accel_filter_list[2].accel_x + accel_val.accel_x) / 4
-    accel_val.accel_y = (accel_filter_list[0].accel_y + accel_filter_list[1].accel_y + accel_filter_list[2].accel_y + accel_val.accel_y) / 4
-    accel_val.accel_z = (accel_filter_list[0].accel_z + accel_filter_list[1].accel_z + accel_filter_list[2].accel_z + accel_val.accel_z) / 4
+    accel_val.accel_x = (accel_filter_list[0].accel_x + accel_filter_list[1].accel_x + accel_filter_list[2].accel_x + accel_filter_list[3].accel_x + accel_val.accel_x) / 4
+    accel_val.accel_y = (accel_filter_list[0].accel_y + accel_filter_list[1].accel_y + accel_filter_list[2].accel_y + accel_filter_list[3].accel_y + accel_val.accel_y) / 4
+    accel_val.accel_z = (accel_filter_list[0].accel_z + accel_filter_list[1].accel_z + accel_filter_list[2].accel_z + accel_filter_list[3].accel_z + accel_val.accel_z) / 4
     
     accel_filter_list.insert(moving_index, accel_val)
-    moving_index = (moving_index + 1) % 3;
+    moving_index = (moving_index + 1) % 4;
     sample_size += 1    
 
     # finding maximum, minimum
@@ -129,6 +135,31 @@ while(True):
         accel_max = accel_val
     if(compare(accel_min, accel_val) > 0):
         accel_min = accel_val
+
+    if(time.time() - two_seconds_elapsed >= 2):
+        if(steps_per_two_s <= 2):
+            distance_per_two_s = HEIGHT / 5
+        elif (steps_per_two_s <= 3):
+            distance_per_two_s = HEIGHT / 4
+        elif (steps_per_two_s <= 4):
+            distance_per_two_s = HEIGHT / 3
+        elif (steps_per_two_s <= 5):
+            distance_per_two_s = HEIGHT / 2
+        elif (steps_per_two_s <= 6):
+            distance_per_two_s = HEIGHT / 1.2
+        elif (steps_per_two_s <= 8):
+            distance_per_two_s = HEIGHT 
+        else
+            distance_per_two_s = 1.2 * HEIGHT
+
+        total_distance += distance_per_two_s
+
+        print "numsteps per 2s: ", steps_per_two_s
+        print "distance_per_two_s: ", distance_per_two_s
+        print  "total_distance: ", total_distance
+
+        steps_per_two_s = 0
+        distance_per_two_s = 0
 
     if(not first_time):
         sample_old = sample_new
@@ -142,10 +173,12 @@ while(True):
                 # check time window()
         	if(time_window == 0 or time.time() - time_window > 5):
         	    time_window = time.time()
-        	    num_steps += 1
+                steps_per_two_s += 1
+                num_steps += 1
                 print "num steps: ", num_steps
             elif( time.time() - time_window > TIME_WINDOW):
                 time_window = time.time()
+                steps_per_two_s += 1
                 num_steps += 1
                 print "num steps: ", num_steps
 
