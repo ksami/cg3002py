@@ -8,15 +8,22 @@ import smwmap
 import cpython
 import audio.textspeech
 import pedometer.test
+import comms.Python.comm
 
 cameraExe = "./cprocess.o"
 mapName = "COM1"
 mapFloor = "2"
+sendStr = "xbee string to send"
 
 if __name__ == "__main__":
+	# Queues
 	q_cam = multiprocessing.Queue()
 	q_map = multiprocessing.Queue()
+	q_xbee = multiprocessing.Queue()
 
+	# Processes
+	send = multiprocessing.Process(target=comms.Python.comm.send, args=(q_xbee, sendStr))
+	receive = multiprocessing.Process(target=comms.Python.comm.receive, args=(q_xbee,))
 	pedo = multiprocessing.Process(target=pedometer.test.execute)
 	camera = multiprocessing.Process(target=cpython.execute, args=(q_cam, cameraExe))
 	texttospeech = multiprocessing.Process(target=audio.textspeech.speakq, args=(q_cam,))
@@ -24,6 +31,8 @@ if __name__ == "__main__":
 	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
 	# start processes
+	send.start()
+	receive.start()
 	pedo.start()
 	camera.start()
 	texttospeech.start()
@@ -40,6 +49,8 @@ if __name__ == "__main__":
 	print repr(mapinfo)
 
 	# wait for processes to end
+	send.join()
+	receive.join()
 	pedo.join()
 	camera.join()
 	texttospeech.join()
