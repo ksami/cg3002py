@@ -12,10 +12,14 @@ Y = 'y'
 NODENAME = 'nodeName'
 LINKTO = 'linkTo'
 
+INFO = 'info'
+NORTHAT = 'northAt'
+
 class MapInfo:
 
 	def __init__ (self, jsonString):
 		mapinfo = json.loads(jsonString)
+		self.degree = int(mapinfo[INFO][NORTHAT])
 		self.mapList = [] # list of nodes
 		self.adjacencyList = {} # dictionary of rooms that is linked to the room in index i
 		linkToList = []
@@ -89,7 +93,7 @@ class MapInfo:
 
 		return nodeList
 
-	def shortestPathByCoordinates(self, coordX, coordY, heading, endID):
+	def shortestPathByCoordinates(self, coordX, coordY, endID):
 
 		minimumDist = sys.maxint
 		minimumNodeID = 0
@@ -98,9 +102,29 @@ class MapInfo:
 			distance = math.sqrt( (mapItem.getX() - coordX)**2 +  (mapItem.getY() - coordY)**2)
 			if(distance < minimumDist):
 				minimumDist = distance
-				minimumNodeId = mapItem.getId()
+				minimumNodeID = mapItem.getId()
 
-		return self.shortestPath(minimumNodeId, endID)
+		return self.shortestPath(minimumNodeID, endID)
+
+	def giveDirection (self, coordX, coordY, heading):
+
+		for i in self.adjacencyList.keys():
+			for j in self.adjacencyList[i].keys():
+				xi = self.mapList[i-1].getX()
+				yi = self.mapList[i-1].getY()
+				xj = self.mapList[j-1].getX()
+				yj = self.mapList[j-1].getY()
+
+				if( ((xi == coordX) and (yi == coordY)) or ((xj == coordX) and (yj == coordY)) or ((coordY - yi)*(xj - xi) == (yj - yi)*(coordX - xi)) ):
+					# current location is along that path
+					angle = math.atan2((yj - yi),(xj - xi))
+					if(angle < 0):
+						angle += 2*math.pi
+
+					return math.degrees(angle) + 90 - (heading + self.degree) 
+
+		return 0
+
 
 def Dijkstra(graph,start,end=None):
 		"""

@@ -38,6 +38,8 @@ if __name__ == '__main__':
 	mapInfo = MapInfo(jsondata)
 	print mapInfo.shortestPath(1, 7)
 	print "\n\n\n"
-	print mapInfo.shortestPathByCoordinates(150, 100, 270, 7)
+	print mapInfo.shortestPathByCoordinates(250, 100, 7)
+	print "\n"
+	print "You are off by", mapInfo.giveDirection(600, 250, 45)
 	#print repr(nodes)
 
