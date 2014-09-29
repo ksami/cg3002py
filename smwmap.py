@@ -37,5 +37,7 @@ if __name__ == '__main__':
 	nodes = json.loads(jsondata)
 	mapInfo = MapInfo(jsondata)
 	print mapInfo.shortestPath(1, 7)
+	print "\n\n\n"
+	print mapInfo.shortestPathByCoordinates(150, 100, 270, 7)
 	#print repr(nodes)
 

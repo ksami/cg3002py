@@ -1,6 +1,7 @@
 
 import json
 import math
+import sys
 from nodeinfo import NodeInfo
 from priodict import priorityDictionary
 
@@ -45,10 +46,12 @@ class MapInfo:
 		self.printSelf()
 
 	def printSelf(self):
-		print "map\n"
+		print "-\n-------map------\n"
 		for i in range(self.size):
 			node = self.mapList[i]
 			print str(node.getId()) , str(node.getX()) , str(node.getY()) , node.getName()
+
+		print "\n"
 
 		for i in self.adjacencyList.keys():
 			print str(i) , "---------------"
@@ -79,7 +82,25 @@ class MapInfo:
 		for p in path:
 			nodeList.append(self.mapList[p].getId())
 
+		for i in range(len(path)-1):
+			print self.mapList[path[i]].getId(), self.mapList[path[i]].getName(), "---TO---", self.mapList[path[i+1]].getId(), self.mapList[path[i+1]].getName()
+
+		print "\n"
+
 		return nodeList
+
+	def shortestPathByCoordinates(self, coordX, coordY, heading, endID):
+
+		minimumDist = sys.maxint
+		minimumNodeID = 0
+
+		for mapItem in self.mapList:
+			distance = math.sqrt( (mapItem.getX() - coordX)**2 +  (mapItem.getY() - coordY)**2)
+			if(distance < minimumDist):
+				minimumDist = distance
+				minimumNodeId = mapItem.getId()
+
+		return self.shortestPath(minimumNodeId, endID)
 
 def Dijkstra(graph,start,end=None):
 		"""
