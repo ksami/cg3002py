@@ -20,58 +20,135 @@ sendStr = "xbee string to send"
 systemState = State()
 
 def main():
-	print "hello world"
+	setup()
 
 	while True:
 		currentState = systemState.getCurrentState()
+
 		if currentState == State.STATE_OFF:
-			print "state off!"
-			systemState.changeState(False)
+			executeOff()
+
+		elif currentState == State.STATE_IDLE:
+			executeIdle()
+
+		elif currentState == State.STATE_INIT:
+			executeInit()
+		
+		elif currentState == State.STATE_NAVI:
+			executeNavi()
+		
+		elif currentState == State.STATE_WAIT:
+			executeWait()
+		
 		else:
-			print "haha"
+			pass
+
+# Creates a new process
+# params: function to call, tuple of arguments
+# returns: process
+def createProcess(function, args=()):
+	return multiprocessing.Process(target=function, args=args)
+
+# Creates a new queue
+# returns: queue
+def createQueue():
+	return multiprocessing.Queue()
 
 
-def startProcesses():
+def setup():
+	pass
 	# Queues
-	q_cam = multiprocessing.Queue()
-	q_map = multiprocessing.Queue()
-	q_xbee = multiprocessing.Queue()
+	# global q_cam = createQueue()
+	# global q_map = createQueue()
+	# global q_xbee = createQueue()
 
 	# Processes
-	send = multiprocessing.Process(target=comms.Python.comm.send, args=(q_xbee, sendStr))
-	receive = multiprocessing.Process(target=comms.Python.comm.receive, args=(q_xbee,))
-	pedo = multiprocessing.Process(target=pedometer.test.execute)
-	camera = multiprocessing.Process(target=cpython.execute, args=(q_cam, cameraExe))
-	texttospeech = multiprocessing.Process(target=audio.textspeech.speakq, args=(q_cam,))
-	alarm = multiprocessing.Process(target=timer.alarm, args=(4,))
-	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
+	# global p_send = createProcess(function=comms.Python.comm.send, args=(sendStr,))
+	# global p_receive = createProcess(function=comms.Python.comm.receive, args=(q_xbee,))
+	# global p_pedo = createProcess(function=pedometer.test.execute)
+	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
+	# global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
+	# global p_alarm = createProcess(function=timer.alarm, args=(4,))
+	# global p_getmap = createProcess(function=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
-	# start processes
-	send.start()
-	receive.start()
-	pedo.start()
-	camera.start()
-	texttospeech.start()
-	alarm.start()
-	getmap.start()
 
-	# timer seconds since processes started
-	for x in range(1,10):
-		time.sleep(1)
-		print str(x)
+def executeOff():
+	print "in off state"
+	#send device ready to arduino
+	#handle timeout and repeated sending
+	# isDone = False
 	
-	# get data from mapqueue
-	mapinfo = q_map.get()
-	print repr(mapinfo)
+	# while isDone == False:
+	# 	p_send = createProcess(comms.Python.comm.send, ("device ready",))
+	# 	p_send.start()
+	# 	p_send.join()
+		
+	# 	recvmsg = q_xbee.get()
+	# 	if recvmsg is not None:
+	# 		isDone = True
 
-	# wait for processes to end
-	send.join()
-	receive.join()
-	pedo.join()
-	camera.join()
-	texttospeech.join()
-	alarm.join()
-	getmap.join()
+	# #arduino ack
+	# if recvmsg == "ACK":
+	# 	systemState.changeState()
+
+
+def executeIdle():
+	print "in idle state"
+	#nothing
+	# isDone = False
+	
+	# while isDone == False:
+	# 	recvmsg = q_xbee.get()
+	# 	if recvmsg is not None:
+	# 		isDone = True
+
+	# if recvmsg == "NAVI READY":
+	# 	systemState.changeState()
+
+def executeInit():
+	print "in init state"
+	#ask user for end location and confirm
+	#get map
+
+def executeNavi():
+	print "in navi state"
+	#navigate
+
+def executeWait():
+	print "in wait state"
+	#do nothing
+
+
+
+# def startProcesses():
+	
+
+# 	# start processes
+# 	p_send.start()
+# 	p_receive.start()
+# 	p_pedo.start()
+# 	p_camera.start()
+# 	p_texttospeech.start()
+# 	p_alarm.start()
+# 	p_getmap.start()
+
+# 	# timer seconds since processes started
+# 	for x in range(1,10):
+# 		time.sleep(1)
+# 		print str(x)
+	
+# 	# get data from mapqueue
+# 	mapinfo = q_map.get()
+# 	print repr(mapinfo)
+
+# 	# wait for processes to end
+# 	p_send.join()
+# 	p_receive.join()
+# 	p_pedo.join()
+# 	p_camera.join()
+# 	p_texttospeech.join()
+# 	p_alarm.join()
+# 	p_getmap.join()
 
 
 if __name__ == "__main__":

@@ -3,10 +3,10 @@ import time
 
 #xbee = Xbee.Xbee("COM3")
 
-def send(queue, string):
+def send(string):
 	#xbee.SendStr(string)
 	time.sleep(2)
-	queue.put(string + " has been sent")
+	print string + " has been sent"
 
 def receive(queue):
 	while True:
