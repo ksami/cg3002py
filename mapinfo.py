@@ -30,7 +30,7 @@ class MapInfo:
 			self.mapList.append(nodeinfo)
 			
 			linkList = []
-			links = node[LINKTO].split(", ")
+			links = node[LINKTO].split(",")
 			for link in links:
 				linkList.append(int(link))
 			linkToList.append(linkList)
@@ -74,14 +74,16 @@ class MapInfo:
 		"""
 		start = start - 1
 		end = end - 1
+		self.current = 0
 		final_distances,predecessors = Dijkstra(self.adjacencyList,start,end)
-		path = []
+		self.path = []
 		while 1:
-			path.append(end)
+			self.path.append(end)
 			if end == start: break
 			end = predecessors[end]
-		path.reverse()
+		self.path.reverse()
 
+		# just for debugging purposes
 		nodeList = []
 		for p in path:
 			nodeList.append(self.mapList[p].getId())
@@ -108,22 +110,30 @@ class MapInfo:
 
 	def giveDirection (self, coordX, coordY, heading):
 
-		for i in self.adjacencyList.keys():
-			for j in self.adjacencyList[i].keys():
-				xi = self.mapList[i-1].getX()
-				yi = self.mapList[i-1].getY()
-				xj = self.mapList[j-1].getX()
-				yj = self.mapList[j-1].getY()
+		while(self.current <= len(self.path) - 1):
+	
+			startX = self.maplist[self.path[self.current]].getX()
+			startY = self.maplist[self.path[self.current]].getY()
 
-				if( ((xi == coordX) and (yi == coordY)) or ((xj == coordX) and (yj == coordY)) or ((coordY - yi)*(xj - xi) == (yj - yi)*(coordX - xi)) ):
-					# current location is along that path
-					angle = math.atan2((yj - yi),(xj - xi))
-					if(angle < 0):
-						angle += 2*math.pi
+			endX = self.maplist[self.path[self.current+1]].getX()
+			endY = self.maplist[self.path[self.current+1]].getY()			
 
-					return math.degrees(angle) + 90 - (heading + self.degree) 
+			#checking if that coordinates is along that edge
+			# need checking on that condition
+			if(  (startX <= coordX <= endX) and (startY <= coordY <= endY) ):
+				break
 
-		return 0
+			self.current += 1
+
+		if(self.current == len(self.path) - 1):
+			#reach destination
+			return 0
+
+		angle = math.atan2((endY - startY),(endX - startX))
+		if(angle < 0):
+			angle += 2*math.pi
+
+		return math.degrees(angle) + 90 - (heading + self.degree) 
 
 
 def Dijkstra(graph,start,end=None):

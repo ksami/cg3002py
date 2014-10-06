@@ -9,8 +9,8 @@ from wifiinfo import WifiInfo
 
 # Strings
 baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
-building = 'DemoBuilding'
-level = '1'
+building = 'yimelo'
+level = '5'
 query = 'Building=' + building + '&' + 'Level=' + level
 orienInfo = 0
 mapInfo = 0
@@ -36,10 +36,10 @@ if __name__ == '__main__':
 	jsondata = response.read()
 	nodes = json.loads(jsondata)
 	mapInfo = MapInfo(jsondata)
-	print mapInfo.shortestPath(1, 7)
-	print "\n\n\n"
-	print mapInfo.shortestPathByCoordinates(250, 100, 7)
-	print "\n"
-	print "You are off by", mapInfo.giveDirection(600, 250, 45)
+	print mapInfo.shortestPath(15, 16)
+	#print "\n\n\n"
+	print mapInfo.shortestPathByCoordinates(450, 125, 16)
+	#print "\n"
+	print "You are off by", mapInfo.giveDirection(450, 125, 180)
 	#print repr(nodes)
 
