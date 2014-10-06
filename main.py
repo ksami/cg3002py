@@ -17,8 +17,21 @@ mapName = "COM1"
 mapFloor = "2"
 sendStr = "xbee string to send"
 
+systemState = State()
 
-if __name__ == "__main__":
+def main():
+	print "hello world"
+
+	while True:
+		currentState = systemState.getCurrentState()
+		if currentState == State.STATE_OFF:
+			print "state off!"
+			systemState.changeState(False)
+		else:
+			print "haha"
+
+
+def startProcesses():
 	# Queues
 	q_cam = multiprocessing.Queue()
 	q_map = multiprocessing.Queue()
@@ -59,3 +72,7 @@ if __name__ == "__main__":
 	texttospeech.join()
 	alarm.join()
 	getmap.join()
+
+
+if __name__ == "__main__":
+	main()
