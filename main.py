@@ -58,18 +58,22 @@ def createQueue():
 def setup():
 	pass
 	# Queues
-	# global q_cam = createQueue()
-	# global q_map = createQueue()
+	# # global q_cam = createQueue()
+	# # global q_map = createQueue()
 	# global q_xbee = createQueue()
+	# global q_time = createQueue()
 
 	# Processes
-	# global p_send = createProcess(function=comms.Python.comm.send, args=(sendStr,))
+	# # global p_send = createProcess(function=comms.Python.comm.send, args=(sendStr,))
 	# global p_receive = createProcess(function=comms.Python.comm.receive, args=(q_xbee,))
 	# global p_pedo = createProcess(function=pedometer.test.execute)
 	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
-	# global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
-	# global p_alarm = createProcess(function=timer.alarm, args=(4,))
-	# global p_getmap = createProcess(function=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
+	# # global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
+	# # global p_alarm = createProcess(function=timer.alarm, args=(4,))
+	# # global p_getmap = createProcess(function=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
+
+	# Start xbee receive
+	# p_receive.start()
 
 
 def executeOff():
@@ -81,7 +85,7 @@ def executeOff():
 	# while isDone == False:
 	# 	p_send = createProcess(comms.Python.comm.send, ("device ready",))
 	# 	p_send.start()
-	# 	p_send.join()
+	# 	p_send.join(timeout=2) #TODO possibility of not joining
 		
 	# 	recvmsg = q_xbee.get()
 	# 	if recvmsg is not None:
@@ -120,7 +124,7 @@ def executeInit():
 	# 	p_texttospeech.start()
 	# 	p_texttospeech.join()
 	#
-	#	startpt = speechtotext listen #todo
+	#	startpt = speechtotext listen #TODO
 	#	time.sleep(2)
 	#	
 	#	recvmsg = q_xbee.get()
@@ -135,7 +139,7 @@ def executeInit():
 	#		 	p_texttospeech.start()
 	# 			p_texttospeech.join()
 	# 			
-	# 			confirm = speechtotext listen #todo
+	# 			confirm = speechtotext listen #TODO
 	# 			time.sleep(2)
 	# 			
 	# 			recvmsg = q_xbee.get()
@@ -155,7 +159,7 @@ def executeInit():
 	# 	p_texttospeech.start()
 	# 	p_texttospeech.join()
 	#
-	#	endpt = speechtotext listen #todo
+	#	endpt = speechtotext listen #TODO
 	#	time.sleep(2)
 	#	
 	#	recvmsg = q_xbee.get()
@@ -170,7 +174,7 @@ def executeInit():
 	#		 	p_texttospeech.start()
 	# 			p_texttospeech.join()
 	# 			
-	# 			confirm = speechtotext listen #todo
+	# 			confirm = speechtotext listen #TODO
 	# 			time.sleep(2)
 	# 			
 	# 			recvmsg = q_xbee.get()
@@ -182,12 +186,12 @@ def executeInit():
 	# 				isDone = True
 	# 
 	# if isCancel == True:
-	# 	systemState.changeState(isCancel)
+	# 	systemState.changeState(isHandOpen=True)
 	# 	
 	# else:
 	# 	# Initialise and start navigation processes
 	# 	p_getmap = createProcess(smwmap.obtainMap, (q_map, mapName, mapFloor))
-	# 	#todo
+	# 	#TODO
 	# 
 	# 	# Change to NAVI state
 	# 	p_send = createProcess(comms.Python.comm.send, ("NAVI READY",))
@@ -198,11 +202,63 @@ def executeInit():
 def executeNavi():
 	print "in navi state"
 	#navigate
+	#
+	# pedoisalive = p_pedo.is_alive()
+	# camisalive = p_camera.is_alive()
+	# if pedoisalive == False:
+	# 	p_pedo.start()
+	# if camisalive == False:
+	#	p_camera.start() #TODO might take a long time to start
+	#
+	# isPause = False
+	# 
+	# while isPause == False:
+	# 	recvmsg = q_xbee.get()
+	# 	if (recvmsg is not None) and (recvmsg == "PAUSE"):
+	# 		isPause = True
+	# 		
+	# if isPause == True:
+	# 	systemState.changeState(isHandOpen=True)
+	
 
 def executeWait():
 	print "in wait state"
 	#do nothing
-
+	# 
+	# TIMEOUT = 10
+	#
+	# p_timer = createProcess(function=timer.timer, args=(q_time, TIMEOUT))
+	# p_timer.start()
+	# 
+	# isTimeout = False
+	# isResume = False
+	# 
+	# while (isTimeout == False) and (isResume == False):
+	# 	recvmsg = q_xbee.get()
+	# 	if (recvmsg is not None) and (recvmsg == "PAUSE"):
+	# 		isResume = True
+	# 		
+	# 	timerup = q_timer.get(block=False)
+	# 	if (timerup is not None) and (timerup == TIMEOUT):
+	# 		isTimeout = True
+	# 		
+	# # Cleanup before going next state
+	# if isResume == True:
+	# 	isalive = p_timer.is_alive()
+	# 	if isalive == True:
+	# 		p_timer.terminate() #TODO chance of corrupting q_time
+	# 	systemState.changeState(isHandOpen=False)
+	# 
+	# elif isTimeout == True:
+	# 	pedoisalive = p_pedo.is_alive()
+	# 	camisalive = p_camera.is_alive()
+	# 	
+	# 	if pedoisalive == True:
+	# 		p_pedo.terminate()
+	# 	if camisalive == True:
+	# 		p_camera.terminate()
+	# 	
+	# 	systemState.changeState(isHandOpen=True)
 
 
 # def startProcesses():

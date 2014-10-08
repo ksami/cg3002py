@@ -8,7 +8,6 @@ class State(object):
 	STATE_NAVI = 3
 	STATE_WAIT = 4
 
-	TIMEOUT_WAIT = 5
 
 	def __init__(self):
 		self.currentState = State.STATE_OFF
@@ -29,20 +28,11 @@ class State(object):
 				self.currentState = State.STATE_NAVI
 
 		elif self.currentState == State.STATE_NAVI:
-			if isHandOpen == True:
-				self.currentState = State.STATE_WAIT
-				start = time.time()
-			else:
-				pass
+			self.currentState = State.STATE_WAIT
 
 		elif self.currentState == State.STATE_WAIT:
 			if isHandOpen == True:
-				#check timeout
-				end = time.time()
-				if end-start >= TIMEOUT_WAIT:
-					self.currentState = State.STATE_IDLE
-				else:
-					pass
+				self.currentState = State.STATE_IDLE
 			else:
 				self.currentState = State.STATE_NAVI
 

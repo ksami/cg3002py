@@ -8,6 +8,12 @@ def alarm(x):
 	time.sleep(x)
 	print "timer up!!"
 
+# Puts x onto queue q once x seconds are up
+# params: queue, num of seconds
+def timer(q, x):
+	time.sleep(x)
+	q.put(x)
+
 # For testing:
 # Run in command line using
 # python timer.py 3
