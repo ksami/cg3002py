@@ -5,14 +5,22 @@ import time
 # Raises a flag when x seconds are up
 # params: num of seconds
 def alarm(x):
-	time.sleep(x)
-	print "timer up!!"
+	try:
+		time.sleep(x)
+		print "timer up!!"
+	except KeyboardInterrupt:
+		#Ctrl-C
+		pass
 
 # Puts x onto queue q once x seconds are up
 # params: queue, num of seconds
 def timer(q, x):
-	time.sleep(x)
-	q.put(x)
+	try:
+		time.sleep(x)
+		q.put(x)
+	except KeyboardInterrupt:
+		#Ctrl-C
+		pass
 
 # For testing:
 # Run in command line using
@@ -20,7 +28,10 @@ def timer(q, x):
 if __name__ == '__main__':
 	import sys
 	seconds = int(sys.argv[1])
-	time.sleep(seconds)
 
-	print "timer up!"
-
+	try:
+		time.sleep(seconds)
+		print "timer up!"
+	except KeyboardInterrupt:
+		#Ctrl-C
+		print "interrupted"

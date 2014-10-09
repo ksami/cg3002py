@@ -247,6 +247,7 @@ def executeWait():
 	# 	isalive = p_timer.is_alive()
 	# 	if isalive == True:
 	# 		p_timer.terminate() #TODO chance of corrupting q_time
+	# 		p_timer.join()
 	# 	systemState.changeState(isHandOpen=False)
 	# 
 	# elif isTimeout == True:
@@ -255,8 +256,10 @@ def executeWait():
 	# 	
 	# 	if pedoisalive == True:
 	# 		p_pedo.terminate()
+	# 		p_pedo.join()
 	# 	if camisalive == True:
 	# 		p_camera.terminate()
+	# 		p_camera.join()
 	# 	
 	# 	systemState.changeState(isHandOpen=True)
 
