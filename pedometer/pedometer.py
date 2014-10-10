@@ -5,9 +5,12 @@ import sys
 from vector import Vector
 
 SAMPLE_SIZE = 50
-PRECISION = 1000/2 # = 32767 - 31128 (max and min values when stabilized)
-TIME_WINDOW = 0.4
+PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
+TIME_WINDOW_MIN = 0.3
+TIME_WINDOW_MAX = 2
 HEIGHT = 1.77 # in meters
+STANDING_MODE = 0
+WALKING_MODE = 1
 
 MAX_ACCEL_VALUE = 32767
 MIN_ACCEL_VALUE = 31128
@@ -16,6 +19,8 @@ MAX_STATIONARY_ACCEL = Vector(MAX_ACCEL_VALUE, MAX_ACCEL_VALUE, MAX_ACCEL_VALUE)
 MIN_STATIONARY_ACCEL = Vector(MIN_ACCEL_VALUE, MIN_ACCEL_VALUE, MIN_ACCEL_VALUE)
 
 scale = 1.3
+most_active_axis = 2
+mode = STANDING_MODE
 
 # Power management registers
 power_mgmt_1 = 0x6b
@@ -85,7 +90,6 @@ bus.write_byte_data(mpu_address, 0x6A, 0)
 bus.write_byte_data(mpu_address, 0x37, 2)
 bus.write_byte_data(mpu_address, power_mgmt_1, 0)
 
-
 bus.write_byte_data(hmc_address, 0, 0b01110000) # Set to 8 samples @ 15Hz
 bus.write_byte_data(hmc_address, 1, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
 bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
@@ -100,6 +104,7 @@ accel_filter_list = []
 sample_old = Vector(0, 0, 0)
 sample_new = Vector(0, 0, 0)
 num_steps = 0
+testing_steps = 0
 steps_per_two_s = 0
 two_seconds_elapsed = 0
 distance_per_two_s = 0
@@ -129,10 +134,11 @@ for i in range(4) :
     accel_filter_list.append(accel_val)
 
 first_time = True
-size = 0
-s_size = 0
+#size = 0
+#s_size = 0
 
-print "TIME_WINDOW: ", TIME_WINDOW
+print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
+print "TIME_WINDOW_MAX: ", TIME_WINDOW_MAX
 print "PRECISION: " , PRECISION
 
 two_seconds_elapsed = time.time()
@@ -172,9 +178,8 @@ while(True):
 
     compass_val = Vector(compass_xout, compass_yout, compass_zout)
 
-    moving_index = (moving_index + 1) % 4;
+    moving_index = (moving_index + 1) % 4
     sample_size += 1    
-    size += 1;
 
     # finding maximum, minimum
     if(compare(accel_max, accel_val) < 0):
@@ -188,14 +193,31 @@ while(True):
         if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
 	    #print "------------- get sample_new value\n "
 	    sample_new = accel_val
-
-	    if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-        	if(time_window == 0 or time.time() - time_window > TIME_WINDOW):
-	       	     #time_window = time.time()
-	             steps_per_two_s += 1
-	             num_steps += 1
-        	     print "num steps: ", num_steps, time.time() - time_window
-		     time_window = time.time()
+	
+	    if(mode == WALKING_MODE):
+	       if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
+		      if(TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
+		          num_steps += 1
+		          time_window = time.time()
+		          print "WALKING MODE: num_steps =", num_steps
+		      elif(time.time() - time_window > TIME_WINDOW_MAX):
+			     mode = STANDING_MODE
+			     testing_steps = 1
+			     print "GOING TO STANDING MODE\n"
+	    if(mode == STANDING_MODE):
+		  if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
+		      if(time_window == 0 or TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
+			     testing_steps += 1
+			     time_window = time.time()
+			     print "STANDING MODE TO WALKING MODE", testing_steps
+		      elif(time.time() - time_window > TIME_WINDOW_MAX):
+			     testing_steps = 1
+			     print "STILL STANDING MODE"
+			     time_window = time.time()
+		  if(testing_steps >= 3):
+		      num_steps += testing_steps
+		      print "GOING TO WALKING MODE: num_steps =", num_steps
+		      mode = WALKING_MODE
 
     else:
 	 sample_new = accel_val
@@ -221,12 +243,12 @@ while(True):
 
         heading = getHeading(compass_val)
 
-    	print "\n\n-------------", time.time() - two_seconds_elapsed
-    	print "numsteps per 2s: ", steps_per_two_s
-    	print "distance per 2s: ", distance_per_two_s
-    	print "total_numsteps: ", num_steps
-    	print "total_distance: ", total_distance
-        print "Heading: ", heading
+    	#print "\n\n-------------", time.time() - two_seconds_elapsed
+    	#print "numsteps per 2s: ", steps_per_two_s
+    	#print "distance per 2s: ", distance_per_two_s
+    	#print "total_numsteps: ", num_steps
+    	#print "total_distance: ", total_distance
+        #print "Heading: ", heading
     	  
     	two_seconds_elapsed = time.time()
     	steps_per_two_s = 0

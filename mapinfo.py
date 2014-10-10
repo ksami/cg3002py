@@ -15,6 +15,10 @@ LINKTO = 'linkTo'
 INFO = 'info'
 NORTHAT = 'northAt'
 
+ARRIVE = 0
+TURN_LEFT = 1
+TURN_RIGHT = 2
+
 class MapInfo:
 
 	def __init__ (self, jsonString):
