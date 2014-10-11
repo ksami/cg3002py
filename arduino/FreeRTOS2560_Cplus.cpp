@@ -43,6 +43,13 @@ void testTask(void* p)
 		cmdistance = microsec / _cmDivison / 2.0;
 		int test = (int) cmdistance;
 		
+		if (test >= 100) {
+			digitalWrite(10, HIGH);
+		}
+		else {
+			digitalWrite(10, LOW);
+		}
+		
 		printInt(test);
 		Serial.print('\n');
 
@@ -106,6 +113,25 @@ void task2(void* p)
 	}
 }
 
+void Servotask(void *p)
+{
+	while (1) {
+		
+		digitalWrite(6, HIGH);
+		vTaskDelay(15);
+		digitalWrite(6, LOW);
+		vTaskDelay(185);
+		
+		vTaskDelay(1000);
+		
+		digitalWrite(6, HIGH);
+		vTaskDelay(25);
+		digitalWrite(6, LOW);
+		vTaskDelay(175);
+		
+	}
+}
+
 int main()
 {
 	
@@ -115,8 +141,11 @@ int main()
 	pinMode(_trigPin, OUTPUT);
 	pinMode(_EchoPin, INPUT);
 	
+	pinMode(10, OUTPUT);
 	pinMode(11, OUTPUT);
 	pinMode(12, OUTPUT);
+	
+	pinMode(6, OUTPUT);
 	
 	//pinMode(13, OUTPUT);
 
@@ -126,6 +155,7 @@ int main()
 	//xTaskCreate(task_rx, "t2", STACK_DEPTH, NULL, 5, &t2);
 	
 	xTaskCreate(testTask, "test", STACK_DEPTH, NULL, 6, &t1);
+	xTaskCreate(Servotask, "servo", STACK_DEPTH, NULL, 6, &t3);
 	
 	//xTaskCreate(task1, "t1", STACK_DEPTH, NULL, 6, &t1);
 	xTaskCreate(task2, "t2", STACK_DEPTH, NULL, 6, &t2);
