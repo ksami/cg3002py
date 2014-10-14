@@ -1,4 +1,5 @@
 # Main file handling multiple processes
+# TODO: feedback to user on every state change?
 
 import multiprocessing
 import time
@@ -12,6 +13,7 @@ import comms.python.main
 from comms.python.comms import Comms
 from state import State
 
+TIMEOUT_WAIT = 10
 
 cameraExe = "./cprocess.o"
 mapName = "COM1"
@@ -95,7 +97,7 @@ def executeIdle():
 	print "in idle state"
 	#nothing
 	# TODO: when does ard send handopen? assume only on handchange
-	hand = q_xbee.get()
+	hand = q_xbee.get(block=True)
 	if hand == comms.python.main.HAND_CLOSE:
 		_systemState.changeState()
 	else:
@@ -218,10 +220,11 @@ def executeInit():
 		p_send.join()
 		_systemState.changeState(isHandOpen=False)
 
+
 def executeNavi():
 	print "in navi state"
 	#navigate
-	#
+	#TODO: p_navi.start()
 	# pedoisalive = p_pedo.is_alive()
 	# camisalive = p_camera.is_alive()
 	# if pedoisalive == False:
@@ -229,89 +232,65 @@ def executeNavi():
 	# if camisalive == False:
 	#	p_camera.start() #TODO might take a long time to start
 	#
-	# isPause = False
-	# 
-	# while isPause == False:
-	# 	recvmsg = q_xbee.get()
-	# 	if (recvmsg is not None) and (recvmsg == "PAUSE"):
-	# 		isPause = True
-	# 		
-	# if isPause == True:
-	# 	_systemState.changeState(isHandOpen=True)
-	
+	hand = q_xbee.get(block=True)
+	if hand == comms.python.main.HAND_OPEN:
+		_systemState.changeState(isHandOpen=True)
+	else:
+		#TODO: will repeat again
+		pass
+
 
 def executeWait():
 	print "in wait state"
 	#do nothing
-	# 
-	# TIMEOUT = 10
-	#
-	# p_timer = createProcess(function=timer.timer, args=(q_time, TIMEOUT))
-	# p_timer.start()
-	# 
-	# isTimeout = False
-	# isResume = False
-	# 
-	# while (isTimeout == False) and (isResume == False):
-	# 	recvmsg = q_xbee.get()
-	# 	if (recvmsg is not None) and (recvmsg == "PAUSE"):
-	# 		isResume = True
-	# 		
-	# 	timerup = q_timer.get(block=False)
-	# 	if (timerup is not None) and (timerup == TIMEOUT):
-	# 		isTimeout = True
-	# 		
-	# # Cleanup before going next state
-	# if isResume == True:
-	# 	isalive = p_timer.is_alive()
-	# 	if isalive == True:
-	# 		p_timer.terminate() #TODO chance of corrupting q_time
-	# 		p_timer.join()
-	# 	_systemState.changeState(isHandOpen=False)
-	# 
-	# elif isTimeout == True:
-	# 	pedoisalive = p_pedo.is_alive()
-	# 	camisalive = p_camera.is_alive()
-	# 	
-	# 	if pedoisalive == True:
-	# 		p_pedo.terminate()
-	# 		p_pedo.join()
-	# 	if camisalive == True:
-	# 		p_camera.terminate()
-	# 		p_camera.join()
-	# 	
-	# 	_systemState.changeState(isHandOpen=True)
-
-
-# def startProcesses():
+		
+	p_timer = createProcess(function=timer.timer, args=(q_time, TIMEOUT_WAIT))
+	p_timer.start()
 	
-
-# 	# start processes
-# 	p_send.start()
-# 	p_receive.start()
-# 	p_pedo.start()
-# 	p_camera.start()
-# 	p_texttospeech.start()
-# 	p_alarm.start()
-# 	p_getmap.start()
-
-# 	# timer seconds since processes started
-# 	for x in range(1,10):
-# 		time.sleep(1)
-# 		print str(x)
+	isTimeout = False
+	isResume = False
 	
-# 	# get data from mapqueue
-# 	mapinfo = q_map.get()
-# 	print repr(mapinfo)
+	while (isTimeout == False) and (isResume == False):
+		# check for terminate
+		try:
+			hand = q_xbee.get(block=False)
+			if hand == comms.python.main.HAND_CLOSE:
+				isResume = True
+		# Queue.empty
+		except Exception:
+			#ignore
+			pass
+			
+		try:
+			timerup = q_timer.get(block=False)
+			if (timerup is not None) and (timerup == TIMEOUT_WAIT):
+				isTimeout = True
+		# Queue.empty
+		except Exception:
+			#ignore
+			pass
+			
+	# Cleanup before going next state
+	if isResume == True:
+		isalive = p_timer.is_alive()
+		if isalive == True:
+			p_timer.terminate()
+			p_timer.join()
+		_systemState.changeState(isHandOpen=False)
+	
+	elif isTimeout == True:
+		# pedoisalive = p_pedo.is_alive()
+		# camisalive = p_camera.is_alive()
+		#
+		# if pedoisalive == True:
+		# 	p_pedo.terminate()
+		# 	p_pedo.join()
+		# if camisalive == True:
+		# 	p_camera.terminate()
+		# 	p_camera.join()
+		
+		_systemState.changeState(isHandOpen=True)
 
-# 	# wait for processes to end
-# 	p_send.join()
-# 	p_receive.join()
-# 	p_pedo.join()
-# 	p_camera.join()
-# 	p_texttospeech.join()
-# 	p_alarm.join()
-# 	p_getmap.join()
 
 
 if __name__ == "__main__":
