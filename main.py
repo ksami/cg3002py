@@ -84,9 +84,9 @@ def executeOff():
 	#send device ready to arduino
 	#handle timeout and repeated sending
 
-	p_send = createProcess(comms.python.main.send, (comms.python.main.DEVICE_READY,))
+	p_send = createProcess(comms.python.main.send, (_comms, comms.python.main.DEVICE_READY,))
 	p_send.start()
-	p_send.join() #TODO: does it block? p_send's death == ard sends ack
+	p_send.join() #TODO: blocks until p_send's death == ard sends ack
 
 	_systemState.changeState()
 
@@ -94,105 +94,129 @@ def executeOff():
 def executeIdle():
 	print "in idle state"
 	#nothing
-	# isDone = False
-	
-	# while isDone == False:
-	# 	recvmsg = q_xbee.get()
-	# 	if (recvmsg is not None) and (recvmsg == "NAVI READY"):
-	# 		isDone = True
+	# TODO: when does ard send handopen? assume only on handchange
+	hand = q_xbee.get()
+	if hand == comms.python.main.HAND_CLOSE:
+		_systemState.changeState()
+	else:
+		#TODO: will repeat again
+		pass
 
-	# _systemState.changeState()
 
 def executeInit():
 	print "in init state"
 	#ask user for end location and confirm
 	#get map
-	#
-	# # Boolean for returning to IDLE state
-	# isCancel = False
-	#
-	# # Get and confirm start point
-	# isDone = False
-	#
-	# while (isDone == False) and (isCancel == False):
-	# 	p_texttospeech = createProcess(audio.textspeech.speak, ("Please state your starting point",))
-	# 	p_texttospeech.start()
-	# 	p_texttospeech.join()
-	#
-	#	startpt = speechtotext listen #TODO
-	#	time.sleep(2)
-	#	
-	#	recvmsg = q_xbee.get()
-	# 	if (recvmsg is not None) and (recvmsg == "TERMINATE"):
-	# 		isCancel = True
-	#	
-	#	if startpt is not None:
-	#		isConfirmed = False
-	#		
-	#		while (isConfirmed == False) and (isCancel == False):
-	#			p_texttospeech = createProcess(audio.textspeech.speak, ("Please confirm, starting point is " + startpt,))
-	#		 	p_texttospeech.start()
-	# 			p_texttospeech.join()
-	# 			
-	# 			confirm = speechtotext listen #TODO
-	# 			time.sleep(2)
-	# 			
-	# 			recvmsg = q_xbee.get()
-	# 			if (recvmsg is not None) and (recvmsg == "TERMINATE"):
-	# 				isCancel = True
-	# 			
-	# 			if confirm == "yes":
-	# 				isConfirmed = True
-	# 				isDone = True
-	#
-	#
-	# # Get and confirm end point
-	# isDone = False
-	#
-	# while (isDone == False) and (isCancel == False):
-	# 	p_texttospeech = createProcess(audio.textspeech.speak, ("Please state your destination",))
-	# 	p_texttospeech.start()
-	# 	p_texttospeech.join()
-	#
-	#	endpt = speechtotext listen #TODO
-	#	time.sleep(2)
-	#	
-	#	recvmsg = q_xbee.get()
-	# 	if (recvmsg is not None) and (recvmsg == "TERMINATE"):
-	# 		isCancel = True
-	#	
-	#	if endpt is not None:
-	#		isConfirmed = False
-	#		
-	#		while (isConfirmed == False) and (isCancel == False):
-	#			p_texttospeech = createProcess(audio.textspeech.speak, ("Please confirm, destination is " + endpt,))
-	#		 	p_texttospeech.start()
-	# 			p_texttospeech.join()
-	# 			
-	# 			confirm = speechtotext listen #TODO
-	# 			time.sleep(2)
-	# 			
-	# 			recvmsg = q_xbee.get()
-	# 			if (recvmsg is not None) and (recvmsg == "TERMINATE"):
-	# 				isCancel = True
-	# 			
-	# 			if confirm == "yes":
-	# 				isConfirmed = True
-	# 				isDone = True
-	# 
-	# if isCancel == True:
-	# 	_systemState.changeState(isHandOpen=True)
-	# 	
-	# else:
-	# 	# Initialise and start navigation processes
-	# 	p_getmap = createProcess(smwmap.obtainMap, (q_map, mapName, mapFloor))
-	# 	#TODO
-	# 
-	# 	# Change to NAVI state
-	# 	p_send = createProcess(comms.Python.comm.send, ("NAVI READY",))
-	# 	p_send.start()
-	# 	p_send.join()
-	# 	_systemState.changeState()
+
+	#boolean for returning to IDLE state
+	isCancel = False
+	
+	# Get and confirm start point
+	isDone = False
+	
+	while (isDone == False) and (isCancel == False):
+		# p_texttospeech = createProcess(audio.textspeech.speak, ("Please state your starting point",))
+		# p_texttospeech.start()
+		# p_texttospeech.join()
+	
+		# startpt = speechtotext listen #TODO
+		# time.sleep(2)
+		
+		# check for terminate
+		try:
+			hand = q_xbee.get(block=False)
+			if hand == comms.python.main.HAND_OPEN:
+				isCancel = True
+		# Queue.empty
+		except Exception:
+			#ignore
+			pass
+		
+		if startpt is not None:
+			isConfirmed = False
+			
+			while (isConfirmed == False) and (isCancel == False):
+				# p_texttospeech = createProcess(audio.textspeech.speak, ("Please confirm, starting point is " + startpt,))
+				# p_texttospeech.start()
+				# p_texttospeech.join()
+				
+				# confirm = speechtotext listen #TODO
+				# time.sleep(2)
+				
+				# check for terminate
+				try:
+					hand = q_xbee.get(block=False)
+					if hand == comms.python.main.HAND_OPEN:
+						isCancel = True
+				# Queue.empty
+				except Exception:
+					#ignore
+					pass
+				
+				if confirm == "yes":
+					isConfirmed = True
+					isDone = True
+	
+	
+	# Get and confirm end point
+	isDone = False
+	
+	while (isDone == False) and (isCancel == False):
+		# p_texttospeech = createProcess(audio.textspeech.speak, ("Please state your destination",))
+		# p_texttospeech.start()
+		# p_texttospeech.join()
+	
+		# endpt = speechtotext listen #TODO
+		# time.sleep(2)
+		
+		# check for terminate
+		try:
+			hand = q_xbee.get(block=False)
+			if hand == comms.python.main.HAND_OPEN:
+				isCancel = True
+		# Queue.empty
+		except Exception:
+			#ignore
+			pass
+		
+		if endpt is not None:
+			isConfirmed = False
+			
+			while (isConfirmed == False) and (isCancel == False):
+				# p_texttospeech = createProcess(audio.textspeech.speak, ("Please confirm, destination is " + endpt,))
+				# p_texttospeech.start()
+				# p_texttospeech.join()
+				
+				# confirm = speechtotext listen #TODO
+				# time.sleep(2)
+				
+				# check for terminate
+				try:
+					hand = q_xbee.get(block=False)
+					if hand == comms.python.main.HAND_OPEN:
+						isCancel = True
+				# Queue.empty
+				except Exception:
+					#ignore
+					pass
+				
+				if confirm == "yes":
+					isConfirmed = True
+					isDone = True
+	
+	if isCancel == True:
+		_systemState.changeState(isHandOpen=True)
+		
+	else:
+		# Initialise and start navigation processes
+		# p_getmap = createProcess(smwmap.obtainMap, (q_map, mapName, mapFloor))
+		#TODO
+	
+		# Change to NAVI state
+		p_send = createProcess(comms.python.main.send, (_comms, comms.python.comm.NAVI_READY))
+		p_send.start()
+		p_send.join()
+		_systemState.changeState(isHandOpen=False)
 
 def executeNavi():
 	print "in navi state"
