@@ -49,16 +49,16 @@ class XBee():
 
         # All bytes in message must be unescaped before validating content
         frame = self.Unescape(msg)
-
+   
         LSB = frame[1]
         # Frame (minus checksum) must contain at least length equal to LSB
         if LSB > (len(frame[2:]) - 1):
             return False
-
+       
         # Validate checksum
         if (sum(frame[2:3+LSB]) & 0xFF) != 0xFF:
             return False
-
+ 	
         print("Rx: " + self.format(bytearray(b'\x7E') + msg))
         self.RxMessages.append(frame)
         return True

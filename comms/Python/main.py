@@ -1,21 +1,27 @@
-import XBee
-from time import sleep
+#import XBee
+from Comms import Comms
 
 if __name__ == "__main__":
-    xbee = XBee.XBee("COM3")  # Your serial port name here <- /dev/ttyAMA0 for RPi
 
-    # A simple string message
-    sent = xbee.SendStr("Hello World")
-    sleep(0.25)
-    Msg = xbee.Receive()
-    if Msg:
-        content = Msg[7:-1].decode('ascii')
-        print("Msg: " + content)
+    # Always instatiate a Comms object
+    comms = Comms();
 
-    # A message that requires escaping
-    xbee.Send(bytearray.fromhex("7e 7d 11 13 5b 01 01 01 01 01 01 01"))
-    sleep(0.25)
-    Msg = xbee.Receive()
-    if Msg:
-        content = Msg[7:-1]
-        print("Msg: " + xbee.format(content))
+    # Shows the all the different information that Pi
+    # sends to Arduino. This methods runs until an 
+    # it receives an acknowledgement from Arduino
+
+    # comms.DeviceReady()
+    # comms.NaviReady()
+    # comms.NaviEnd()
+    # comms.ObstacleDetected("L",3)
+
+    
+
+    # The following code represents
+    # the process that always run
+    
+    while True:
+        Msg = comms.ReceiveHandStatus();
+        if Msg:
+	    print str(Msg)
+            break;        
