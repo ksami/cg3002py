@@ -8,6 +8,7 @@ import smwmap
 import cpython
 import audio.textspeech
 import pedometer.test
+import comms.python.main
 from comms.python.comms import Comms
 from state import State
 
@@ -17,14 +18,14 @@ mapName = "COM1"
 mapFloor = "2"
 sendStr = "xbee string to send"
 
-systemState = State()
-comms = Comms()
+_systemState = State()
+_comms = Comms()
 
 def main():
 	setup()
 
 	while True:
-		currentState = systemState.getCurrentState()
+		currentState = _systemState.getCurrentState()
 
 		if currentState == State.STATE_OFF:
 			executeOff()
@@ -57,16 +58,17 @@ def createQueue():
 
 
 def setup():
-	pass
 	# Queues
 	# # global q_cam = createQueue()
 	# # global q_map = createQueue()
-	# global q_xbee = createQueue()
+	global q_xbee
+	q_xbee = createQueue()
 	# global q_time = createQueue()
 
 	# Processes
-	# # global p_send = createProcess(function=comms.Python.comm.send, args=(sendStr,))
-	# global p_receive = createProcess(function=comms.Python.comm.receive, args=(q_xbee,))
+	# # global p_send = createProcess(function=comms.python.comm.send, args=(sendStr, comms))
+	global p_receive
+	p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
 	# global p_pedo = createProcess(function=pedometer.test.execute)
 	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
 	# # global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
@@ -74,27 +76,19 @@ def setup():
 	# # global p_getmap = createProcess(function=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
 	# Start xbee receive
-	# p_receive.start()
+	p_receive.start()
 
 
 def executeOff():
 	print "in off state"
 	#send device ready to arduino
 	#handle timeout and repeated sending
-	# isDone = False
-	
-	# while isDone == False:
-	# 	p_send = createProcess(comms.Python.comm.send, ("device ready",))
-	# 	p_send.start()
-	# 	p_send.join(timeout=2) #TODO possibility of not joining
-		
-	# 	recvmsg = q_xbee.get()
-	# 	if recvmsg is not None:
-	# 		isDone = True
 
-	# #arduino ack
-	# if recvmsg == "ACK":
-	# 	systemState.changeState()
+	p_send = createProcess(comms.python.main.send, (comms.python.main.DEVICE_READY,))
+	p_send.start()
+	p_send.join() #TODO: does it block? p_send's death == ard sends ack
+
+	_systemState.changeState()
 
 
 def executeIdle():
@@ -107,7 +101,7 @@ def executeIdle():
 	# 	if (recvmsg is not None) and (recvmsg == "NAVI READY"):
 	# 		isDone = True
 
-	# systemState.changeState()
+	# _systemState.changeState()
 
 def executeInit():
 	print "in init state"
@@ -187,7 +181,7 @@ def executeInit():
 	# 				isDone = True
 	# 
 	# if isCancel == True:
-	# 	systemState.changeState(isHandOpen=True)
+	# 	_systemState.changeState(isHandOpen=True)
 	# 	
 	# else:
 	# 	# Initialise and start navigation processes
@@ -198,7 +192,7 @@ def executeInit():
 	# 	p_send = createProcess(comms.Python.comm.send, ("NAVI READY",))
 	# 	p_send.start()
 	# 	p_send.join()
-	# 	systemState.changeState()
+	# 	_systemState.changeState()
 
 def executeNavi():
 	print "in navi state"
@@ -219,7 +213,7 @@ def executeNavi():
 	# 		isPause = True
 	# 		
 	# if isPause == True:
-	# 	systemState.changeState(isHandOpen=True)
+	# 	_systemState.changeState(isHandOpen=True)
 	
 
 def executeWait():
@@ -249,7 +243,7 @@ def executeWait():
 	# 	if isalive == True:
 	# 		p_timer.terminate() #TODO chance of corrupting q_time
 	# 		p_timer.join()
-	# 	systemState.changeState(isHandOpen=False)
+	# 	_systemState.changeState(isHandOpen=False)
 	# 
 	# elif isTimeout == True:
 	# 	pedoisalive = p_pedo.is_alive()
@@ -262,7 +256,7 @@ def executeWait():
 	# 		p_camera.terminate()
 	# 		p_camera.join()
 	# 	
-	# 	systemState.changeState(isHandOpen=True)
+	# 	_systemState.changeState(isHandOpen=True)
 
 
 # def startProcesses():
