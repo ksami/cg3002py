@@ -1,5 +1,5 @@
 #import XBee
-from Comms import Comms
+from comms import Comms
 
 if __name__ == "__main__":
 
@@ -23,5 +23,5 @@ if __name__ == "__main__":
     while True:
         Msg = comms.ReceiveHandStatus();
         if Msg:
-	    print str(Msg)
-            break;        
+	       print str(Msg)
+           break;        

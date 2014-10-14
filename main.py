@@ -8,7 +8,7 @@ import smwmap
 import cpython
 import audio.textspeech
 import pedometer.test
-import comms.Python.comm
+from comms.python.comms import Comms
 from state import State
 
 
@@ -18,6 +18,7 @@ mapFloor = "2"
 sendStr = "xbee string to send"
 
 systemState = State()
+comms = Comms()
 
 def main():
 	setup()
