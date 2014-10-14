@@ -1,6 +1,7 @@
 
 import json
 import math
+import sys
 from nodeinfo import NodeInfo
 from priodict import priorityDictionary
 
@@ -11,10 +12,18 @@ Y = 'y'
 NODENAME = 'nodeName'
 LINKTO = 'linkTo'
 
+INFO = 'info'
+NORTHAT = 'northAt'
+
+ARRIVE = 0
+TURN_LEFT = 1
+TURN_RIGHT = 2
+
 class MapInfo:
 
 	def __init__ (self, jsonString):
 		mapinfo = json.loads(jsonString)
+		self.degree = int(mapinfo[INFO][NORTHAT])
 		self.mapList = [] # list of nodes
 		self.adjacencyList = {} # dictionary of rooms that is linked to the room in index i
 		linkToList = []
@@ -25,7 +34,7 @@ class MapInfo:
 			self.mapList.append(nodeinfo)
 			
 			linkList = []
-			links = node[LINKTO].split(", ")
+			links = node[LINKTO].split(",")
 			for link in links:
 				linkList.append(int(link))
 			linkToList.append(linkList)
@@ -45,10 +54,12 @@ class MapInfo:
 		self.printSelf()
 
 	def printSelf(self):
-		print "map\n"
+		print "-\n-------map------\n"
 		for i in range(self.size):
 			node = self.mapList[i]
 			print str(node.getId()) , str(node.getX()) , str(node.getY()) , node.getName()
+
+		print "\n"
 
 		for i in self.adjacencyList.keys():
 			print str(i) , "---------------"
@@ -67,19 +78,67 @@ class MapInfo:
 		"""
 		start = start - 1
 		end = end - 1
+		self.current = 0
 		final_distances,predecessors = Dijkstra(self.adjacencyList,start,end)
-		path = []
+		self.path = []
 		while 1:
-			path.append(end)
+			self.path.append(end)
 			if end == start: break
 			end = predecessors[end]
-		path.reverse()
+		self.path.reverse()
 
+		# just for debugging purposes
 		nodeList = []
 		for p in path:
 			nodeList.append(self.mapList[p].getId())
 
+		for i in range(len(path)-1):
+			print self.mapList[path[i]].getId(), self.mapList[path[i]].getName(), "---TO---", self.mapList[path[i+1]].getId(), self.mapList[path[i+1]].getName()
+
+		print "\n"
+
 		return nodeList
+
+	def shortestPathByCoordinates(self, coordX, coordY, endID):
+
+		minimumDist = sys.maxint
+		minimumNodeID = 0
+
+		for mapItem in self.mapList:
+			distance = math.sqrt( (mapItem.getX() - coordX)**2 +  (mapItem.getY() - coordY)**2)
+			if(distance < minimumDist):
+				minimumDist = distance
+				minimumNodeID = mapItem.getId()
+
+		return self.shortestPath(minimumNodeID, endID)
+
+	def giveDirection (self, coordX, coordY, heading):
+
+		while(self.current <= len(self.path) - 1):
+	
+			startX = self.maplist[self.path[self.current]].getX()
+			startY = self.maplist[self.path[self.current]].getY()
+
+			endX = self.maplist[self.path[self.current+1]].getX()
+			endY = self.maplist[self.path[self.current+1]].getY()			
+
+			#checking if that coordinates is along that edge
+			# need checking on that condition
+			if(  (startX <= coordX <= endX) and (startY <= coordY <= endY) ):
+				break
+
+			self.current += 1
+
+		if(self.current == len(self.path) - 1):
+			#reach destination
+			return 0
+
+		angle = math.atan2((endY - startY),(endX - startX))
+		if(angle < 0):
+			angle += 2*math.pi
+
+		return math.degrees(angle) + 90 - (heading + self.degree) 
+
 
 def Dijkstra(graph,start,end=None):
 		"""

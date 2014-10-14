@@ -2,51 +2,61 @@
 
 import multiprocessing
 import time
-import proc
+
 import timer
 import smwmap
 import cpython
+import audio.textspeech
+import pedometer.test
+import comms.Python.comm
+from state import State
 
-cameraExe = "cprocess.o"
-mapName = "DemoBuilding"
+
+cameraExe = "./cprocess.o"
+mapName = "COM1"
 mapFloor = "2"
+sendStr = "xbee string to send"
+
 
 if __name__ == "__main__":
-	q = multiprocessing.Queue()
-	mapqueue = multiprocessing.Queue()
-	cameraqueue = multiprocessing.Queue()
+	# Queues
+	q_cam = multiprocessing.Queue()
+	q_map = multiprocessing.Queue()
+	q_xbee = multiprocessing.Queue()
 
-	cameraConsume = multiprocessing.Process(target=proc.consume, args=(cameraqueue,))
-	#camera = multiprocessing.Process(target=cpython.execute, args=(cameraqueue,cameraExe))
-	alarm = multiprocessing.Process(target=timer.xseconds, args=(q,1))
-	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(mapqueue, mapName, mapFloor))
-	pro = multiprocessing.Process(target=proc.produce, args=(q,))
-	pro2 = multiprocessing.Process(target=proc.produce2, args=(q,))
-	con = multiprocessing.Process(target=proc.consume, args=(q,))
+	# Processes
+	send = multiprocessing.Process(target=comms.Python.comm.send, args=(q_xbee, sendStr))
+	receive = multiprocessing.Process(target=comms.Python.comm.receive, args=(q_xbee,))
+	pedo = multiprocessing.Process(target=pedometer.test.execute)
+	camera = multiprocessing.Process(target=cpython.execute, args=(q_cam, cameraExe))
+	texttospeech = multiprocessing.Process(target=audio.textspeech.speakq, args=(q_cam,))
+	alarm = multiprocessing.Process(target=timer.alarm, args=(4,))
+	getmap = multiprocessing.Process(target=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
 	# start processes
-	cameraConsume.start()
-	#camera.start()
+	send.start()
+	receive.start()
+	pedo.start()
+	camera.start()
+	texttospeech.start()
+
 	alarm.start()
-	pro.start()
-	pro2.start()
-	con.start()
 	getmap.start()
 
 	# timer seconds since processes started
-	for x in range(1,6):
+	for x in range(1,10):
 		time.sleep(1)
 		print str(x)
 	
 	# get data from mapqueue
-	mapinfo = mapqueue.get()
+	mapinfo = q_map.get()
 	print repr(mapinfo)
 
 	# wait for processes to end
-	cameraConsume.join()
-	#camera.join()
-	alarm.join()
-	pro.join()
-	pro2.join()
-	con.join()
-	getmap.join()
+
+	send.join()
+	receive.join()
+	pedo.join()
+	camera.join()
+	texttospeech.join()
+

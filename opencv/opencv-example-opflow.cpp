@@ -7,13 +7,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 using namespace cv;
 using namespace std;
 
 #define MAX_COUNT 500
-#define LEFT 24
-#define RIGHT 40
+#define WIDTH 128
+#define HEIGHT 128
+#define LEFT 100
+#define RIGHT 156
 char rawWindow[] = "Raw Video";
 //char opticalFlowWindow[] = "Optical Flow Window";
 char imageFileName[32];
@@ -23,8 +26,8 @@ char keyPressed;
 
 int main() {
 	VideoCapture cap(0);
-	cap.set(CV_CAP_PROP_FRAME_WIDTH, 64);
-	cap.set(CV_CAP_PROP_FRAME_HEIGHT, 64);
+	cap.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+	cap.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
 	Mat frame, grayFrames, rgbFrames, prevGrayFrame;
 	Mat opticalFlow = Mat(cap.get(CV_CAP_PROP_FRAME_HEIGHT), cap.get(CV_CAP_PROP_FRAME_HEIGHT), CV_32FC3);
@@ -46,9 +49,13 @@ int main() {
 	int rightdy = 0;
 	int rightmag = 0;
 	Point leftBoundTop = Point(LEFT, 0);
-	Point leftBoundBottom = Point(LEFT, 64);
+	Point leftBoundBottom = Point(LEFT, HEIGHT);
 	Point rightBoundTop = Point(RIGHT, 0);
-	Point rightBoundBottom = Point(RIGHT, 64);
+	Point rightBoundBottom = Point(RIGHT, HEIGHT);
+
+	time_t start, end;
+	double fps, sec;
+	int counter=0;
 
 	vector<uchar> status;
 	vector<float> err;
@@ -60,11 +67,21 @@ int main() {
 	int i, k;
 	TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
 	Size subPixWinSize(10, 10), winSize(31, 31);
-	//namedWindow(rawWindow, CV_WINDOW_AUTOSIZE);
+	namedWindow(rawWindow, CV_WINDOW_AUTOSIZE);
 	double angle;
+
+	time(&start);
 
 	while (1) {
 		cap >> frame;
+
+		// fps
+                time(&end);
+                counter++;
+                sec = difftime(end, start);
+                fps = counter / sec;
+                cout << "FPS: " << fps << endl;
+
 		frame.copyTo(rgbFrames);
 		cvtColor(rgbFrames, grayFrames, CV_BGR2GRAY);
 
@@ -113,9 +130,9 @@ int main() {
 		centmag = sqrt((centdx*centdx) + (centdy*centdy));		
 		
 		if (leftmag > rightmag) {
-			cout << "move towards rightright" << endl;
-		} else if (leftmag < rightmag) {
 			cout << "move towards left" << endl;
+		} else if (leftmag < rightmag) {
+			cout << "move towards rightright" << endl;
 		} else {
 			cout << "go straight" << endl;
 		}
@@ -130,7 +147,7 @@ int main() {
 		centmag = centdx = centdy = 0;
 		
 
-		//imshow(rawWindow, rgbFrames);
+		imshow(rawWindow, rgbFrames);
 		//imshow(opticalFlowWindow, opticalFlow);
 
 		std::swap(points2, points1);

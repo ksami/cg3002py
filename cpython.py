@@ -3,7 +3,7 @@
 import subprocess
 import sys
 
-def execute(cameraqueue,command):
+def execute(q_cam, command):
 	process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 	# Poll process for new output until finished
@@ -15,7 +15,7 @@ def execute(cameraqueue,command):
 		#print nextline
 		#sys.stdout.write(nextline)
 		#sys.stdout.flush()
-		cameraqueue.put(nextline)
+		q_cam.put(nextline)
 
 	output = process.communicate()[0]
 	exitCode = process.returncode
