@@ -31,8 +31,6 @@ void setup()
 
 void loop()
 {           
-  int output_mode; // 0 = raw data, 1 = filtered data, 2 = raw data and filtered data
-  float old_cmdistance;
   int flexsensorReading= analogRead(flexsensorReading);
   
   Serial.println(flexsensorReading);
@@ -49,21 +47,10 @@ void loop()
    {  
       float cmdistance; //left
       float cmdistance_2; //right
-      old_cmdistance=cmdistance;
       long microsec = ultrasonic.timing();
       long microsec_2 = ultrasonic_2.timing();
       cmdistance = ultrasonic.CalcDistance(microsec,Ultrasonic::CM);//this result unit is centimeter
       cmdistance_2 = ultrasonic_2.CalcDistance(microsec_2,Ultrasonic::CM);//this result unit is centimeter
-      if(output_mode == 0)
-     { 
-       ;
-     } 
-     if(output_mode == 1)
-     { 
-       cmdistance = Filter(cmdistance, old_cmdistance, 8); 
-     } 
-    if(output_mode == 2)
-     { 
       Serial.print(cmdistance); 
       Serial.print(" "); 
       cmdistance = Filter(cmdistance, old_cmdistance, 4); 
@@ -138,38 +125,5 @@ void loop()
   //              myservo_2.write(pos2);
   //         }
   delay(500);
-}
-
-
-// This filter limits the max difference between readings and also apply an average filter 
-int Filter(int new_value, int old_value, int max_diff) 
-{ 
-  int diff_values; 
-  int result; 
-  if (old_value == 0) 
-  { // Filter is not initialized (no old value) 
-    return(new_value); 
-  } 
-  diff_values = new_value - old_value; 
-  // Difference with old reading 
-  if (diff_values > max_diff) 
-  { 
-    result = old_value + max_diff; 
-    // We limit the max difference between readings 
-  } 
-  else 
-  { 
-    if (diff_values < -max_diff) 
-    { 
-      result = old_value - max_diff; 
-      // We limit the max difference between readings 
-    } 
-    else 
-    { 
-      result = (new_value + old_value) >> 1; 
-      // Small filtering (average filter) 
-    } 
-  } 
-  return(result); 
 }
 
