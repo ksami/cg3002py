@@ -44,6 +44,7 @@ class Comms:
 		Msg = self.xbee.Receive()
 		if Msg:
 			content = Msg[7:-1].decode('ascii')
+			print "ack: ", content
 			return content == 'ACK'
 		return False
 	
@@ -51,6 +52,7 @@ class Comms:
 		Msg = self.xbee.Receive()
 		if Msg:
 			content = Msg[7:-1].decode('ascii')
+			print "handstatus: ", content
 			if len(content) == 2 and content[0] == ARD_HAND_PACKAGEID:
 				return {'status': content[-1]} # 0: open , 1: close
 		return False

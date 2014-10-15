@@ -86,7 +86,7 @@ def executeOff():
 	#send device ready to arduino
 	#handle timeout and repeated sending
 
-	p_send = createProcess(comms.python.main.send, (_comms, comms.python.main.DEVICE_READY,))
+	p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.DEVICE_READY},))
 	p_send.start()
 	p_send.join() #TODO: blocks until p_send's death == ard sends ack
 
@@ -215,7 +215,7 @@ def executeInit():
 		#TODO
 	
 		# Change to NAVI state
-		p_send = createProcess(comms.python.main.send, (_comms, comms.python.comm.NAVI_READY))
+		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.comm.NAVI_READY}))
 		p_send.start()
 		p_send.join()
 		_systemState.changeState(isHandOpen=False)

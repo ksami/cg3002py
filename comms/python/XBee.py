@@ -21,7 +21,7 @@ class XBee():
             self.RxBuff.extend(chunk)
 
         msgs = self.RxBuff.split(bytes(b'\x7E'))
-        print msgs
+        #print msgs
         for msg in msgs[:-1]:
             self.Validate(msg)
 
