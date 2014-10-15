@@ -1,4 +1,4 @@
-from accelerometer import Accelerometer
+#from accelerometer import Accelerometer
 import time
 
 def execute():
