@@ -7,16 +7,15 @@ from vector import Vector
 SAMPLE_SIZE = 50
 PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
 TIME_WINDOW_MIN = 0.3
-TIME_WINDOW_MAX = 2
-HEIGHT = 1.77 # in meters
-STANDING_MODE = 0
-WALKING_MODE = 1
 
-MAX_ACCEL_VALUE = 32767
-MIN_ACCEL_VALUE = 31128
+ACCEL_X_OFFSET = 3026
+ACCEL_Y_OFFSET = 15721
+ACCEL_Z_OFFSET = 3213
 
-MAX_STATIONARY_ACCEL = Vector(MAX_ACCEL_VALUE, MAX_ACCEL_VALUE, MAX_ACCEL_VALUE)
-MIN_STATIONARY_ACCEL = Vector(MIN_ACCEL_VALUE, MIN_ACCEL_VALUE, MIN_ACCEL_VALUE)
+MULTIPLIER = 1 # will need to change it
+
+LOW_PASS = 0.1
+HIGH_PASS = 0.1
 
 scale = 1.3
 most_active_axis = 2
@@ -59,6 +58,21 @@ def compare(accel_1, accel_2):
     if( most_active_axis == 2 ) :
         return accel_1.z - accel_2.z
 
+def getDist(accel_val):
+
+    x = accel_val.x 
+    y = accel_val.y 
+    z = accel_val.z 
+    
+    if( most_active_axis == 0 ) :
+        return math.sqrt( (y*y + z*z) / 16.0)
+    
+    if( most_active_axis == 1 ) :
+        return math.sqrt( (x*x + z*z) / 16.0)
+    
+    if( most_active_axis == 2 ) :
+        return math.sqrt( (x*x + y*y) / 16.0)
+
 def getHeading(compass_val):
 
     heading = 0
@@ -97,6 +111,7 @@ bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
 accel_max = Vector(0, 0, 0)
 accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
 accel_val = Vector(0, 0, 0)
+accel_gravity = Vector(0, 0, 0)
 dynamic_threshold = Vector(0, 0, 0) # the moving average of 50 accelerometer data
 moving_index = 0
 sample_size = 0
@@ -104,12 +119,16 @@ accel_filter_list = []
 sample_old = Vector(0, 0, 0)
 sample_new = Vector(0, 0, 0)
 num_steps = 0
-old_num_steps = 0
-testing_steps = 0
-two_seconds_elapsed = 0
-distance_per_two_s = 0
 time_window = 0
 total_distance = 0
+
+max_dist = 0
+min_dist = sys.maxint
+val_dist = 0
+avg_dist = 0
+list_dist = []
+list_dist_filter = []
+dist_moving_index = 0
 
 # initialization stage
 
@@ -134,16 +153,16 @@ for i in range(4) :
     accel_filter_list.append(accel_val)
 
 first_time = True
-#size = 0
-#s_size = 0
 
-print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
-print "TIME_WINDOW_MAX: ", TIME_WINDOW_MAX
-print "PRECISION: " , PRECISION
+print "TIME_WINDOW_MIN:", TIME_WINDOW_MIN
+print "PRECISION:" , PRECISION
+print "MULTIPLIER K:", MULTIPLIER
 
-two_seconds_elapsed = time.time()
+stride_txt = open("stride_length.txt", 'w')
 
-while(True):
+time_elapsed = time.time()
+
+while(time.time() - time_elapsed <= 10):
 
     if(sample_size == SAMPLE_SIZE):
         sample_size = 0
@@ -156,28 +175,36 @@ while(True):
         accel_max = Vector(0, 0, 0)
         accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
 
+        max_dist = 0
+        min_dist = sys.maxint
+        val_dist = 0
+        avg_dist = 0
+        list_dist = []
+
         first_time = False
 
     #filter accelerometer values
-    accel_xout = read_word_2c(mpu_address, 0x3b)
-    accel_yout = read_word_2c(mpu_address, 0x3d)
-    accel_zout = read_word_2c(mpu_address, 0x3f)
+    accel_xout = read_word_2c(mpu_address, 0x3b) - ACCEL_X_OFFSET
+    accel_yout = read_word_2c(mpu_address, 0x3d) - ACCEL_Y_OFFSET
+    accel_zout = read_word_2c(mpu_address, 0x3f) - ACCEL_Z_OFFSET
 
     accel_val = Vector(accel_xout, accel_yout, accel_zout)
 
+    # simple moving average to smooth the acceleration data
     accel_val.x = (accel_filter_list[0].x + accel_filter_list[1].x + accel_filter_list[2].x + accel_filter_list[3].x + accel_val.x) / 5
     accel_val.y = (accel_filter_list[0].y + accel_filter_list[1].y + accel_filter_list[2].y + accel_filter_list[3].y + accel_val.y) / 5
     accel_val.z = (accel_filter_list[0].z + accel_filter_list[1].z + accel_filter_list[2].z + accel_filter_list[3].z + accel_val.z) / 5
+
+    # remove gravity, get pure linear acceleration
+    #accel_gravity.x = accel_gravity.x * (1 - HIGH_PASS) + accel_val.x * HIGH_PASS
+    #accel_gravity.y = accel_gravity.y * (1 - HIGH_PASS) + accel_val.y * HIGH_PASS
+    #accel_gravity.z = accel_gravity.z * (1 - HIGH_PASS) + accel_val.z * HIGH_PASS
+
+    #accel_val.x = accel_val.x - accel_gravity.x
+    #accel_val.y = accel_val.y - accel_gravity.y
+    #accel_val.z = accel_val.z - accel_gravity.z
     
     accel_filter_list.insert(moving_index, accel_val)
-
-    # filter compass values
-    compass_xout = read_word_2c(hmc_address, 3) * scale
-    compass_yout = read_word_2c(hmc_address, 7) * scale
-    compass_zout = read_word_2c(hmc_address, 5) * scale
-
-    compass_val = Vector(compass_xout, compass_yout, compass_zout)
-
     moving_index = (moving_index + 1) % 4
     sample_size += 1    
 
@@ -187,38 +214,71 @@ while(True):
     if(compare(accel_min, accel_val) > 0):
         accel_min = accel_val
 
+    val = getDist(accel_val)
+    list_dist.append(val)
+
+    # finding maximum, minimum
+    if(val > max_dist):
+        max_dist = val
+    if(val < min_dist):
+        min_dist = val
+
+    # filter compass values
+    compass_xout = read_word_2c(hmc_address, 3) * scale
+    compass_yout = read_word_2c(hmc_address, 7) * scale
+    compass_zout = read_word_2c(hmc_address, 5) * scale
+
+    compass_val = Vector(compass_xout, compass_yout, compass_zout)
+
     if(not first_time):
-        sample_old = sample_new	
+        sample_old = sample_new 
+
 
         if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
             sample_new = accel_val
-	    #print "------------- get sample_new value\n "
-	
-    	    if(mode == WALKING_MODE):
-                if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-                    if(TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
-                        num_steps += 1
-                        print "WALKING MODE: num_steps =", num_steps, "------------", time.time() - time_window
-                        time_window = time.time()
-                    elif(time.time() - time_window > TIME_WINDOW_MAX):
-                        mode = STANDING_MODE
-                        testing_steps = 1
-                        print "GOING TO STANDING MODE", "---------", time.time() - time_window
-                        time_window = time.time()
-    	    elif(mode == STANDING_MODE):
-                if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-                    if(time_window == 0 or TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
-                        testing_steps += 1
-                        print "STANDING MODE TO WALKING MODE:", testing_steps, "--------------", time.time() - time_window
-                        time_window = time.time()
-                    elif(time.time() - time_window > TIME_WINDOW_MAX):
-                        testing_steps = 1
-                        print "STILL STANDING MODE", "------------", time.time() - time_window
-                        time_window = time.time()
-                if(testing_steps >= 3):
-                    num_steps += testing_steps
-                    print "GOING TO WALKING MODE: num_steps =", num_steps
-                    mode = WALKING_MODE
+            
+            if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
+                if(time.time() - time_window >= TIME_WINDOW_MIN):
+                    num_steps += 1
+
+                    sum_dist = 0
+                    for dist in list_dist :
+                        sum_dist += dist
+                    avg_dist = sum_dist / len(list_dist)
+
+                    velocity = 0
+                    displace = 0
+                    for dist in list_dist:
+                        velocity += (dist - avg_dist)
+                        displace += velocity
+
+                    stride = math.fabs(displace * ((max_dist - avg_dist) / (avg_dist - min_dist))) * MULTIPLIER
+                    if(num_steps <= 4):
+                        list_dist_filter.append(stride)
+                    else:
+                        stride = (list_dist_filter[0] + list_dist_filter[1] + list_dist_filter[2] + list_dist_filter[3] + stride) / 5
+                        list_dist_filter.insert(dist_moving_index, stride)
+                        dist_moving_index = (dist_moving_index + 1) % 4
+                    total_distance += stride
+
+                    print "\n-----------------"
+                    print "numsteps:", num_steps
+                    print "Accel:", accel_val.x, accel_val.y, accel_val.z
+                    print "stride length:", stride
+                    print "num of samples:", len(list_dist)
+                    print "total distance:", total_distance
+
+                    stride_txt.write(str(time.time()) + "\t" + str(stride) + "\t" + str(num_steps))
+
+                    max_dist = 0
+                    min_dist = sys.maxint
+                    val_dist = 0
+                    avg_dist = 0
+                    list_dist = []
+
+                    time_window = time.time()
 
     else:
         sample_new = accel_val
+
+stride_txt.close()

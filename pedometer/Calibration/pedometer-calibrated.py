@@ -5,23 +5,24 @@ import sys
 from vector import Vector
 
 SAMPLE_SIZE = 50
-PRECISION = 1000/2 # = 32767 - 31128 (max and min values when stabilized)
-TIME_WINDOW = 0.4
-HEIGHT = 1.77 # in meters
+PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
+TIME_WINDOW_MIN = 0.3
 
-MAX_ACCEL_VALUE = 32767
-MIN_ACCEL_VALUE = 31128
-
-MAX_STATIONARY_ACCEL = Vector(MAX_ACCEL_VALUE, MAX_ACCEL_VALUE, MAX_ACCEL_VALUE)
-MIN_STATIONARY_ACCEL = Vector(MIN_ACCEL_VALUE, MIN_ACCEL_VALUE, MIN_ACCEL_VALUE)
+ACCEL_X_OFFSET = 3026
+ACCEL_Y_OFFSET = 15721
+ACCEL_Z_OFFSET = 3213
 
 scale = 1.3
+most_active_axis = 2
 
 # Power management registers
 power_mgmt_1 = 0x6b
 
 # MPU6050 i2c address
 mpu_address = 0x68 
+
+# HMC5883l i2c address
+hmc_address = 0x1e
 
 
 def read_byte(adr):
@@ -51,11 +52,51 @@ def compare(accel_1, accel_2):
     if( most_active_axis == 2 ) :
         return accel_1.z - accel_2.z
 
+def getHeading(compass_val):
+
+    heading = 0
+    
+    if(most_active_axis == 0): # x-axis 
+        heading = math.atan2(compass_val.z, compass_val.y)
+
+    if(most_active_axis == 1): # y-axis 
+        heading = math.atan2(compass_val.x, compass_val.z)
+
+    if(most_active_axis == 2): # x-axis 
+        heading = math.atan2(compass_val.y, compass_val.x)
+
+    heading += 0.0404
+
+    if(heading < 0):
+        heading += 2*math.pi
+
+    if(heading > 2*math.pi):
+        heading -= 2*math.pi
+
+    return math.degrees(heading)
+
+def getAccel(accel_val):
+    
+    if( most_active_axis == 0 ) :
+        return accel_val.x
+    
+    if( most_active_axis == 1 ) :
+        return accel_val.y
+    
+    if( most_active_axis == 2 ) :
+        return accel_val.z
+
 
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
 # Now wake the 6050 up as it starts in sleep mode
+bus.write_byte_data(mpu_address, 0x6A, 0)
+bus.write_byte_data(mpu_address, 0x37, 2)
 bus.write_byte_data(mpu_address, power_mgmt_1, 0)
+
+bus.write_byte_data(hmc_address, 0, 0b01110000) # Set to 8 samples @ 15Hz
+bus.write_byte_data(hmc_address, 1, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
+bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
 
 accel_max = Vector(0, 0, 0)
 accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
@@ -68,6 +109,12 @@ sample_old = Vector(0, 0, 0)
 sample_new = Vector(0, 0, 0)
 num_steps = 0
 time_window = 0
+
+size = 0
+
+sum_x = 0
+sum_y = 0
+sum_z = 0
 
 # initialization stage
 
@@ -93,15 +140,12 @@ for i in range(4) :
 
 first_time = True
 
-print "TIME_WINDOW: ", TIME_WINDOW
+print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
 print "PRECISION: " , PRECISION
 
-time_traversed = time.time()
-threshold_file = open("threshold_file", 'w');
-threshold_avg = 0
-threshold_size = 0
+accel_graph = open("accel_graph-standing_still.txt", 'w')
 
-while(time.time() - time_traversed <= 120):
+while(size <= 20000):
 
     if(sample_size == SAMPLE_SIZE):
         sample_size = 0
@@ -128,9 +172,23 @@ while(time.time() - time_traversed <= 120):
     
     accel_filter_list.insert(moving_index, accel_val)
 
-    moving_index = (moving_index + 1) % 4;
+    print size, "Accel: ", accel_val.x, accel_val.y, accel_val.z
+    accel_graph.write(str(size) + "\t" + str(accel_val.x) + "\t" + str(accel_val.y) + "\t" + str(accel_val.z) + "\n")
+
+    # filter compass values
+    compass_xout = read_word_2c(hmc_address, 3) * scale
+    compass_yout = read_word_2c(hmc_address, 7) * scale
+    compass_zout = read_word_2c(hmc_address, 5) * scale
+
+    compass_val = Vector(compass_xout, compass_yout, compass_zout)
+
+    moving_index = (moving_index + 1) % 4
     sample_size += 1    
-    size += 1;
+    size += 1
+
+    sum_x += accel_val.x
+    sum_y += accel_val.y
+    sum_z += accel_val.z
 
     # finding maximum, minimum
     if(compare(accel_max, accel_val) < 0):
@@ -141,22 +199,21 @@ while(time.time() - time_traversed <= 120):
     if(not first_time):
         sample_old = sample_new	
 
-        threshold_file.write(math.fabs(compare(accel_val, sample_new)) + "\n")
-        threshold_avg += math.fabs(compare(accel_val, sample_new))
-        num += 1
-        if( math.fabs(compare(accel_val, sample_new)) > PRECISION	 
+        if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
             sample_new = accel_val
-
-	    if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-        	if(time_window == 0 or time.time() - time_window > TIME_WINDOW):
-	             steps_per_two_s += 1
-	             num_steps += 1
-        	     print "num steps: ", num_steps, time.time() - time_window
-		         time_window = time.time()
+	
+            if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
+                if(time.time() - time_window >= TIME_WINDOW_MIN):
+                    num_steps += 1
+                    print "numsteps:", num_steps
+                    time_window = time.time()
 
     else:
-	 sample_new = accel_val
+        sample_new = accel_val
 
-threshold_avg /= num
-threshold_file.write("----" + threshold_avg + "\n")
-threshold_file.close()
+sum_x /= size
+sum_y /= size
+sum_z /= size
+print "------------------- ", sum_x, sum_y, sum_z
+
+accel_graph.close()
