@@ -21,9 +21,9 @@ def send(comms, msg):
 
 def receive(q_xbee, comms):
     while True:
-        msg = comms.ReceiveHandStatus()
-        if msg != False:
-            q_xbee.put(msg.status)
+        msg = comms.Receive(q_xbee)
+        # if msg != None:
+        #     q_xbee.put(msg.status)
 
 
 # if __name__ == "__main__":

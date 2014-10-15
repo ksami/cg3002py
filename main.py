@@ -88,7 +88,7 @@ def executeOff():
 
 	p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.DEVICE_READY},))
 	p_send.start()
-	p_send.join() #TODO: blocks until p_send's death == ard sends ack
+	p_send.join() #blocks until p_send's death == ard sends ack
 
 	_systemState.changeState()
 
@@ -96,12 +96,10 @@ def executeOff():
 def executeIdle():
 	print "in idle state"
 	#nothing
-	# TODO: when does ard send handopen? assume only on handchange
 	hand = q_xbee.get(block=True)
 	if hand == comms.python.main.HAND_CLOSE:
 		_systemState.changeState()
 	else:
-		#TODO: will repeat again
 		pass
 
 
@@ -236,7 +234,6 @@ def executeNavi():
 	if hand == comms.python.main.HAND_OPEN:
 		_systemState.changeState(isHandOpen=True)
 	else:
-		#TODO: will repeat again
 		pass
 
 
