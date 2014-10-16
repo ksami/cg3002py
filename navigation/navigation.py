@@ -10,7 +10,8 @@ from mapinfo import MapInfo
 # constants for pedometer
 SAMPLE_SIZE = 50
 PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
-STRIDE_LENGTH = 0.81
+HEIGHT = 1.76
+CONSTANT_STRIDE = 0.415
 TIME_WINDOW_MIN = 0.3
 X_AXIS = 0
 Y_AXIS = 1
@@ -180,7 +181,7 @@ class Navigation:
                             self.num_steps += 1
                             print "WALKING MODE: num_steps =", num_steps, "------------", time.time() - time_window
                             self.time_window = time.time()
-                            self.total_distance += STRIDE_LENGTH
+                            self.total_distance += HEIGHT * CONSTANT_STRIDE
 
             else:
                 sample_new = accel_val
@@ -189,6 +190,7 @@ class Navigation:
             if(time.time() - update_time <= UPDATE_TIME):
                 heading = getHeading(self.most_active_axis, self.compass_val)
                 tup = self.mapinfo.giveDirection(self.total_distance, heading)
+                self.total_distance = 0
                 feedback = ""
 
                 if(tup[0] == GO_FORWARD):
