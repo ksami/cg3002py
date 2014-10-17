@@ -5,22 +5,18 @@ import sys
 from vector import Vector
 
 SAMPLE_SIZE = 50
-PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
-TIME_WINDOW_MIN = 0.3
-
+ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
+PEAK_THRESHOLD = 2000
+TIME_THRESHOLD = 0
 HIGH_PASS = 0.8
 
-scale = 1.3
-most_active_axis = 2
+MAXIMA = 1
+MINIMA = 0
 
-# Power management registers
-power_mgmt_1 = 0x6b
-
-# MPU6050 i2c address
-mpu_address = 0x68 
-
-# HMC5883l i2c address
-hmc_address = 0x1e
+# register address
+power_mgmt_1 = 0x6b # Power management registers
+mpu_address = 0x68  # MPU6050 i2c address
+hmc_address = 0x1e  # HMC5883l i2c address
 
 
 def read_byte(adr):
@@ -39,7 +35,7 @@ def read_word_2c(sensor_address, adr):
     else:
         return val
 
-def compare(accel_1, accel_2):
+def compare(most_active_axis, accel_1, accel_2):
 
     if( most_active_axis == 0 ) :
         return accel_1.x - accel_2.x
@@ -49,40 +45,6 @@ def compare(accel_1, accel_2):
     
     if( most_active_axis == 2 ) :
         return accel_1.z - accel_2.z
-
-def getHeading(compass_val):
-
-    heading = 0
-    
-    if(most_active_axis == 0): # x-axis 
-        heading = math.atan2(compass_val.z, compass_val.y)
-
-    if(most_active_axis == 1): # y-axis 
-        heading = math.atan2(compass_val.x, compass_val.z)
-
-    if(most_active_axis == 2): # x-axis 
-        heading = math.atan2(compass_val.y, compass_val.x)
-
-    heading += 0.0404
-
-    if(heading < 0):
-        heading += 2*math.pi
-
-    if(heading > 2*math.pi):
-        heading -= 2*math.pi
-
-    return math.degrees(heading)
-
-def getAccel(accel_val):
-    
-    if( most_active_axis == 0 ) :
-        return accel_val.x
-    
-    if( most_active_axis == 1 ) :
-        return accel_val.y
-    
-    if( most_active_axis == 2 ) :
-        return accel_val.z
 
 
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
@@ -96,18 +58,20 @@ bus.write_byte_data(hmc_address, 0, 0b01110000) # Set to 8 samples @ 15Hz
 bus.write_byte_data(hmc_address, 1, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
 bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
 
-accel_max = Vector(0, 0, 0)
-accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
+accel_maxima = Vector(0, 0, 0)
+accel_minima = Vector(0, 0, 0)
 accel_val = Vector(0, 0, 0)
 gravity = Vector(0, 0, 0)
-dynamic_threshold = Vector(0, 0, 0) # the moving average of 50 accelerometer data
+peak_direction = MINIMA
 moving_index = 0
 sample_size = 0
 accel_filter_list = []
-sample_old = Vector(0, 0, 0)
-sample_new = Vector(0, 0, 0)
+accel_list = []
 num_steps = 0
+sample_new = Vector(0, 0, 0)
 time_window = 0
+time_threshold = 0
+peak_threshold = 0
 
 size = 0
 
@@ -129,11 +93,21 @@ if(max_axis < accel_yout):
     max_axis = accel_xout
     most_active_axis = 1
 
-print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
-print "PRECISION: " , PRECISION
+for i in range(4) :
+    accel_xout = read_word_2c(mpu_address, 0x3b)
+    accel_yout = read_word_2c(mpu_address, 0x3d)
+    accel_zout = read_word_2c(mpu_address, 0x3f)
+
+    accel_val = Vector(accel_xout, accel_yout, accel_zout)
+    accel_filter_list.append(accel_val)
+
+#print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
+#print "PRECISION: " , PRECISION
 print "MOST ACTIVE AXIS: ", most_active_axis
 
+
 # calibration stage
+
 print "\n---CALIBRATION STAGE---"
 
 calibration_time = time.time()
@@ -162,38 +136,34 @@ accel_offset_x = sum_x/calibration_size
 accel_offset_y = sum_y/calibration_size
 accel_offset_z = sum_z/calibration_size
 
-print "---End CALIBRATION STAGE---\n"
+print "\n----END CALIBRATION"
+print "\nCALIBRATION SIZE: " , calibration_size  
+print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
 
-for i in range(4) :
-    accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
-    accel_yout = read_word_2c(mpu_address, 0x3d) - 0
-    accel_zout = read_word_2c(mpu_address, 0x3f) - accel_offset_z
+time.sleep(1)
 
-    accel_val = Vector(accel_xout, accel_yout, accel_zout)
-    accel_filter_list.append(accel_val)
+threshold_sum = 0
+threshold_size = 0
 
 first_time = True
 
+# execution stage
+
 while(True):
 
-    if(sample_size == SAMPLE_SIZE):
-        sample_size = 0
-
-        dynamic_threshold.x = (accel_max.x + accel_min.x) / 2
-        dynamic_threshold.y = (accel_max.y + accel_min.y) / 2
-        dynamic_threshold.z = (accel_max.z + accel_min.z) / 2
-
-        accel_max = Vector(0, 0, 0)
-        accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
-
-        first_time = False
-
-    #filter accelerometer values
-    accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
-    accel_yout = read_word_2c(mpu_address, 0x3d) - 0
-    accel_zout = read_word_2c(mpu_address, 0x3f) - accel_offset_z
+    # filter accelerometer values
+    accel_xout = read_word_2c(mpu_address, 0x3b)
+    accel_yout = read_word_2c(mpu_address, 0x3d)
+    accel_zout = read_word_2c(mpu_address, 0x3f)
 
     accel_val = Vector(accel_xout, accel_yout, accel_zout)
+
+    #print "\nSize:", size ,"---------------"
+    #print "Raw Accel: ", accel_val.x, accel_val.y, accel_val.z
+    
+    accel_val.x -= accel_offset_x
+    accel_val.y -= accel_offset_y
+    accel_val.z -= accel_offset_z
     
     accel_val.x = (accel_filter_list[0].x + accel_filter_list[1].x + accel_filter_list[2].x + accel_filter_list[3].x + accel_val.x) / 5
     accel_val.y = (accel_filter_list[0].y + accel_filter_list[1].y + accel_filter_list[2].y + accel_filter_list[3].y + accel_val.y) / 5
@@ -203,44 +173,62 @@ while(True):
     gravity.y = 0
     gravity.z = HIGH_PASS * gravity.z + (1 - HIGH_PASS) * accel_val.z
 
+    #print "Gravity: ", gravity.x, gravity.y, gravity.z
+
     accel_val.x = accel_val.x - gravity.x
     accel_val.y = accel_val.y - gravity.y
     accel_val.z = accel_val.z - gravity.z
 
     accel_filter_list.insert(moving_index, accel_val)
 
-    # filter compass values
-    compass_xout = read_word_2c(hmc_address, 3) * scale
-    compass_yout = read_word_2c(hmc_address, 7) * scale
-    compass_zout = read_word_2c(hmc_address, 5) * scale
-
-    compass_val = Vector(compass_xout, compass_yout, compass_zout)
+    #print "Calibrated Accel: ", accel_val.x, accel_val.y, accel_val.z
 
     moving_index = (moving_index + 1) % 4
     sample_size += 1    
     size += 1
 
-    # finding maximum, minimum
-    if(compare(accel_max, accel_val) < 0):
-        accel_max = accel_val
-    if(compare(accel_min, accel_val) > 0):
-        accel_min = accel_val
-
+    # finding minima and maxima
     if(not first_time):
-        sample_old = sample_new	
-
-        if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
+        if( math.fabs( compare(most_active_axis, sample_new, accel_val)) >= ACCEL_THRESHOLD):
             sample_new = accel_val
-	
-            if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-                if(time.time() - time_window >= TIME_WINDOW_MIN):
-                    num_steps += 1
-                    print "numsteps:", num_steps
-                    time_window = time.time()
+            time_threshold = time.time()
+            accel_list.append(accel_val)
+
+            print "t =", t
+            t += 1
+
+            # looking for a minima peak
+            if( peak_direction == MINIMA ):
+                if(  compare(most_active_axis, accel_maxima, accel_val) >= peak_threshold ):
+                    # time between two steps should be larger than 
+                    print "minima coming"
+                    if(time.time() - time_window >= TIME_THRESHOLD):
+                        # a maxima has been detected and a step is detected
+                        num_steps += 1
+                        peak_direction = MAXIMA
+                        accel_minima = accel_val
+                        time_window = time.time()
+                        print "PEAK DETECTED MAXIMA", num_steps
+                        peak_threshold = PEAK_THRESHOLD
+
+            # looking for a maxima peak
+            if( peak_direction == MAXIMA ):
+                if( compare(most_active_axis, accel_val, accel_minima) >= peak_threshold ):
+                    # time between two steps should be larger than 
+                    print "maxima coming"
+                    if(time.time() - time_window >= TIME_THRESHOLD):
+                        # a maxima has been detected and a step is detected
+                        num_steps += 1
+                        peak_direction = MINIMA
+                        accel_maxima = accel_val
+                        time_window = time.time()                    
+                        print "PEAK DETECTED MINIMA", num_steps
+                        peak_threshold = PEAK_THRESHOLD
 
     else:
+        peak_direction = MINIMA
+        peak_threshold = PEAK_THRESHOLD / 2
+        accel_maxima = accel_val
+        first_time = False
         sample_new = accel_val
-
-threshold_sum /= threshold_size
-print "threshold =", threshold_sum
-#graph.close()
+        t = 0

@@ -13,9 +13,11 @@ PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
 HEIGHT = 1.76
 CONSTANT_STRIDE = 0.415
 TIME_WINDOW_MIN = 0.3
+
 X_AXIS = 0
 Y_AXIS = 1
 Z_AXIS = 2 
+
 UPDATE_TIME = 3
 #TIME_WINDOW_MAX = 2
 #HEIGHT = 1.77 # in meters
@@ -110,10 +112,43 @@ class Navigation:
             max_axis = accel_xout
             self.most_active_axis = 1
 
+        print "\n---CALIBRATION STAGE---"
+
+        calibration_time = time.time()
+        calibration_size = 0
+
+        while(time.time() - calibration_time <= 5):
+            accel_xout = read_word_2c(mpu_address, 0x3b)
+            accel_yout = read_word_2c(mpu_address, 0x3d)
+            accel_zout = read_word_2c(mpu_address, 0x3f)
+
+            gravity.x = HIGH_PASS * gravity.x + (1 - HIGH_PASS) * accel_val.x
+            gravity.y = 0
+            gravity.z = HIGH_PASS * gravity.z + (1 - HIGH_PASS) * accel_val.z
+
+            accel_xout -= gravity.x
+            accel_yout -= gravity.y
+            accel_zout -= gravity.z
+
+            sum_x += accel_xout
+            sum_y += accel_yout
+            sum_z += accel_zout
+
+            calibration_size += 1
+
+        accel_offset_x = sum_x/calibration_size
+        accel_offset_y = sum_y/calibration_size
+        accel_offset_z = sum_z/calibration_size
+
+        print "\n----END CALIBRATION"
+
+        print "\nCALIBRATION SIZE: " , calibration_size  
+        print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
+
         for i in range(4) :
-            accel_xout = read_word_2c(self.bus, mpu_address, 0x3b)
-            accel_yout = read_word_2c(self.bus, mpu_address, 0x3d)
-            accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
+            accel_xout = read_word_2c(self.bus, mpu_address, 0x3b) - accel_offset_x
+            accel_yout = read_word_2c(self.bus, mpu_address, 0x3d) - 0
+            accel_zout = read_word_2c(self.bus, mpu_address, 0x3f) - accel_offset_z
 
             accel_val = Vector(accel_xout, accel_yout, accel_zout)
             self.accel_filter_list.append(accel_val)
