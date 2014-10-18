@@ -1,0 +1,1 @@
+extern void ssTask(void* p);

@@ -1,2 +1,3 @@
 *.pyc
 *.o
+/arduino/FreeRTOS2560_Cplus/FreeRTOS2560_Cplus/Debug
