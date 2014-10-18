@@ -39,6 +39,7 @@ if __name__ == "__main__":
 	pedo.start()
 	camera.start()
 	texttospeech.start()
+
 	alarm.start()
 	getmap.start()
 
@@ -52,10 +53,10 @@ if __name__ == "__main__":
 	print repr(mapinfo)
 
 	# wait for processes to end
+
 	send.join()
 	receive.join()
 	pedo.join()
 	camera.join()
 	texttospeech.join()
-	alarm.join()
-	getmap.join()
+

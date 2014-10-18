@@ -7,20 +7,11 @@ from vector import Vector
 SAMPLE_SIZE = 50
 PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
 TIME_WINDOW_MIN = 0.3
-TIME_WINDOW_MAX = 2
-HEIGHT = 1.77 # in meters
-STANDING_MODE = 0
-WALKING_MODE = 1
 
-MAX_ACCEL_VALUE = 32767
-MIN_ACCEL_VALUE = 31128
-
-MAX_STATIONARY_ACCEL = Vector(MAX_ACCEL_VALUE, MAX_ACCEL_VALUE, MAX_ACCEL_VALUE)
-MIN_STATIONARY_ACCEL = Vector(MIN_ACCEL_VALUE, MIN_ACCEL_VALUE, MIN_ACCEL_VALUE)
+HIGH_PASS = 0.8
 
 scale = 1.3
 most_active_axis = 2
-mode = STANDING_MODE
 
 # Power management registers
 power_mgmt_1 = 0x6b
@@ -82,6 +73,17 @@ def getHeading(compass_val):
 
     return math.degrees(heading)
 
+def getAccel(accel_val):
+    
+    if( most_active_axis == 0 ) :
+        return accel_val.x
+    
+    if( most_active_axis == 1 ) :
+        return accel_val.y
+    
+    if( most_active_axis == 2 ) :
+        return accel_val.z
+
 
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
@@ -97,6 +99,7 @@ bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
 accel_max = Vector(0, 0, 0)
 accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
 accel_val = Vector(0, 0, 0)
+gravity = Vector(0, 0, 0)
 dynamic_threshold = Vector(0, 0, 0) # the moving average of 50 accelerometer data
 moving_index = 0
 sample_size = 0
@@ -104,12 +107,13 @@ accel_filter_list = []
 sample_old = Vector(0, 0, 0)
 sample_new = Vector(0, 0, 0)
 num_steps = 0
-old_num_steps = 0
-testing_steps = 0
-two_seconds_elapsed = 0
-distance_per_two_s = 0
 time_window = 0
-total_distance = 0
+
+size = 0
+
+sum_x = 0
+sum_y = 0
+sum_z = 0
 
 # initialization stage
 
@@ -134,20 +138,55 @@ for i in range(4) :
     accel_filter_list.append(accel_val)
 
 first_time = True
-#size = 0
-#s_size = 0
 
 print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
-print "TIME_WINDOW_MAX: ", TIME_WINDOW_MAX
 print "PRECISION: " , PRECISION
+print "MOST ACTIVE AXIS: ", most_active_axis
 
-two_seconds_elapsed = time.time()
+print "\n---CALIBRATION STAGE---"
 
-while(True):
+calibration_time = time.time()
+calibration_size = 0
+
+while(time.time() - calibration_time <= 5):
+    accel_xout = read_word_2c(mpu_address, 0x3b)
+    accel_yout = read_word_2c(mpu_address, 0x3d)
+    accel_zout = read_word_2c(mpu_address, 0x3f)
+
+    gravity.x = HIGH_PASS * gravity.x + (1 - HIGH_PASS) * accel_val.x
+    gravity.y = 0
+    gravity.z = HIGH_PASS * gravity.z + (1 - HIGH_PASS) * accel_val.z
+
+    accel_xout -= gravity.x
+    accel_yout -= gravity.y
+    accel_zout -= gravity.z
+
+    sum_x += accel_xout
+    sum_y += accel_yout
+    sum_z += accel_zout
+
+    calibration_size += 1
+
+accel_offset_x = sum_x/calibration_size
+accel_offset_y = sum_y/calibration_size
+accel_offset_z = sum_z/calibration_size
+
+print "\n----END CALIBRATION"
+print "\nCALIBRATION SIZE: " , calibration_size  
+print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
+
+time.sleep(1)
+
+threshold_sum = 0
+threshold_size = 0
+
+graph = open('accel_graph_walking.txt', 'w')
+
+time_elapsed = time.time()
+while(time.time() - time_elapsed <= 20):
 
     if(sample_size == SAMPLE_SIZE):
         sample_size = 0
-       # print "--------------------------------- finished 50 samples \n"
 
         dynamic_threshold.x = (accel_max.x + accel_min.x) / 2
         dynamic_threshold.y = (accel_max.y + accel_min.y) / 2
@@ -165,11 +204,32 @@ while(True):
 
     accel_val = Vector(accel_xout, accel_yout, accel_zout)
 
+    print "\nSize:", size ,"---------------"
+    print "Raw Accel: ", accel_val.x, accel_val.y, accel_val.z
+    
+    accel_val.x -= accel_offset_x
+    accel_val.y -= 0
+    accel_val.z -= accel_offset_z
+    
     accel_val.x = (accel_filter_list[0].x + accel_filter_list[1].x + accel_filter_list[2].x + accel_filter_list[3].x + accel_val.x) / 5
     accel_val.y = (accel_filter_list[0].y + accel_filter_list[1].y + accel_filter_list[2].y + accel_filter_list[3].y + accel_val.y) / 5
     accel_val.z = (accel_filter_list[0].z + accel_filter_list[1].z + accel_filter_list[2].z + accel_filter_list[3].z + accel_val.z) / 5
-    
+
+    gravity.x = HIGH_PASS * gravity.x + (1 - HIGH_PASS) * accel_val.x
+    gravity.y = 0
+    gravity.z = HIGH_PASS * gravity.z + (1 - HIGH_PASS) * accel_val.z
+
+    print "Gravity: ", gravity.x, gravity.y, gravity.z
+
+    accel_val.x = accel_val.x - gravity.x
+    accel_val.y = accel_val.y - gravity.y
+    accel_val.z = accel_val.z - gravity.z
+
     accel_filter_list.insert(moving_index, accel_val)
+
+    print "Calibrated Accel: ", accel_val.x, accel_val.y, accel_val.z
+
+    graph.write(str(size) + "\t" + str(accel_val.x) + "\t" + str(accel_val.y) + "\t" + str(accel_val.z) + "\n")
 
     # filter compass values
     compass_xout = read_word_2c(hmc_address, 3) * scale
@@ -180,6 +240,7 @@ while(True):
 
     moving_index = (moving_index + 1) % 4
     sample_size += 1    
+    size += 1
 
     # finding maximum, minimum
     if(compare(accel_max, accel_val) < 0):
@@ -190,35 +251,21 @@ while(True):
     if(not first_time):
         sample_old = sample_new	
 
+        threshold_sum += math.fabs(compare(accel_val, sample_new))
+        threshold_size += 1
         if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
             sample_new = accel_val
-	    #print "------------- get sample_new value\n "
 	
-    	    if(mode == WALKING_MODE):
-                if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-                    if(TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
-                        num_steps += 1
-                        print "WALKING MODE: num_steps =", num_steps, "------------", time.time() - time_window
-                        time_window = time.time()
-                    elif(time.time() - time_window > TIME_WINDOW_MAX):
-                        mode = STANDING_MODE
-                        testing_steps = 1
-                        print "GOING TO STANDING MODE", "---------", time.time() - time_window
-                        time_window = time.time()
-    	    elif(mode == STANDING_MODE):
-                if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
-                    if(time_window == 0 or TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
-                        testing_steps += 1
-                        print "STANDING MODE TO WALKING MODE:", testing_steps, "--------------", time.time() - time_window
-                        time_window = time.time()
-                    elif(time.time() - time_window > TIME_WINDOW_MAX):
-                        testing_steps = 1
-                        print "STILL STANDING MODE", "------------", time.time() - time_window
-                        time_window = time.time()
-                if(testing_steps >= 3):
-                    num_steps += testing_steps
-                    print "GOING TO WALKING MODE: num_steps =", num_steps
-                    mode = WALKING_MODE
+            if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
+                if(time.time() - time_window >= TIME_WINDOW_MIN):
+                    num_steps += 1
+                    print "numsteps:", num_steps
+		    time_window = time.time()
 
     else:
         sample_new = accel_val
+    #time.sleep(1)
+
+threshold_sum /= threshold_size
+print "threshold =", threshold_sum
+graph.close()

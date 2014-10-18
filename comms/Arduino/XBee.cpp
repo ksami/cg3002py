@@ -39,7 +39,7 @@ int XBee::Send(unsigned char *msg, int len, unsigned char *outBuff, int addr){
 
     buf[0] = 0x7E;
     buf[1] = 0x00;
-    // LSB = content + 5 (content length + API type + frameid + addr(2) + options)
+    // LSB = content + 5 (API type + frameid + addr(2) + options)
     buf[2] = (unsigned char)(len + 5);
     buf[3] = 0x01;  // transmit request
     buf[4] = 0x00;  // Frame ID
@@ -105,18 +105,4 @@ int XBee::unescape(unsigned char *input, int inLen, unsigned char *output){
     }
 
     return pos;
-}
-
-int XBee::GetDataId(unsigned char *inbuf){
-  // first byte of data is reserved for data id
-  return (int)inbuf[8] - (int)'0';
-}
-
-int XBee::GetData(unsigned char *inbuf,int len,unsigned char *data){
-  // inbuf = Delimeter + Length(2) + Frame Type + Addr(2) + RSSI + Option + Data + Checksum
-  // inbuf = 8 bytes + Data + 1 byte
-  // data_we_want = inbuf[8:-1] - data id = inbuf[9:-1]
-  // data length = Total len - 10(Delimeter + Length(2) + Frame Type + Addr(2) + RSSI + Option + Data id + Checksum)
-  memcpy(data, &inbuf[9], len-10);
-  return len-10;
 }

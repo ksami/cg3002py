@@ -82,6 +82,17 @@ def getHeading(compass_val):
 
     return math.degrees(heading)
 
+def getAccel(accel_val):
+    
+    if( most_active_axis == 0 ) :
+        return accel_val.x
+    
+    if( most_active_axis == 1 ) :
+        return accel_val.y
+    
+    if( most_active_axis == 2 ) :
+        return accel_val.z
+
 
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
@@ -104,8 +115,8 @@ accel_filter_list = []
 sample_old = Vector(0, 0, 0)
 sample_new = Vector(0, 0, 0)
 num_steps = 0
-old_num_steps = 0
 testing_steps = 0
+steps_per_two_s = 0
 two_seconds_elapsed = 0
 distance_per_two_s = 0
 time_window = 0
@@ -134,16 +145,18 @@ for i in range(4) :
     accel_filter_list.append(accel_val)
 
 first_time = True
-#size = 0
-#s_size = 0
 
 print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
 print "TIME_WINDOW_MAX: ", TIME_WINDOW_MAX
 print "PRECISION: " , PRECISION
 
 two_seconds_elapsed = time.time()
+stride_txt = open("stride_length.txt", 'w')
+num = 0
 
-while(True):
+time_elapsed = time.time()
+
+while(time.time() - time_elapsed <= 30):
 
     if(sample_size == SAMPLE_SIZE):
         sample_size = 0
@@ -192,14 +205,19 @@ while(True):
 
         if( math.fabs(compare(accel_val, sample_new)) > PRECISION ):
             sample_new = accel_val
-	    #print "------------- get sample_new value\n "
 	
     	    if(mode == WALKING_MODE):
                 if( compare(sample_new, dynamic_threshold) < 0 and compare(dynamic_threshold, sample_old) < 0):
                     if(TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
                         num_steps += 1
                         print "WALKING MODE: num_steps =", num_steps, "------------", time.time() - time_window
+                        stride_txt.write(str(num) + "\t" + str(getAccel(accel_min)) + "\n")
+                        num += 1
+                        stride_txt.write(str(num) + "\t" + str(getAccel(dynamic_threshold)) + "\n")
+                        num += 1
+                        stride_txt.write(str(num) + "\t" + str(getAccel(dynamic_threshold)) + "\n")
                         time_window = time.time()
+
                     elif(time.time() - time_window > TIME_WINDOW_MAX):
                         mode = STANDING_MODE
                         testing_steps = 1
@@ -210,6 +228,11 @@ while(True):
                     if(time_window == 0 or TIME_WINDOW_MIN <= time.time() - time_window <= TIME_WINDOW_MAX):
                         testing_steps += 1
                         print "STANDING MODE TO WALKING MODE:", testing_steps, "--------------", time.time() - time_window
+                        stride_txt.write(str(num) + "\t" + str(getAccel(accel_min)) + "\n")
+                        num += 1
+                        stride_txt.write(str(num) + "\t" + str(getAccel(dynamic_threshold)) + "\n")
+                        num += 1
+                        stride_txt.write(str(num) + "\t" + str(getAccel(dynamic_threshold)) + "\n")
                         time_window = time.time()
                     elif(time.time() - time_window > TIME_WINDOW_MAX):
                         testing_steps = 1
@@ -222,3 +245,5 @@ while(True):
 
     else:
         sample_new = accel_val
+
+stride_txt.close()

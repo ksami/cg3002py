@@ -1,0 +1,57 @@
+
+#include <Ultrasonic.h>
+
+const int sonar_arraysize=5;
+int rangevalue[sonar_arraysize];
+int index=0;  // the index of the current reading
+int total=0;  // the running total
+int average=0;
+int trigpin = 2;//appoint trigger pin
+int echopin = 3;//appoint echo pin
+
+Ultrasonic ultrasonic(trigpin,echopin);
+
+void setup()
+{
+  Serial.begin(9600);//set Serial Baud rate
+  // initialize all the readings to 0:
+   for (int thisReading = 0; thisReading < sonar_arraysize; thisReading++)
+  {
+    rangevalue[thisReading] = 0; 
+  }    
+  Serial.println("System is starting!!!\n");
+
+
+}
+
+void loop()
+{
+  // subtract the last reading:
+  total=total - rangevalue[index];
+  float cmdistance;
+  long microsec = ultrasonic.timing();
+  cmdistance = ultrasonic.CalcDistance(microsec,Ultrasonic::CM);//this result unit is centimeter
+  // read from the sensor
+  rangevalue[index]=cmdistance;
+  // add the reading to the total
+  total=total +rangevalue[index];
+  //next position in the array
+  index=index+1;
+  // if we're at the end of the array
+  if (index>=sonar_arraysize)
+  {
+    //wrap around to the beginning 
+    index=0;
+    average=total/(sonar_arraysize);
+    if(average>=400)
+    {
+       average=0;
+    }
+  }
+  Serial.print(average); 
+  Serial.println(" ");
+ 
+   delay(100);
+  
+}
+
