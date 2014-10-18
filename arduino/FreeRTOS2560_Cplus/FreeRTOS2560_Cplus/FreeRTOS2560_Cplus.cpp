@@ -30,8 +30,8 @@ Ultrasonic ultrasonic_2(trigpin_2, echopin_2);
 
 //Attach corresponding servo pins
 
-Servo servo_1;
-Servo servo_2;
+//Servo servo_1;
+//Servo servo_2;
 
 //Sonar variables
 
@@ -56,7 +56,7 @@ int index_2;
 uint16_t *history_1;
 uint16_t *history_2;
 
-//int initFlag;
+bool start = false;
 
 //QuickSort for Sonar Filtering
 
@@ -104,17 +104,15 @@ void ssSetup()
 	//sonar2_ready = false;
 	/*
 	for(int i=0; i<arraysize; i++) {
-		reading_1[i] = 0;
-		reading_2[i] = 0;
+	reading_1[i] = 0;
+	reading_2[i] = 0;
 	}
 	*/
-	servo_1.attach(7);
-	servo_2.attach(8);
+	//servo_1.attach(7);
+	//servo_2.attach(8);
 	
-	servo_1.write(0);
-	servo_2.write(0);
-
-	//initFlag = 0;
+	//servo_1.write(0);
+	//servo_2.write(0);
 }
 
 //Sonar and Servo Tasks
@@ -124,82 +122,99 @@ void ssTask(void* p)
 	
 	while (1) {
 		
-		//Left Sonar
-		//Obtains time of travel for sound.
-		microsec_1 = ultrasonic_1.timing();
-		//Updates distance in cm.
-		distance_1 = ultrasonic_1.CalcDistance(microsec_1, Ultrasonic::CM);
-		
-		distance_1 = sma_filter(distance_1, history_1);
-		
-		//memcpy(temp_1, reading_1, sizeof(reading_1));
-		//quicksort(temp_1, 0, arraysize-1);
-		//distance_1 = temp_1[median];
-		
-		//Servo Left
-		
-		Serial.print("L: ");
-		Serial.print((int) distance_1, DEC);
-		
-		if ((distance_1 > 0.1) && (distance_1 <= 60)) {
-			servo_1.write(10);
-			delayInMilliSeconds(50);
-			servo_1.write(0);
-			delayInMilliSeconds(50);
+		if (start) {
+			
+			//Left Sonar
+			//Obtains time of travel for sound.
+			microsec_1 = ultrasonic_1.timing();
+			//Updates distance in cm.
+			distance_1 = ultrasonic_1.CalcDistance(microsec_1, Ultrasonic::CM);
+			
+			distance_1 = sma_filter(distance_1, history_1);
+			
+			//memcpy(temp_1, reading_1, sizeof(reading_1));
+			//quicksort(temp_1, 0, arraysize-1);
+			//distance_1 = temp_1[median];
+			
+			//Servo Left
+			
+			Serial.print("L: ");
+			Serial.print((int) distance_1, DEC);
+			
+			if ((distance_1 > 0.1) && (distance_1 <= 60)) {
+				digitalWrite(7, HIGH);
+				delayInMilliSeconds(200);
+				digitalWrite(7, LOW);
+				delayInMilliSeconds(200);
+				/*
+				servo_1.write(10);
+				delayInMilliSeconds(50);
+				servo_1.write(0);
+				delayInMilliSeconds(50);
+				*/
+			}
+			
+
+			//Right Sonar
+			//Obtains time of travel for sound.
+			microsec_2 = ultrasonic_2.timing();
+			//Updates distance in cm.
+			distance_2 = ultrasonic_2.CalcDistance(microsec_2, Ultrasonic::CM);
+			
+			distance_2 = sma_filter(distance_2, history_2);
+			
+			//memcpy(temp_2, reading_2, sizeof(reading_1));
+			//quicksort(temp_2, 0, arraysize-1);
+			//distance_2 = temp_2[median];
+			
+			//Servo Right
+
+			Serial.print("     ");
+			Serial.print("R: ");
+			Serial.print((int) distance_2, DEC);
+			Serial.println();
+			
+			if ((distance_2 > 0.1) && (distance_2 <= 60)) {
+				digitalWrite(8, HIGH);
+				delayInMilliSeconds(200);
+				digitalWrite(8, LOW);
+				delayInMilliSeconds(200);
+				/*
+				servo_2.write(10);
+				delayInMilliSeconds(50);
+				servo_2.write(0);
+				delayInMilliSeconds(50);
+				*/
+			}
 		}
-		//}
-
-		//Right Sonar
-		//Obtains time of travel for sound.
-		microsec_2 = ultrasonic_2.timing();
-		//Updates distance in cm.
-		distance_2 = ultrasonic_2.CalcDistance(microsec_2, Ultrasonic::CM);
-	
-		distance_2 = sma_filter(distance_2, history_2);
-		
-		//memcpy(temp_2, reading_2, sizeof(reading_1));
-		//quicksort(temp_2, 0, arraysize-1);
-		//distance_2 = temp_2[median];
-		
-		//Servo Right
-
-		Serial.print("     ");
-		Serial.print("R: ");
-		Serial.print((int) distance_2, DEC);
-		Serial.println();
-		
-		if ((distance_2 > 0.1) && (distance_2 <= 60)) {
-			servo_2.write(10);
-			delayInMilliSeconds(50);
-			servo_2.write(0);
-			delayInMilliSeconds(50);
-		}
-
+		vTaskDelay(200);
 	}
-	vTaskDelay(200);
 }
 
 
 
 void flexTask(void* p) {
-	
-	int readRaw = analogRead(flexpin);
-	Serial.println(readRaw);
-	
-	//Readings are remapped from 0 to 10.
-	int readAdj = map(readRaw, 498, 520, 0, 10);
-	Serial.println(readAdj);
-	
-	if (readAdj > 8) {
-		//off
-		Serial.println("OFF");
+	while (1) {
+		int readRaw = analogRead(flexpin);
+		Serial.println(readRaw);
+		
+		//Readings are remapped from 0 to 10.
+		int readMap = map(readRaw, 520, 600, 0, 10);
+		Serial.println(readMap);
+		
+		if (readMap > 10) {
+			//on
+			start = true;
+			Serial.println("ON");
+		}
+		
+		else {
+			start = false;
+			Serial.println("OFF");
+			//on
+		}
+		vTaskDelay(100);
 	}
-	
-	else if (readAdj <=5)  {
-		Serial.println("ON");
-		//on
-	}
-	delay(60);
 }
 
 void testTask(void* p) {
@@ -224,11 +239,14 @@ int main()
 	
 	ssSetup();
 	
+	pinMode(7, OUTPUT);
+	pinMode(8, OUTPUT);
+	
 	TaskHandle_t taskSS;
 
 	xTaskCreate(ssTask, "ssTask", STACK_DEPTH, NULL, 5, &taskSS);
 	//xTaskCreate(task2, "test", STACK_DEPTH, NULL, 5, NULL);
-	//xTaskCreate(flexTask, "Flex", STACK_DEPTH, NULL, 5, &taskRightSS);
+	xTaskCreate(flexTask, "Flex", STACK_DEPTH, NULL, 5, NULL);
 
 	vTaskStartScheduler();
 }
