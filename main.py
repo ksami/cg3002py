@@ -7,7 +7,7 @@ import time
 import timer
 import smwmap
 import cpython
-import audio.textspeech
+#import audio.textspeech
 import pedometer.test
 import comms.python.main
 from comms.python.comms import Comms

@@ -16,31 +16,47 @@ class Comms:
 		self.xbee = XBee.XBee("/dev/ttyAMA0",ARD_BAUDRATE)
 	
 	def DeviceReady(self):
+		delay = 2
 		while True:
 			self.xbee.SendStr("0",ARD_ADDR,ARD_OPT,ARD_FRAME)
-			sleep(1)
+			sleep(delay)
+			delay = delay * 2
+			if delay >= 32:
+				delay = 2
 			if self.ReceiveAck(): 
 				break	
 	
 	def NaviReady(self):
+		delay = 2
 		while True:
 			self.xbee.SendStr("1",ARD_ADDR,ARD_OPT,ARD_FRAME)
-			sleep(1)
+			sleep(delay)
+			delay = delay * 2
+			if delay >= 32:
+				delay = 2
 			if self.ReceiveAck(): 
 				break
 	
 	def NaviEnd(self):
+		delay = 2
 		while True:
 			self.xbee.SendStr("2",ARD_ADDR,ARD_OPT,ARD_FRAME)
-			sleep(1)
+			sleep(delay)
+			delay = delay * 2
+			if delay >= 32:
+				delay = 2
 			if self.ReceiveAck(): 
 				break
 	
 	def ObstacleDetected(self,direction,strength):
+		delay = 2
 		Msg = "3{}{}".format(direction,strength)
 		while True:
 			self.xbee.SendStr(Msg,ARD_ADDR,ARD_OPT,ARD_FRAME)
-			sleep(1)
+			sleep(delay)
+			delay = delay * 2
+			if delay >= 32:
+				delay = 2
 			if self.ReceiveAck(): 
 				break
 	
