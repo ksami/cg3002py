@@ -121,15 +121,7 @@ class Navigation:
             accel_xout = read_word_2c(mpu_address, 0x3b)
             accel_yout = read_word_2c(mpu_address, 0x3d)
             accel_zout = read_word_2c(mpu_address, 0x3f)
-
-            gravity.x = HIGH_PASS * gravity.x + (1 - HIGH_PASS) * accel_val.x
-            gravity.y = 0
-            gravity.z = HIGH_PASS * gravity.z + (1 - HIGH_PASS) * accel_val.z
-
-            accel_xout -= gravity.x
-            accel_yout -= gravity.y
-            accel_zout -= gravity.z
-
+            
             sum_x += accel_xout
             sum_y += accel_yout
             sum_z += accel_zout
@@ -276,7 +268,7 @@ def getHeading(most_active_axis, compass_val):
     if(most_active_axis == 1): # y-axis 
         heading = math.atan2(compass_val.x, compass_val.z)
 
-    if(most_active_axis == 2): # x-axis 
+    if(most_active_axis == 2): # z-axis 
         heading = math.atan2(compass_val.y, compass_val.x)
 
     heading += 0.0404

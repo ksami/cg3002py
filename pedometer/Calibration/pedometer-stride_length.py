@@ -58,6 +58,7 @@ def getStrideLength(accel_list):
 
     return STRIDE_COEFFICIENT * math.pow(accel_sum, 1/3)
 
+
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
 # Now wake the 6050 up as it starts in sleep mode
@@ -144,9 +145,11 @@ time.sleep(1)
 
 first_time = True
 
-# execution stage
+accel_graph = open('accel_graph-stride_length.txt', 'w')
 
-while(True):
+# execution stage
+time_elapsed = time.time()
+while(time.time() - time_elapsed <= 15):
 
     # filter accelerometer values
     accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
@@ -171,8 +174,6 @@ while(True):
 
     moving_index = (moving_index + 1) % 4
 
-    # finding minima and maxima
-    
     # finding minima and maxima
     if(not first_time):
         if( math.fabs( compare(most_active_axis, sample_new, accel_val)) >= ACCEL_THRESHOLD):
@@ -247,8 +248,8 @@ while(True):
                             peak_direction = MINIMA
                             accel_maxima = accel_val
                             time_window = time.time()
-                            print "PEAK DETECTED MAXIMA", num_steps
                             calculate_distance = True
+                            print "PEAK DETECTED MAXIMA", num_steps
                             if(calibrate_threshold):
                                 if(num_steps <= 3):
                                     peak_threshold = PEAK_THRESHOLD
@@ -257,3 +258,11 @@ while(True):
                                     peak_threshold = sum_threshold / 3
                                     print "THRESHOLD:", peak_threshold
                                     calibrate_threshold = False
+
+    else:
+        peak_direction = MINIMA
+        peak_threshold = PEAK_THRESHOLD / 2
+        accel_maxima = accel_val
+        first_time = False
+        sample_new = accel_val
+        time_window = time.time()
