@@ -170,8 +170,6 @@ while(True):
     accel_filter_list.insert(moving_index, accel_val)
 
     moving_index = (moving_index + 1) % 4
-
-    # finding minima and maxima
     
     # finding minima and maxima
     if(not first_time):

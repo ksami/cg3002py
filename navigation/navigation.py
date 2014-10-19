@@ -7,43 +7,28 @@ import sys
 from vector import Vector
 from mapinfo import MapInfo
 
-# constants for pedometer
-SAMPLE_SIZE = 50
-PRECISION = 1000 # = 32767 - 31128 (max and min values when stabilized)
+ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
+PEAK_THRESHOLD = 9000
+TIME_THRESHOLD = 0.4
 HEIGHT = 1.76
-CONSTANT_STRIDE = 0.415
-TIME_WINDOW_MIN = 0.3
+HIGH_PASS = 0.8
+STRIDE_COEFFICIENT = 1
 
-X_AXIS = 0
-Y_AXIS = 1
-Z_AXIS = 2 
+MAXIMA = 1
 
 UPDATE_TIME = 3
-#TIME_WINDOW_MAX = 2
-#HEIGHT = 1.77 # in meters
-#STANDING_MODE = 0
-#WALKING_MODE = 1
 scale = 1.3
-most_active_axis = 2
-#mode = STANDING_MODE
 
-# Power management registers
-power_mgmt_1 = 0x6b
-
-# MPU6050 i2c address
-mpu_address = 0x68 
-
-# HMC5883l i2c address
-hmc_address = 0x1e
+# register address
+power_mgmt_1 = 0x6b # Power management registers
+mpu_address = 0x68  # MPU6050 i2c address
+hmc_address = 0x1e  # HMC5883l i2c address
 
 # constants for map
 baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
 building = 'yimelo'
 level = '5'
 query = 'Building=' + building + '&' + 'Level=' + level
-orienInfo = 0
-mapInfo = 0
-wifiInfo = 0
 
 # mode
 GO_FORWARD = 0
@@ -71,20 +56,24 @@ class Navigation:
         self.bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
 
         # initializing important attributes
-        self.accel_max = Vector(0, 0, 0)
-        self.accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
-        self.dynamic_threshold = Vector(0, 0, 0) # the moving average of 50 accelerometer data
+        self.accel_maxima = Vector(0, 0, 0)
+        self.accel_minima = Vector(0, 0, 0)
         self.accel_val = Vector(0, 0, 0)
-        self.compass_val = Vector(0, 0, 0)
-        self.most_active_axis = Z_AXIS
+        self.gravity = Vector(0, 0, 0)
+        self.peak_direction = MINIMA
         self.moving_index = 0
-        self.sample_size = 0
         self.accel_filter_list = []
-        self.sample_old = Vector(0, 0, 0)
-        self.sample_new = Vector(0, 0, 0)
+        self.accel_list = []
         self.num_steps = 0
+        self.sample_new = Vector(0, 0, 0)
         self.time_window = 0
+        self.peak_threshold = 0
+        self.sum_threshold = 0
+        self.stride_length = 0
         self.total_distance = 0
+        self.calibrate_threshold = True
+        self.calculate_distance = True
+        self.most_active_axis = 1
 
         # download map
         building = bldg
@@ -104,82 +93,49 @@ class Navigation:
         accel_yout = read_word_2c(self.bus, mpu_address, 0x3d)
         accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
 
-        max_axis = accel_zout
-        if(max_axis < accel_xout):
-            max_axis = accel_xout
-            self.most_active_axis = 0
-        if(max_axis < accel_yout):
-            max_axis = accel_xout
-            self.most_active_axis = 1
-
-        print "\n---CALIBRATION STAGE---"
-
-        calibration_time = time.time()
-        calibration_size = 0
-
-        while(time.time() - calibration_time <= 5):
-            accel_xout = read_word_2c(mpu_address, 0x3b)
-            accel_yout = read_word_2c(mpu_address, 0x3d)
-            accel_zout = read_word_2c(mpu_address, 0x3f)
-            
-            sum_x += accel_xout
-            sum_y += accel_yout
-            sum_z += accel_zout
-
-            calibration_size += 1
-
-        accel_offset_x = sum_x/calibration_size
-        accel_offset_y = sum_y/calibration_size
-        accel_offset_z = sum_z/calibration_size
-
-        print "\n----END CALIBRATION"
-
-        print "\nCALIBRATION SIZE: " , calibration_size  
-        print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
+        self.most_active_axis = 1
 
         for i in range(4) :
-            accel_xout = read_word_2c(self.bus, mpu_address, 0x3b) - accel_offset_x
-            accel_yout = read_word_2c(self.bus, mpu_address, 0x3d) - 0
-            accel_zout = read_word_2c(self.bus, mpu_address, 0x3f) - accel_offset_z
+            accel_xout = read_word_2c(self.bus, mpu_address, 0x3b)
+            accel_yout = read_word_2c(self.bus, mpu_address, 0x3d) 
+            accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
 
             accel_val = Vector(accel_xout, accel_yout, accel_zout)
             self.accel_filter_list.append(accel_val)
 
         first_time = True
 
-        print "TIME_WINDOW_MIN: ", TIME_WINDOW_MIN
-        print "TIME_WINDOW_MAX: ", TIME_WINDOW_MAX
-        print "PRECISION: " , PRECISION
+        print "STRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
+        print "PEAK THRESHOLD", PEAK_THRESHOLD
+        print "TIME THRESHOLD", TIME_THRESHOLD
+        print "START!!"
 
         update_time = time.time()
 
         while(True):
 
-            if(self.sample_size == SAMPLE_SIZE):
-                self.sample_size = 0
-               # print "--------------------------------- finished 50 samples \n"
-
-                self.dynamic_threshold.x = (self.accel_max.x + self.accel_min.x) / 2
-                self.dynamic_threshold.y = (self.accel_max.y + self.accel_min.y) / 2
-                self.dynamic_threshold.z = (self.accel_max.z + self.accel_min.z) / 2
-
-                self.accel_max = Vector(0, 0, 0)
-                self.accel_min = Vector(sys.maxint, sys.maxint, sys.maxint)
-
-                first_time = False
-
-            #filter accelerometer values
-            accel_xout = read_word_2c(self.bus, mpu_address, 0x3b)
-            accel_yout = read_word_2c(self.bus, mpu_address, 0x3d)
-            accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
+            # filter accelerometer values
+            accel_xout = read_word_2c(mpu_address, 0x3b)
+            accel_yout = read_word_2c(mpu_address, 0x3d)
+            accel_zout = read_word_2c(mpu_address, 0x3f)
 
             self.accel_val = Vector(accel_xout, accel_yout, accel_zout)
 
+            self.gravity.x = HIGH_PASS * self.gravity.x + (1 - HIGH_PASS) * self.accel_val.x
+            self.gravity.y = 0
+            self.gravity.z = HIGH_PASS * self.gravity.z + (1 - HIGH_PASS) * self.accel_val.z
+
+            self.accel_val.x = self.accel_val.x - self.gravity.x
+            self.accel_val.y = self.accel_val.y - self.gravity.y
+            self.accel_val.z = self.accel_val.z - self.gravity.z
+            
             self.accel_val.x = (self.accel_filter_list[0].x + self.accel_filter_list[1].x + self.accel_filter_list[2].x + self.accel_filter_list[3].x + self.accel_val.x) / 5
             self.accel_val.y = (self.accel_filter_list[0].y + self.accel_filter_list[1].y + self.accel_filter_list[2].y + self.accel_filter_list[3].y + self.accel_val.y) / 5
             self.accel_val.z = (self.accel_filter_list[0].z + self.accel_filter_list[1].z + self.accel_filter_list[2].z + self.accel_filter_list[3].z + self.accel_val.z) / 5
-            
-            self.accel_filter_list.insert(self.moving_index, accel_val)
+
+            self.accel_filter_list.insert(self.moving_index, self.accel_val)
+
+            self.moving_index = (self.moving_index + 1) % 4
 
             # filter compass values
             compass_xout = read_word_2c(self.bus, hmc_address, 3) * scale
@@ -188,31 +144,95 @@ class Navigation:
 
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
 
-            self.moving_index = (self.moving_index + 1) % 4
-            self.sample_size += 1    
-
             # finding maximum, minimum
-            if(compare(self.accel_max, self.accel_val) < 0):
-                self.accel_max = self.accel_val
-            if(compare(self.accel_min, self.accel_val) > 0):
-                self.accel_min = self.accel_val
-
             if(not first_time):
-                self.sample_old = self.sample_new	
-
-                if( math.fabs(compare(self.accel_val, self.sample_new)) > PRECISION ):
+                if( math.fabs( compare(self.most_active_axis, self.sample_new, self.accel_val)) >= ACCEL_THRESHOLD):
                     self.sample_new = self.accel_val
-        	
-                    if( compare(self.sample_new, self.dynamic_threshold) < 0 and compare(self.dynamic_threshold, self.sample_old) < 0):
-                        if(time.time() - self.time_window >= TIME_WINDOW_MIN ):
-                            self.num_steps += 1
-                            print "WALKING MODE: num_steps =", num_steps, "------------", time.time() - time_window
-                            self.time_window = time.time()
-                            self.total_distance += HEIGHT * CONSTANT_STRIDE
+                    self.accel_list.append(self.accel_val)
 
-            else:
-                sample_new = accel_val
+                    # looking for a minima peak
+                    if(self.peak_direction == MINIMA):
 
+                        if(compare(self.most_active_axis, self.accel_val, self.accel_maxima) > 0):
+                            self.accel_maxima = self.accel_val
+                            # calculate_distance = True
+                        
+                        else:
+
+                            # if(calculate_distance):
+                            #     stride_length = getStrideLength(accel_list)
+                            #     total_distance += stride_length
+                            #     print "accel list", len(accel_list)
+                            #     print "stride length", stride_length
+                            #     print "total_distance", total_distance
+                            #     accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(len(accel_list)) + "\n")
+                            #     accel_list = []
+                            #     calculate_distance = False
+
+                            if( compare(self.most_active_axis, self.accel_maxima, self.accel_val) >= self.peak_threshold ):
+                                #print "minima coming"
+                                if(time.time() - self.time_window >= TIME_THRESHOLD):
+                                    # a maxima has been detected and a step is detected
+                                    self.num_steps += 1
+                                    self.peak_direction = MAXIMA
+                                    self.accel_minima = self.accel_val
+                                    self.time_window = time.time()
+                                    self.stride_length = STRIDE_COEFFICIENT * HEIGHT
+                                    total_distance += self.stride_length
+                                    print "PEAK DETECTED MINIMA", self.num_steps
+                                    print "total distance", self.total_distance
+
+                                    # calculate_distance = True
+                                    if(self.calibrate_threshold):
+                                        if(self.num_steps <= 3):
+                                            self.peak_threshold = PEAK_THRESHOLD
+                                            self.sum_threshold += compare(self.most_active_axis, self.accel_maxima, self.accel_val)
+                                        else:
+                                            self.peak_threshold = self.sum_threshold / 3
+                                            print "THRESHOLD:", self.peak_threshold
+                                            self.calibrate_threshold = False
+                                    
+
+                    # looking for a maxima peak
+                    if( self.peak_direction == MAXIMA ):
+                        
+                        if(compare(self.most_active_axis, self.accel_val, self.accel_minima) < 0):
+                            self.accel_minima = self.accel_val
+                            # calculate_distance = True
+
+                        else:
+
+                            # if(calculate_distance):
+                            #     stride_length = getStrideLength(accel_list)
+                            #     total_distance += stride_length
+                            #     print "accel list", len(accel_list)
+                            #     print "stride length", stride_length
+                            #     print "total_distance", total_distance
+                            #     accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(len(accel_list)) + "\n")
+                            #     accel_list = []
+                            #     calculate_distance = False
+
+                            if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
+                                #print "maxima coming"
+                                if(time.time() - self.time_window >= TIME_THRESHOLD):
+                                    # a maxima has been detected and a step is detected
+                                    self.num_steps += 1
+                                    self.peak_direction = MINIMA
+                                    self.accel_maxima = self.accel_val
+                                    self.time_window = time.time()
+                                    self.stride_length = STRIDE_COEFFICIENT * HEIGHT
+                                    self. total_distance += self.stride_length
+                                    print "PEAK DETECTED MAXIMA", self.num_steps
+                                    print "total distance", self.total_distance
+                                    # calculate_distance = True
+                                    if(self.calibrate_threshold):
+                                        if(self.num_steps <= 3):
+                                            self.peak_threshold = PEAK_THRESHOLD
+                                            self.sum_threshold += compare(self.most_active_axis, self.accel_val, self.accel_minima)
+                                        else:
+                                            self.peak_threshold = self.sum_threshold / 3
+                                            print "THRESHOLD:", self.peak_threshold
+                                            self.calibrate_threshold = False
 
             if(time.time() - update_time <= UPDATE_TIME):
                 heading = getHeading(self.most_active_axis, self.compass_val)
@@ -247,7 +267,7 @@ def read_word_2c(bus, sensor_address, adr):
     else:
         return val
 
-def compare(accel_1, accel_2):
+def compare(most_active_axis, accel_1, accel_2):
 
     if( most_active_axis == 0 ) :
         return accel_1.x - accel_2.x
