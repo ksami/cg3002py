@@ -8,11 +8,11 @@ from vector import Vector
 from mapinfo import MapInfo
 
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
-PEAK_THRESHOLD = 9000
+PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HEIGHT = 1.76
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 1
+STRIDE_COEFFICIENT = 0.415
 
 MAXIMA = 1
 
@@ -181,16 +181,7 @@ class Navigation:
                                     total_distance += self.stride_length
                                     print "PEAK DETECTED MINIMA", self.num_steps
                                     print "total distance", self.total_distance
-
-                                    # calculate_distance = True
-                                    if(self.calibrate_threshold):
-                                        if(self.num_steps <= 3):
-                                            self.peak_threshold = PEAK_THRESHOLD
-                                            self.sum_threshold += compare(self.most_active_axis, self.accel_maxima, self.accel_val)
-                                        else:
-                                            self.peak_threshold = self.sum_threshold / 3
-                                            print "THRESHOLD:", self.peak_threshold
-                                            self.calibrate_threshold = False
+                                    peak_threshold = PEAK_THRESHOLD
                                     
 
                     # looking for a maxima peak
@@ -224,15 +215,15 @@ class Navigation:
                                     self. total_distance += self.stride_length
                                     print "PEAK DETECTED MAXIMA", self.num_steps
                                     print "total distance", self.total_distance
-                                    # calculate_distance = True
-                                    if(self.calibrate_threshold):
-                                        if(self.num_steps <= 3):
-                                            self.peak_threshold = PEAK_THRESHOLD
-                                            self.sum_threshold += compare(self.most_active_axis, self.accel_val, self.accel_minima)
-                                        else:
-                                            self.peak_threshold = self.sum_threshold / 3
-                                            print "THRESHOLD:", self.peak_threshold
-                                            self.calibrate_threshold = False
+                                    peak_threshold = PEAK_THRESHOLD
+
+            else:
+                peak_direction = MINIMA
+                peak_threshold = PEAK_THRESHOLD / 2
+                accel_maxima = accel_val
+                first_time = False
+                sample_new = accel_val
+                time_window = time.time()    
 
             if(time.time() - update_time <= UPDATE_TIME):
                 heading = getHeading(self.most_active_axis, self.compass_val)
