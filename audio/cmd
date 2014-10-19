@@ -1,0 +1,1 @@
+gcc -o cont continuous.c -DMODELDIR="/usr/local/share/pocketsphinx/model" -I/usr/local/include -I/usr/local/include/sphinxbase -I/usr/local/include/pocketsphinx -L/usr/local/lib -lpocketsphinx -lsphinxbase -lsphinxad -lasound -lpthread -lm /home/pi/pocketsphinx-0.8/src/libpocketsphinx/pocketsphinx.o

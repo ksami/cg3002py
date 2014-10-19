@@ -26,10 +26,10 @@ def receive(q_xbee, comms):
         #     q_xbee.put(msg.status)
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
 #     # Always instatiate a Comms object
-#     comms = Comms();
+    comms = Comms();
 
 #     # Shows the all the different information that Pi
 #     # sends to Arduino. This methods runs until an 
@@ -45,9 +45,9 @@ def receive(q_xbee, comms):
 #     # The following code represents
 #     # the process that always run
     
-#     while True:
-#         Msg = comms.ReceiveHandStatus()
-#         if Msg:
-# 	       print str(Msg)
-#            break
+    while True:
+        Msg = comms.rcv()
+        if Msg:
+		print str(Msg)
+		break
            

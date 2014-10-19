@@ -73,6 +73,13 @@ class Comms:
 		else:
 			return False
 
+	def rcv(self):
+		msg = self.xbee.Receive()
+		if msg:
+			content = msg[7:-1].decode('ascii')
+			return content
+
+
 	def ReceiveAck(self):
 		# Msg = self.xbee.Receive()
 		# if Msg:
