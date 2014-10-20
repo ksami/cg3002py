@@ -1,56 +1,49 @@
 import sys,os,time
 
-class Speak(object):
+class Speak:
 	#Commands to read out
-	cmd_list = {'sp': 'State starting position', 'e': 'State your ending position', 'c': 'Did you say ' 'gf': 'Go Forward', 'tl': 'Turn Left', 'tr': 'Turn Right'}
-	
+	cmd_list = {"sp": "State starting position", "e": "State your ending position", "c": "Did you say ", "gf": "Go Forward", "tl": "Turn Left", "tr": "Turn Right"}
+	program = "espeak -s 155 \"{}\" > dev/null 2>&1"
+
 	def __init__(self):
-		self.state = 0
-		self.prevcmd = 'tl'
-	#need to think of a better way to write this
-	def sysinit(sys_queue):
-		if(sys_queue.get() == 'c'):
-			command = 'espeak -s 155 "'+cmd_list['c']+sys_queue.get() +'" > dev/null 2>&1'
-			os.system(command)
-			self.state = self.state -1
-			
-		else:
-			if((sys_queue.get() == 'sp') and (self.state == 0)):
-				command = 'espeak -s 155 "'+cmd_list['sp']+'" > dev/null 2>&1'
-				os.system(command)
-				self.state = self.state +1
+		self.prevcmd = ""
 				
-			if(sys_queue.get() == 'ep' and (self.state == 1)):
-				command = 'espeak -s 155 "'+cmd_list['ep']+'" > dev/null 2>&1'
+	def speak(self, q_tts):
+		while True:
+			cmd = q_tts.get(block=True)
+
+			if self.prevcmd == "gf" and cmd == "gf":
+				#Do nothing
+				pass
+			else:
+				#cmd = "c,stringtoconfirm"
+				if cmd[0] == "c":
+					#slice from comma to end
+					strtoconfirm = Speak.cmd_list[cmd[0]] + cmd[2:]
+					command = Speak.program.format(strtoconfirm)
+					self.prevcmd = "c"
+				else:
+					command = Speak.program.format(Speak.cmd_list[cmd])
+					self.prevcmd = cmd
+
 				os.system(command)
-				self.state = self.state +1
-				
-		
-	def giveCmd(sys_queue):
-		if(self.prevcmd == 'gf' and sys_queue.get() == 'gf'):
-			#Do nothing
-		else:
-			self.prevcmd = sys_queue.get()
-			command = 'espeak -s 155 "'+self.prevcmd+'" > /dev/null 2>&1'
-			os.system(command)
-	
+
+
 	#just for testing
-	def speakTest(myString):
-		command = 'espeak -s 155 "'+myString+'"'
+	def speakTest(self, myString):
+		command = Speak.program.format(myString)
+		print "running: ", command
 		os.system(command)
 
 
 
 # for testing
 # call with python textspeech.py texttoreadout
-if __name__ == '__main__':
-	lenOfArgs = len(sys.argv) -1
-	printOrder = 1
-	myString = ''
-	
-	while(lenOfArgs):
-		myString = myString + sys.argv[printOrder] + ' '
-		printOrder = printOrder + 1
-		lenOfArgs = lenOfArgs - 1
-
-	speak(myString)
+if __name__ == "__main__":
+	if len(sys.argv) < 2:
+		print "call with python textspeech.py texttoreadout"
+	else:
+		speak = Speak()
+		myString = sys.argv[1]
+		print "speaking"
+		speak.speakTest(myString)
