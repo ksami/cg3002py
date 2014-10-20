@@ -70,8 +70,10 @@ def setup():
 	# # global q_cam = createQueue()
 	global q_navi
 	global q_xbee
+	global q_listen
 	q_navi = createQueue()
 	q_xbee = createQueue()
+	q_listen = createQueue()
 	# global q_time = createQueue()
 
 	# Processes
@@ -124,13 +126,17 @@ def executeInit():
 	
 	while (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "sp"))
+		p_listen = createProcess(audio.main.listen, (q_listen,))
+
 		p_speak.start()
-		#waits till finish speaking
+		p_listen.start()
+
 		p_speak.join()
-	
-		# startpt = speechtotext listen #TODO
-		# time.sleep(2)
 		
+		startpt = q_listen.get(block=True)
+
+		p_listen.join()
+
 		# check for terminate
 		try:
 			hand = q_xbee.get(block=False)
@@ -147,12 +153,16 @@ def executeInit():
 			while (isConfirmed == False) and (isCancel == False):
 				confirmstart = "c," + startpt
 				p_speak = createProcess(audio.main.speak, (_speak, confirmstart))
+				p_listen = createProcess(audio.main.listen, (q_listen,))
+
 				p_speak.start()
-				#waits till finish speaking
+				p_listen.start()
+
 				p_speak.join()
-				
-				# confirm = speechtotext listen #TODO
-				# time.sleep(2)
+
+				confirm = q_listen.get(block=True)
+
+				p_listen.join()
 				
 				# check for terminate
 				try:
@@ -174,12 +184,16 @@ def executeInit():
 	
 	while (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "ep"))
+		p_listen = createProcess(audio.main.listen, (q_listen,))
+
 		p_speak.start()
-		#waits till finish speaking
+		p_listen.start()
+
 		p_speak.join()
-	
-		# endpt = speechtotext listen #TODO
-		# time.sleep(2)
+		
+		startpt = q_listen.get(block=True)
+
+		p_listen.join()
 		
 		# check for terminate
 		try:
@@ -197,12 +211,16 @@ def executeInit():
 			while (isConfirmed == False) and (isCancel == False):
 				confirmend = "c," + endpt
 				p_speak = createProcess(audio.main.speak, (_speak, confirmend))
+				p_listen = createProcess(audio.main.listen, (q_listen,))
+
 				p_speak.start()
-				#waits till finish speaking
+				p_listen.start()
+
 				p_speak.join()
-				
-				# confirm = speechtotext listen #TODO
-				# time.sleep(2)
+
+				confirm = q_listen.get(block=True)
+
+				p_listen.join()
 				
 				# check for terminate
 				try:
@@ -223,7 +241,6 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
-		#TODO
 		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, startpt, endpt))
 		p_navisp.start()
 		p_navisp.join()

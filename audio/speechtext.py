@@ -6,7 +6,7 @@ class Listen:
 	program = "compiledcfile -samprate 48000 -dict /home/pi/pocketsphinx-0.8/model/lm/en_US/cmu07a.dic -nfft 2048"
 
 	# currently prints all output from the c process
-	def listen(self, q_cam):
+	def listen(self, q_listen):
 		process = subprocess.Popen(Listen.program, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 		# Poll process for new output until finished
@@ -18,7 +18,7 @@ class Listen:
 			#print nextline
 			#sys.stdout.write(nextline)
 			#sys.stdout.flush()
-			q_cam.put(nextline)
+			q_listen.put(nextline)
 
 		output = process.communicate()[0]
 		exitCode = process.returncode
