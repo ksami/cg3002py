@@ -15,12 +15,10 @@ LINKTO = 'linkTo'
 INFO = 'info'
 NORTHAT = 'northAt'
 
-GO_FORWARD = 0
-TURN_LEFT = 1
-TURN_RIGHT = 2
-ABOUT_REACH = 3
-ARRIVE_DESTINATION = 4
-THRESHOLD_DISTANCE = 500
+NODE = 0
+GO_FORWARD = 1
+TURN = 2
+ARRIVE_DESTINATION = 3
 
 class MapInfo:
 
@@ -124,42 +122,43 @@ class MapInfo:
 
 		return self.shortestPath(minimumNodeID, endID)
 
-	def giveDirection (self, distance, heading):
-
-		mode = GO_FORWARD
+	def giveDirection (self, mode, distance, heading, coordX, coordY):
 
 		startX = self.maplist[self.path[self.current]].getX()
 		startY = self.maplist[self.path[self.current]].getY()
-
 		endX = self.maplist[self.path[self.current+1]].getX()
 		endY = self.maplist[self.path[self.current+1]].getY()			
 
-		edge_angle = math.atan2(endY - startY, endX - startX)
+		if(mode == NODE):
+			mode = TURN
 
-		self.coordX += distance * math.cos(edge_angle)
-		self.coordY += distance * math.sin(edge_angle)
+		if(mode == GO_FORWARD):
 
-		while(self.current < len(self.path) - 1):
-	
-			startX = self.maplist[self.path[self.current]].getX()
-			startY = self.maplist[self.path[self.current]].getY()
+			self.coordX += distance * math.cos(edge_angle)
+			self.coordY += distance * math.sin(edge_angle)
 
-			endX = self.maplist[self.path[self.current+1]].getX()
-			endY = self.maplist[self.path[self.current+1]].getY()			
+			while(self.current < len(self.path) - 1):
 
-			#checking if that coordinates is along that edge
-			# need checking on that condition
-			if(  (startX <= self.coordX  <= endX) and (startY <= self.coordY <= endY) ):
-				break
+				startX = self.maplist[self.path[self.current]].getX()
+				startY = self.maplist[self.path[self.current]].getY()
+				endX = self.maplist[self.path[self.current+1]].getX()
+				endY = self.maplist[self.path[self.current+1]].getY()			
 
-			self.current += 1
+				#checking if that coordinates is along that edge
+				# need checking on that condition
+				if(  (startX <= self.coordX  <= endX) and (startY <= self.coordY <= endY) ): #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					break
 
-		if(self.current == len(self.path) - 1):
-			mode = ARRIVE_DESTINATION
-			return (mode, 0, self.maplist[self.path[self.current]].getName(), self.coordX, self.coordY)
+				self.current += 1
 
-		if( math.sqrt((endX-self.coordX)**2 + (endY-self.coordY)**2) <= 50 ):
-			
+			if(self.current == len(self.path) - 1):
+				mode = ARRIVE_DESTINATION
+
+			if( math.sqrt((endX-self.coordX)**2 + (endY-self.coordY)**2) <= 50 ):
+				mode = NODE
+
+		if(mode == TURN):
+				
 			vector1X = endX - startX
 			vector1Y = endY - startY
 			vector2X = self.maplist[self.path[self.current+2]].getX() - endX
@@ -171,8 +170,6 @@ class MapInfo:
 				mode = TURN_LEFT
 			else:
 				mode = TURN_RIGHT
-
-			return (mode, math.fabs(angle), "", self.coordX, self.coordY)
 
 
 		if( math.sqrt((endX-self.coordX)**2 + (endY-self.coordY)**2) <= THRESHOLD_DISTANCE ):
