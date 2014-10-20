@@ -210,7 +210,9 @@ void xbeeTask(void*p){
 					int packageID = (char)msgBuff[PKG_INDEX] - '0';
 
 					int ack_len = 0;
-					    
+					
+					Serial.print("PID: ");
+					Serial.println(packageID);    
 					switch(packageID){
 						case DEVICE_READY:
 							memcpy(outMsg,"ACK",3);
@@ -255,7 +257,11 @@ void xbeeTask(void*p){
 					}
 				}
 			}
+			//deviceRdy = ack; for debugging to show that globals work
 		}
+		
+		//Serial.print("Device Rdy? ");
+		//Serial.println(deviceRdy);
 
 		RxQ.Clear(delPos);
 		vTaskDelay(200);
