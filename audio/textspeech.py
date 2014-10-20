@@ -3,7 +3,7 @@ import sys,os,time
 class Speak:
 	#Commands to read out
 	cmd_list = {"sp": "State starting position", "ep": "State your ending position", "c": "Did you say ", "gf": "Go Forward", "tl": "Turn Left", "tr": "Turn Right"}
-	program = "espeak -s 155 \"{}\" > dev/null 2>&1"
+	program = "espeak -s 155 \"{}\" > /dev/null 2>&1"
 
 	def __init__(self):
 		self.prevcmd = ""

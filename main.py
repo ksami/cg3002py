@@ -9,10 +9,10 @@ import smwmap
 import cpython
 import pedometer.test
 import comms.python.main
-import navigation.main
+#import navigation.main
 import audio.main
 from comms.python.comms import Comms
-from navigation.navigation import Navigation
+#from navigation.navigation import Navigation
 from audio.textspeech import Speak
 from state import State
 
@@ -27,7 +27,7 @@ _systemState = State()
 _comms = Comms()
 _speak = Speak()
 #TODO: need to ask user for building and level, currently hardcoded in navigation.py
-_navi = Navigation()
+#_navi = Navigation()
 
 def main():
 	setup()
@@ -106,8 +106,11 @@ def executeOff():
 def executeIdle():
 	print "in idle state"
 	#nothing
+
 	hand = q_xbee.get(block=True)
+	print "hand: ", hand
 	if hand == comms.python.main.HAND_CLOSE:
+		print "entered"
 		_systemState.changeState()
 	else:
 		pass
@@ -115,6 +118,8 @@ def executeIdle():
 
 def executeInit():
 	print "in init state"
+	p_listen = createProcess(audio.main.listen, (q_listen,))
+	p_listen.start()
 	#ask user for end location and confirm
 	#get map
 
@@ -126,10 +131,8 @@ def executeInit():
 	
 	while (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "sp"))
-		p_listen = createProcess(audio.main.listen, (q_listen,))
 
 		p_speak.start()
-		p_listen.start()
 
 		p_speak.join()
 		

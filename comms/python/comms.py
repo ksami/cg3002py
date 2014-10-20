@@ -69,7 +69,7 @@ class Comms:
 			if content == 'ACK':
 				self.q_ack.put(True)
 			elif len(content) == 2 and content[0] == ARD_HAND_PACKAGEID:
-				q_hs.put({'status': content[-1]})# 0: open , 1: close
+				q_hs.put(content[-1])# 0: open , 1: close
 		else:
 			return False
 

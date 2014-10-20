@@ -5,8 +5,8 @@ DEVICE_READY = "DR"
 NAVI_READY = "NR"
 NAVI_END = "NE"
 OBSTACLE_DETECTED = "OD"
-HAND_OPEN = 0
-HAND_CLOSE = 1
+HAND_OPEN = "0"
+HAND_CLOSE = "1"
 
 # params: Comms object, msg = {type: "", val: {dir: "", str: 2}}
 def send(comms, msg):

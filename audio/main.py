@@ -11,4 +11,5 @@ def speakTest(speak, myString):
 	speak.speakTest(myString)
 
 def listen(q_listen):
-	Listen.listen(q_listen)
+	listen = Listen()
+	listen.listen(q_listen)

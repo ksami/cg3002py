@@ -53,6 +53,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #if !defined(_WIN32_WCE)
 #include <signal.h>
@@ -255,7 +256,8 @@ recognize_from_microphone()
 
     //for (;;) {
         /* Indicate listening for next utterance */
-        printf("READY....\n");
+        //printf("READY....\n");
+        system("aplay /home/pi/cg3002py/audio/beep.wav");
         fflush(stdout);
         fflush(stderr);
 
@@ -273,7 +275,7 @@ recognize_from_microphone()
         if (ps_start_utt(ps, NULL) < 0)
             E_FATAL("Failed to start utterance\n");
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
-        printf("Listening...\n");
+        //printf("Listening...\n");
         fflush(stdout);
 
         /* Note timestamp for this first block of data */
@@ -315,12 +317,12 @@ recognize_from_microphone()
         while (ad_read(ad, adbuf, 4096) >= 0);
         cont_ad_reset(cont);
 
-        printf("Stopped listening, please wait...\n");
+        //printf("Stopped listening, please wait...\n");
         fflush(stdout);
         /* Finish decoding, obtain and print result */
         ps_end_utt(ps);
         hyp = ps_get_hyp(ps, NULL, &uttid);
-        printf("%s: %s\n", uttid, hyp);
+        printf("%s\n", hyp);
         fflush(stdout);
 
         /* Exit if the first word spoken was GOODBYE */
@@ -368,7 +370,7 @@ main(int argc, char *argv[])
     if (ps == NULL)
         return 1;
 
-    E_INFO("%s COMPILED ON: %s, AT: %s\n\n", argv[0], __DATE__, __TIME__);
+    //E_INFO("%s COMPILED ON: %s, AT: %s\n\n", argv[0], __DATE__, __TIME__);
 
     if (cmd_ln_str_r(config, "-infile") != NULL) {
 	recognize_from_file();
