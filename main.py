@@ -1,5 +1,6 @@
 # Main file handling multiple processes
 # TODO: feedback to user on every state change?
+# TODO: send NAVI_END!
 
 import multiprocessing
 import time
@@ -11,8 +12,10 @@ import cpython
 import pedometer.test
 import comms.python.main
 import navigation.main
+import audio.main
 from comms.python.comms import Comms
 from navigation.navigation import Navigation
+from audio.textspeech import Speak
 from state import State
 
 TIMEOUT_WAIT = 10
@@ -24,6 +27,7 @@ sendStr = "xbee string to send"
 
 _systemState = State()
 _comms = Comms()
+_speak = Speak()
 #TODO: need to ask user for building and level, currently hardcoded in navigation.py
 _navi = Navigation()
 
@@ -119,9 +123,10 @@ def executeInit():
 	isDone = False
 	
 	while (isDone == False) and (isCancel == False):
-		# p_texttospeech = createProcess(audio.textspeech.speak, ("Please state your starting point",))
-		# p_texttospeech.start()
-		# p_texttospeech.join()
+		p_speak = createProcess(audio.main.speak, (_speak, "sp"))
+		p_speak.start()
+		#waits till finish speaking
+		p_speak.join()
 	
 		# startpt = speechtotext listen #TODO
 		# time.sleep(2)
@@ -140,9 +145,11 @@ def executeInit():
 			isConfirmed = False
 			
 			while (isConfirmed == False) and (isCancel == False):
-				# p_texttospeech = createProcess(audio.textspeech.speak, ("Please confirm, starting point is " + startpt,))
-				# p_texttospeech.start()
-				# p_texttospeech.join()
+				confirmstart = "c," + startpt
+				p_speak = createProcess(audio.main.speak, (_speak, confirmstart))
+				p_speak.start()
+				#waits till finish speaking
+				p_speak.join()
 				
 				# confirm = speechtotext listen #TODO
 				# time.sleep(2)
@@ -166,9 +173,10 @@ def executeInit():
 	isDone = False
 	
 	while (isDone == False) and (isCancel == False):
-		# p_texttospeech = createProcess(audio.textspeech.speak, ("Please state your destination",))
-		# p_texttospeech.start()
-		# p_texttospeech.join()
+		p_speak = createProcess(audio.main.speak, (_speak, "ep"))
+		p_speak.start()
+		#waits till finish speaking
+		p_speak.join()
 	
 		# endpt = speechtotext listen #TODO
 		# time.sleep(2)
@@ -187,9 +195,11 @@ def executeInit():
 			isConfirmed = False
 			
 			while (isConfirmed == False) and (isCancel == False):
-				# p_texttospeech = createProcess(audio.textspeech.speak, ("Please confirm, destination is " + endpt,))
-				# p_texttospeech.start()
-				# p_texttospeech.join()
+				confirmend = "c," + endpt
+				p_speak = createProcess(audio.main.speak, (_speak, confirmend))
+				p_speak.start()
+				#waits till finish speaking
+				p_speak.join()
 				
 				# confirm = speechtotext listen #TODO
 				# time.sleep(2)
@@ -237,10 +247,11 @@ def executeNavi():
 		p_navi = createProcess(navigation.main.execute, (_navi, q_navi))
 		p_navi.start()
 
-	#TODO: userfeedback using q_navi:
-	# if p_feedback == None:
-	# 	p_feedback = createProcess(audio.main.speak, (q_navi))
-	# 	p_feedback.start()
+	#TODO: standardise strings used in p_navi and p_feedback
+	#currently p_navi giving dictionary, p_feedback taking string
+	if p_feedback == None:
+		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
+		p_feedback.start()
 
 	#TODO: obstacle detection feedback to user
 	hand = q_xbee.get(block=True)
@@ -297,10 +308,10 @@ def executeWait():
 				p_navi.terminate()  #TODO: handle termination SIGTERM or SIGKILL in navigation might not be necessary
 				p_navi.join()
 
-		# if p_feedback != None:
-		# 	if p_feedback.is_alive():
-		# 		p_feedback.terminate()  #TODO: handle termination SIGTERM or SIGKILL in feedback
-		# 		p_feedback.join()
+		if p_feedback != None:
+			if p_feedback.is_alive():
+				p_feedback.terminate()  #TODO: handle termination SIGTERM or SIGKILL in feedback
+				p_feedback.join()
 
 		# if p_camera != None:
 		# 	if p_camera.is_alive():
