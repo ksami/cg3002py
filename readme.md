@@ -6,3 +6,5 @@
 - python-serial for xbee
 - libasound2 and bison for pocketsphinx
 - pocketspinx 0.8 sphinxbase 0.8 for speech to text
+- smbus for python i2c protocol
+- 
