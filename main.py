@@ -1,6 +1,5 @@
 # Main file handling multiple processes
 # TODO: feedback to user on every state change?
-# TODO: send NAVI_END!
 
 import multiprocessing
 import time
@@ -8,7 +7,6 @@ import time
 import timer
 import smwmap
 import cpython
-#import audio.textspeech
 import pedometer.test
 import comms.python.main
 import navigation.main
@@ -70,17 +68,19 @@ def createQueue():
 def setup():
 	# Queues
 	# # global q_cam = createQueue()
-	global q_navi = None
-	global q_xbee = None
+	global q_navi
+	global q_xbee
 	q_navi = createQueue()
 	q_xbee = createQueue()
 	# global q_time = createQueue()
 
 	# Processes
 	# # global p_send = createProcess(function=comms.python.comm.send, args=(sendStr, comms))
-	global p_receive = None
-	global p_navi = None
-	global p_feedback = None
+	global p_navi
+	global p_feedback
+	global p_receive
+	p_navi = None
+	p_feedback = None
 	p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
 	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
 	# # global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
@@ -229,7 +229,7 @@ def executeInit():
 		p_navisp.join()
 
 		# Change to NAVI state
-		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.comm.NAVI_READY}))
+		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
 		p_send.start()
 		p_send.join()
 		_systemState.changeState(isHandOpen=False)
@@ -318,6 +318,10 @@ def executeWait():
 		# 		p_camera.terminate()
 		# 		p_camera.join()
 		
+		# End NAVI
+		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_END}))
+		p_send.start()
+		p_send.join()
 		_systemState.changeState(isHandOpen=True)
 
 
