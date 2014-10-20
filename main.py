@@ -10,7 +10,9 @@ import cpython
 #import audio.textspeech
 import pedometer.test
 import comms.python.main
+import navigation.main
 from comms.python.comms import Comms
+from navigation.navigation import Navigation
 from state import State
 
 TIMEOUT_WAIT = 10
@@ -22,6 +24,8 @@ sendStr = "xbee string to send"
 
 _systemState = State()
 _comms = Comms()
+#TODO: need to ask user for building and level, currently hardcoded in navigation.py
+_navi = Navigation()
 
 def main():
 	setup()
@@ -62,20 +66,20 @@ def createQueue():
 def setup():
 	# Queues
 	# # global q_cam = createQueue()
-	# # global q_map = createQueue()
-	global q_xbee
+	global q_navi = None
+	global q_xbee = None
+	q_navi = createQueue()
 	q_xbee = createQueue()
 	# global q_time = createQueue()
 
 	# Processes
 	# # global p_send = createProcess(function=comms.python.comm.send, args=(sendStr, comms))
-	global p_receive
+	global p_receive = None
+	global p_navi = None
+	global p_feedback = None
 	p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
-	# global p_pedo = createProcess(function=pedometer.test.execute)
 	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
 	# # global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
-	# # global p_alarm = createProcess(function=timer.alarm, args=(4,))
-	# # global p_getmap = createProcess(function=smwmap.obtainMap, args=(q_map, mapName, mapFloor))
 
 	# Start xbee receive
 	p_receive.start()
@@ -209,9 +213,11 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
-		# p_getmap = createProcess(smwmap.obtainMap, (q_map, mapName, mapFloor))
 		#TODO
-	
+		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, startpt, endpt))
+		p_navisp.start()
+		p_navisp.join()
+
 		# Change to NAVI state
 		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.comm.NAVI_READY}))
 		p_send.start()
@@ -222,14 +228,21 @@ def executeInit():
 def executeNavi():
 	print "in navi state"
 	#navigate
-	#TODO: p_navi.start()
-	# pedoisalive = p_pedo.is_alive()
-	# camisalive = p_camera.is_alive()
-	# if pedoisalive == False:
-	# 	p_pedo.start()
-	# if camisalive == False:
-	#	p_camera.start() #TODO might take a long time to start
-	#
+	# if p_camera == None:
+	# 	p_camera = createProcess(camera, (q_cam))
+	# 	p_camera.start() #TODO might take a long time to start
+
+	#if process has not been created before
+	if p_navi == None:
+		p_navi = createProcess(navigation.main.execute, (_navi, q_navi))
+		p_navi.start()
+
+	#TODO: userfeedback using q_navi:
+	# if p_feedback == None:
+	# 	p_feedback = createProcess(audio.main.speak, (q_navi))
+	# 	p_feedback.start()
+
+	#TODO: obstacle detection feedback to user
 	hand = q_xbee.get(block=True)
 	if hand == comms.python.main.HAND_OPEN:
 		_systemState.changeState(isHandOpen=True)
@@ -268,6 +281,8 @@ def executeWait():
 			pass
 			
 	# Cleanup before going next state
+
+	#going back to NAVI
 	if isResume == True:
 		isalive = p_timer.is_alive()
 		if isalive == True:
@@ -275,16 +290,22 @@ def executeWait():
 			p_timer.join()
 		_systemState.changeState(isHandOpen=False)
 	
+	#going to IDLE
 	elif isTimeout == True:
-		# pedoisalive = p_pedo.is_alive()
-		# camisalive = p_camera.is_alive()
-		#
-		# if pedoisalive == True:
-		# 	p_pedo.terminate()
-		# 	p_pedo.join()
-		# if camisalive == True:
-		# 	p_camera.terminate()
-		# 	p_camera.join()
+		if p_navi != None:
+			if p_navi.is_alive():
+				p_navi.terminate()  #TODO: handle termination SIGTERM or SIGKILL in navigation might not be necessary
+				p_navi.join()
+
+		# if p_feedback != None:
+		# 	if p_feedback.is_alive():
+		# 		p_feedback.terminate()  #TODO: handle termination SIGTERM or SIGKILL in feedback
+		# 		p_feedback.join()
+
+		# if p_camera != None:
+		# 	if p_camera.is_alive():
+		# 		p_camera.terminate()
+		# 		p_camera.join()
 		
 		_systemState.changeState(isHandOpen=True)
 
