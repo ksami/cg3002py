@@ -8,7 +8,8 @@ ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
 PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 0.415
+STRIDE_COEFFICIENT = 0.0264093915247045 
+# from walking in total of 14.4 meters and total_distance (without calibration) 545.260574691
 HEIGHT = 1.76
 
 MAXIMA = 1
@@ -140,7 +141,7 @@ accel_offset_z = 0
 # print "\nCALIBRATION SIZE: " , calibration_size  
 # print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
 
-accel_graph = open('stride_length.txt', 'w')
+accel_graph = open('accel_graph_stride-length.txt', 'w')
 print "STRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
 print "START!!"
 
@@ -196,8 +197,9 @@ while(time.time() - time_elapsed <= 15):
                         total_distance += stride_length
                         print "accel list", len(accel_list)
                         print "stride length", stride_length
-                        print "total_distance", total_distance
-                        accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(len(accel_list)) + "\n")
+                        print "min", accel_minima.y, "max", accel_maxima.y
+                        print "total distance:", total_distance
+                        accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
                         calculate_distance = False
 
@@ -227,8 +229,9 @@ while(time.time() - time_elapsed <= 15):
                         total_distance += stride_length
                         print "accel list", len(accel_list)
                         print "stride length", stride_length
-                        print "total_distance", total_distance
-                        accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(len(accel_list)) + "\n")
+                        print "min", accel_minima.y, "max", accel_maxima.y
+                        print "total distance:", total_distance
+                        accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
                         calculate_distance = False
 
@@ -251,3 +254,6 @@ while(time.time() - time_elapsed <= 15):
         first_time = False
         sample_new = accel_val
         time_window = time.time()
+
+accel_graph.close()
+print "total distance:", total_distance
