@@ -71,9 +71,11 @@ def setup():
 	global q_navi
 	global q_xbee
 	global q_listen
+	global q_listenctrl
 	q_navi = createQueue()
 	q_xbee = createQueue()
 	q_listen = createQueue()
+	q_listenctrl = createQueue()
 	# global q_time = createQueue()
 
 	# Processes
@@ -110,7 +112,6 @@ def executeIdle():
 	hand = q_xbee.get(block=True)
 	print "hand: ", hand
 	if hand == comms.python.main.HAND_CLOSE:
-		print "entered"
 		_systemState.changeState()
 	else:
 		pass
@@ -118,10 +119,12 @@ def executeIdle():
 
 def executeInit():
 	print "in init state"
-	p_listen = createProcess(audio.main.listen, (q_listen,))
-	p_listen.start()
 	#ask user for end location and confirm
 	#get map
+	
+	if p_listen == None:
+		p_listen = createProcess(audio.main.listen, (q_listen, q_listenctrl))
+		p_listen.start()
 
 	#boolean for returning to IDLE state
 	isCancel = False
@@ -131,14 +134,13 @@ def executeInit():
 	
 	while (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "sp"))
-
 		p_speak.start()
-
 		p_speak.join()
 		
-		startpt = q_listen.get(block=True)
+		# tell p_listen to continue with startpt
+		q_listenctrl.put("sp")
 
-		p_listen.join()
+		startpt = q_listen.get(block=True)
 
 		# check for terminate
 		try:
@@ -155,17 +157,15 @@ def executeInit():
 			
 			while (isConfirmed == False) and (isCancel == False):
 				confirmstart = "c," + startpt
+
 				p_speak = createProcess(audio.main.speak, (_speak, confirmstart))
-				p_listen = createProcess(audio.main.listen, (q_listen,))
-
 				p_speak.start()
-				p_listen.start()
-
 				p_speak.join()
 
-				confirm = q_listen.get(block=True)
+				# tell p_listen to continue with confirm start
+				q_listenctrl.put("cs")
 
-				p_listen.join()
+				confirm = q_listen.get(block=True)
 				
 				# check for terminate
 				try:
@@ -177,7 +177,8 @@ def executeInit():
 					#ignore
 					pass
 				
-				if confirm == "yes":
+				#enough to check for first char
+				if confirm[0] == "y":
 					isConfirmed = True
 					isDone = True
 	
@@ -187,16 +188,13 @@ def executeInit():
 	
 	while (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "ep"))
-		p_listen = createProcess(audio.main.listen, (q_listen,))
-
 		p_speak.start()
-		p_listen.start()
-
 		p_speak.join()
 		
-		startpt = q_listen.get(block=True)
+		# tell p_listen to continue with endpt
+		q_listenctrl.put("ep")
 
-		p_listen.join()
+		endpt = q_listen.get(block=True)
 		
 		# check for terminate
 		try:
@@ -214,16 +212,13 @@ def executeInit():
 			while (isConfirmed == False) and (isCancel == False):
 				confirmend = "c," + endpt
 				p_speak = createProcess(audio.main.speak, (_speak, confirmend))
-				p_listen = createProcess(audio.main.listen, (q_listen,))
-
 				p_speak.start()
-				p_listen.start()
-
 				p_speak.join()
 
-				confirm = q_listen.get(block=True)
+				# tell p_listen to continue with confirm end
+				q_listenctrl.put("ce")
 
-				p_listen.join()
+				confirm = q_listen.get(block=True)
 				
 				# check for terminate
 				try:
@@ -239,6 +234,10 @@ def executeInit():
 					isConfirmed = True
 					isDone = True
 	
+	if p_listen.is_alive():
+		q_listenctrl.put("kill")
+		p_listen.join()
+
 	if isCancel == True:
 		_systemState.changeState(isHandOpen=True)
 		
