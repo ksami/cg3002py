@@ -111,17 +111,17 @@ ad_file_read(ad_rec_t * ad, int16 * buf, int32 max)
 static void
 print_word_times(int32 start)
 {
-	ps_seg_t *iter = ps_seg_iter(ps, NULL);
-	while (iter != NULL) {
-		int32 sf, ef, pprob;
-		float conf;
-		
-		ps_seg_frames (iter, &sf, &ef);
-		pprob = ps_seg_prob (iter, NULL, NULL, NULL);
-		conf = logmath_exp(ps_get_logmath(ps), pprob);
-		printf ("%s %f %f %f\n", ps_seg_word (iter), (sf + start) / 100.0, (ef + start) / 100.0, conf);
-		iter = ps_seg_next (iter);
-	}
+    ps_seg_t *iter = ps_seg_iter(ps, NULL);
+    while (iter != NULL) {
+        int32 sf, ef, pprob;
+        float conf;
+        
+        ps_seg_frames (iter, &sf, &ef);
+        pprob = ps_seg_prob (iter, NULL, NULL, NULL);
+        conf = logmath_exp(ps_get_logmath(ps), pprob);
+        printf ("%s %f %f %f\n", ps_seg_word (iter), (sf + start) / 100.0, (ef + start) / 100.0, conf);
+        iter = ps_seg_next (iter);
+    }
 }
 
 /*
@@ -138,8 +138,8 @@ recognize_from_file() {
 
     char waveheader[44];
     if ((rawfd = fopen(cmd_ln_str_r(config, "-infile"), "rb")) == NULL) {
-	E_FATAL_SYSTEM("Failed to open file '%s' for reading", 
-			cmd_ln_str_r(config, "-infile"));
+    E_FATAL_SYSTEM("Failed to open file '%s' for reading", 
+            cmd_ln_str_r(config, "-infile"));
     }
     
     fread(waveheader, 1, 44, rawfd);
@@ -156,11 +156,11 @@ recognize_from_file() {
 
     for (;;) {
 
-	while ((k = cont_ad_read(cont, adbuf, 4096)) == 0);
-	
+    while ((k = cont_ad_read(cont, adbuf, 4096)) == 0);
+    
         if (k < 0) {
-    	    break;
-    	}
+            break;
+        }
 
         if (ps_start_utt(ps, NULL) < 0)
             E_FATAL("ps_start_utt() failed\n");
@@ -172,7 +172,7 @@ recognize_from_file() {
         
         for (;;) {
             if ((k = cont_ad_read(cont, adbuf, 4096)) < 0)
-            	break;
+                break;
 
             if (k == 0) {
                 /*
@@ -194,12 +194,12 @@ recognize_from_file() {
         ps_end_utt(ps);
         
         if (cmd_ln_boolean_r(config, "-time")) {
-	    print_word_times(start);
-	} else {
-	    hyp = ps_get_hyp(ps, NULL, &uttid);
+        print_word_times(start);
+    } else {
+        hyp = ps_get_hyp(ps, NULL, &uttid);
             printf("%s: %s\n", uttid, hyp);
         }
-        fflush(stdout);	
+        fflush(stdout); 
     }
 
     cont_ad_close(cont);
@@ -226,9 +226,9 @@ sleep_msec(int32 ms)
 /*
  * Main utterance processing loop:
  *     for (;;) {
- * 	   wait for start of next utterance;
- * 	   decode utterance until silence of at least 1 sec observed;
- * 	   print utterance result;
+ *     wait for start of next utterance;
+ *     decode utterance until silence of at least 1 sec observed;
+ *     print utterance result;
  *     }
  */
 static void
@@ -352,6 +352,8 @@ int
 main(int argc, char *argv[])
 {
     char const *cfg;
+    char flagToContinue;
+    int iflagToContinue;
 
     if (argc == 2) {
         config = cmd_ln_parse_file_r(NULL, cont_args_def, argv[1], TRUE);
@@ -373,18 +375,25 @@ main(int argc, char *argv[])
     //E_INFO("%s COMPILED ON: %s, AT: %s\n\n", argv[0], __DATE__, __TIME__);
 
     if (cmd_ln_str_r(config, "-infile") != NULL) {
-	recognize_from_file();
+    recognize_from_file();
     } else {
 
         /* Make sure we exit cleanly (needed for profiling among other things) */
-	/* Signals seem to be broken in arm-wince-pe. */
+    /* Signals seem to be broken in arm-wince-pe. */
 #if !defined(GNUWINCE) && !defined(_WIN32_WCE) && !defined(__SYMBIAN32__)
-	signal(SIGINT, &sighandler);
+    signal(SIGINT, &sighandler);
 #endif
 
         if (setjmp(jbuf) == 0) {
-	    recognize_from_microphone();
-	}
+            for(::){
+                recognize_from_microphone();
+                scanf("%c", &flagToContinue);
+                iflagToContinue = flagToContinue - '0';
+                if(iflagToContinue == 0)
+                    break;
+            }    
+            
+    }
     }
 
     ps_free(ps);
