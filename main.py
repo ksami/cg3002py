@@ -243,6 +243,7 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
+		# TODO: convert startpt and endpt to integer before giving to navi
 		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, startpt, endpt))
 		p_navisp.start()
 		p_navisp.join()
