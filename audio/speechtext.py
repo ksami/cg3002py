@@ -4,19 +4,19 @@ import subprocess
 class Listen:
 	program = "/home/pi/cg3002py/audio/cont -samprate 48000 -dict /home/pi/pocketsphinx-0.8/model/lm/en_US/cmu07a.dic -nfft 2048"
 
-	# currently prints all output from the c process
+	#params:
+	#q_listen: output from pocketsphinx
 	def listen(self, q_listen):
 		process = subprocess.Popen(Listen.program, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		print "listen running"
 		# Poll process for new output until finished
-		while True:
+		while process.poll() == None:
+			# read output
 			nextline = process.stdout.readline()
 			if nextline == "" and process.poll() != None:
 				break
 
 			print nextline
-			#sys.stdout.write(nextline)
-			#sys.stdout.flush()
 			q_listen.put(nextline)
 
 		output = process.communicate()[0]
@@ -26,7 +26,7 @@ class Listen:
 		process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Poll process for new output until finished
-		while True:
+		while process.poll() == None:
 			nextline = process.stdout.readline()
 			if nextline == "" and process.poll() != None:
 				break

@@ -3,16 +3,14 @@
 using namespace std;
 
 int main(void){
-	int timer = 0;
-	int i;
+	char kill = '1';
+	int ikill = 1;
 
 	cout << "cprocess started" << endl;
 
-	for(i=0; i<100; i++){
-		while(timer<=100000000){
-			timer++;
-		}
-		timer = 0;
-		cout << "hello " << i << endl;
+	while(ikill > 0){
+		cin >> kill;
+		ikill = kill - '0';
+		cout << "hello " << ikill << endl;
 	}
 }

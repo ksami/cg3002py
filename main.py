@@ -81,8 +81,10 @@ def setup():
 	global p_navi
 	global p_feedback
 	global p_receive
+	global p_listen
 	p_navi = None
 	p_feedback = None
+	p_listen = None
 	p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
 	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
 	# # global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
@@ -110,7 +112,6 @@ def executeIdle():
 	hand = q_xbee.get(block=True)
 	print "hand: ", hand
 	if hand == comms.python.main.HAND_CLOSE:
-		print "entered"
 		_systemState.changeState()
 	else:
 		pass
@@ -118,27 +119,26 @@ def executeIdle():
 
 def executeInit():
 	print "in init state"
-	p_listen = createProcess(audio.main.listen, (q_listen,))
-	p_listen.start()
 	#ask user for end location and confirm
 	#get map
+	
+	#if p_listen == None:
+	p_listen = createProcess(audio.main.listen, (q_listen,))
+	p_listen.start()
 
 	#boolean for returning to IDLE state
 	isCancel = False
 	
 	# Get and confirm start point
 	isDone = False
+	isConfirmed = False
 	
-	while (isDone == False) and (isCancel == False):
+	while (isConfirmed == False) and (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "sp"))
-
 		p_speak.start()
-
 		p_speak.join()
 		
 		startpt = q_listen.get(block=True)
-
-		p_listen.join()
 
 		# check for terminate
 		try:
@@ -153,19 +153,14 @@ def executeInit():
 		if startpt is not None:
 			isConfirmed = False
 			
-			while (isConfirmed == False) and (isCancel == False):
+			if (isConfirmed == False) and (isCancel == False):
 				confirmstart = "c," + startpt
+
 				p_speak = createProcess(audio.main.speak, (_speak, confirmstart))
-				p_listen = createProcess(audio.main.listen, (q_listen,))
-
 				p_speak.start()
-				p_listen.start()
-
 				p_speak.join()
 
 				confirm = q_listen.get(block=True)
-
-				p_listen.join()
 				
 				# check for terminate
 				try:
@@ -177,26 +172,22 @@ def executeInit():
 					#ignore
 					pass
 				
-				if confirm == "yes":
+				#enough to check for first char
+				if confirm[0] == "y":
 					isConfirmed = True
 					isDone = True
 	
 	
 	# Get and confirm end point
 	isDone = False
+	isConfirmed = False
 	
-	while (isDone == False) and (isCancel == False):
+	while (isConfirmed == False) and (isDone == False) and (isCancel == False):
 		p_speak = createProcess(audio.main.speak, (_speak, "ep"))
-		p_listen = createProcess(audio.main.listen, (q_listen,))
-
 		p_speak.start()
-		p_listen.start()
-
 		p_speak.join()
 		
-		startpt = q_listen.get(block=True)
-
-		p_listen.join()
+		endpt = q_listen.get(block=True)
 		
 		# check for terminate
 		try:
@@ -211,19 +202,13 @@ def executeInit():
 		if endpt is not None:
 			isConfirmed = False
 			
-			while (isConfirmed == False) and (isCancel == False):
+			if (isConfirmed == False) and (isCancel == False):
 				confirmend = "c," + endpt
 				p_speak = createProcess(audio.main.speak, (_speak, confirmend))
-				p_listen = createProcess(audio.main.listen, (q_listen,))
-
 				p_speak.start()
-				p_listen.start()
-
 				p_speak.join()
 
 				confirm = q_listen.get(block=True)
-
-				p_listen.join()
 				
 				# check for terminate
 				try:
@@ -235,15 +220,20 @@ def executeInit():
 					#ignore
 					pass
 				
-				if confirm == "yes":
+				if confirm[0] == "y":
 					isConfirmed = True
 					isDone = True
 	
+	if p_listen.is_alive():
+		p_listen.terminate()
+		p_listen.join()
+
 	if isCancel == True:
 		_systemState.changeState(isHandOpen=True)
 		
 	else:
 		# Initialise and start navigation processes
+		# TODO: convert startpt and endpt to integer before giving to navi
 		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, startpt, endpt))
 		p_navisp.start()
 		p_navisp.join()
