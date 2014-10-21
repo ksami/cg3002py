@@ -15,6 +15,9 @@
 // Mapping for flex sensor
 int flexpin = A0;
 
+//counter for flex sensor
+unsigned int counterForFlex[2];
+
 // Mapping of corresponding sonar trigger and echo pins
 int trigpin_1 = 2;
 int echopin_1 = 3;
@@ -75,6 +78,14 @@ void ssSetup()
 
 // Writing to actuator(servo) whenever ard/pi detects obstacle
 void writeToActuator(float left, float right){ //should change to constant val of 0-2 depending on distance
+	
+	//for debugging
+	Serial.print("navi: ");
+	Serial.println(naviRdy);
+	Serial.print("device: ");
+	Serial.println(deviceRdy);
+	Serial.print("hand: ");
+	Serial.println(handStatus);
 	
 	if(naviRdy && deviceRdy && handStatus) { // naviRdy
 		//Servo Left
@@ -149,28 +160,47 @@ void ssTask(void* p)
 void flexTask(void* p) {
 	Serial.println("in flex");
 	while (1) {
-		if(deviceRdy) {
+		if(1) {
 			int readRaw = analogRead(flexpin);
-			//Serial.println(readRaw);
+			Serial.println(readRaw);
 			int frameLen = 0;
 			unsigned char outFrame[Q_SIZE];
 			unsigned char outMsg[2];
 			memcpy(outMsg,"4",1);
 		
 			if (readRaw < 480 && handStatus == open) {
-				// send data to rpi
-				handStatus = close;
-				memcpy(&outMsg[1],"1",1);
-				frameLen = xbee.Send(outMsg, 2, outFrame, RPI_ADDR);
-				Serial1.write(outFrame, frameLen);
-				Serial.println("ON");
-			} else if (readRaw >= 480 && handStatus == close) {
-				// send data to rpi;
-				handStatus = open;
-				memcpy(&outMsg[1],"0",1);
-				frameLen = xbee.Send(outMsg, 2, outFrame, RPI_ADDR);
-				Serial1.write(outFrame, frameLen);
-				Serial.println("OFF");
+				if(counterForFlex[0] >= 5) {
+					// send data to rpi to inform that hand has been closed for 5 cycles
+					handStatus = close;
+					memcpy(&outMsg[1],"1",1);
+					frameLen = xbee.Send(outMsg, 2, outFrame, RPI_ADDR);
+				//	Serial1.write(outFrame, frameLen);
+					Serial.println("ON");
+					counterForFlex[0] = 0; //reset counter	
+				}
+				else {
+					counterForFlex[0]++;	//increment counter
+					counterForFlex[1] = 0;
+				}
+				
+			} else if (readRaw >= 500 && handStatus == close) {
+				if(counterForFlex[1] >= 5) {
+					// send data to rpi to inform that hand has been opened for 5 cycles;
+					handStatus = open;
+					memcpy(&outMsg[1],"0",1);
+					frameLen = xbee.Send(outMsg, 2, outFrame, RPI_ADDR);
+					Serial1.write(outFrame, frameLen);
+					Serial.println("OFF");
+					counterForFlex[1] = 0; //reset counter	
+				}
+				else {
+					counterForFlex[1]++;	//reset counters
+					counterForFlex[0] = 0;
+				}
+			}
+			else {
+				counterForFlex[0] = 0;
+				counterForFlex[1] = 0;
 			}
 		}
 		vTaskDelay(1000);
@@ -211,8 +241,8 @@ void xbeeTask(void*p){
 
 					int ack_len = 0;
 					
-					Serial.print("PID: ");
-					Serial.println(packageID);    
+					//Serial.print("PID: ");
+					////Serial.println(packageID);    
 					switch(packageID){
 						case DEVICE_READY:
 							memcpy(outMsg,"ACK",3);
@@ -260,8 +290,8 @@ void xbeeTask(void*p){
 			//deviceRdy = ack; for debugging to show that globals work
 		}
 		
-		//Serial.print("Device Rdy? ");
-		//Serial.println(deviceRdy);
+		////Serial.print("Device Rdy? ");
+		//////Serial.println(deviceRdy);
 
 		RxQ.Clear(delPos);
 		vTaskDelay(200);
@@ -269,7 +299,7 @@ void xbeeTask(void*p){
 		/* For Debugging receives then sends infinitely with NO problem:)
 		while (Serial1.available() > 0){
 			unsigned char in = (unsigned char)Serial1.read();
-			Serial.println(in,HEX);
+			////Serial.println(in,HEX);
 		}
 		
 		unsigned char outMsg[3] = {'a', 'c', 'k'};
@@ -283,7 +313,7 @@ void xbeeTask(void*p){
 // Task for testing purpose
 void testTask(void* p) {
 	while (1) {
-		Serial.println("hello muneer");
+		////Serial.println("hello muneer");
 		vTaskDelay(1000);
 	}
 }
@@ -306,9 +336,9 @@ int main()
 	pinMode(8, OUTPUT);
 	
 	TaskHandle_t taskSS, taskFlex, taskXBee;
-	xTaskCreate(ssTask, "ssTask", STACK_DEPTH, NULL, 5, &taskSS);
+	//xTaskCreate(ssTask, "ssTask", STACK_DEPTH, NULL, 5, &taskSS);
 	xTaskCreate(flexTask, "Flex", STACK_DEPTH, NULL, 5, &taskFlex);
-	xTaskCreate(xbeeTask,"xbeeTask",STACK_DEPTH*2,NULL,5, &taskXBee);
+	//xTaskCreate(xbeeTask,"xbeeTask",STACK_DEPTH*2,NULL,5, &taskXBee);
 	//xTaskCreate(task2, "test", STACK_DEPTH, NULL, 5, NULL);
 	//xTaskCreate(flexTask, "Flex", STACK_DEPTH, NULL, 5, &taskFlex);
 
