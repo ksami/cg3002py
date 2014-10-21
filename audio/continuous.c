@@ -254,7 +254,7 @@ recognize_from_microphone()
     if (cont_ad_calib(cont) < 0)
         E_FATAL("Failed to calibrate voice activity detection\n");
 
-    //for (;;) {
+    for (;;) {
         /* Indicate listening for next utterance */
         //printf("READY....\n");
         system("aplay /home/pi/cg3002py/audio/beep.wav");
@@ -332,10 +332,12 @@ recognize_from_microphone()
         //        break;
         //}
 
+        sleep_msec(3000);
+
         /* Resume A/D recording for next utterance */
-        //if (ad_start_rec(ad) < 0)
-        //    E_FATAL("Failed to start recording\n");
-    //}
+        if (ad_start_rec(ad) < 0)
+            E_FATAL("Failed to start recording\n");
+    }
 
     cont_ad_close(cont);
     ad_close(ad);
@@ -352,8 +354,6 @@ int
 main(int argc, char *argv[])
 {
     char const *cfg;
-    char flagToContinue;
-    int iflagToContinue;
 
     if (argc == 2) {
         config = cmd_ln_parse_file_r(NULL, cont_args_def, argv[1], TRUE);
@@ -385,15 +385,9 @@ main(int argc, char *argv[])
 #endif
 
         if (setjmp(jbuf) == 0) {
-            for(::){
-                recognize_from_microphone();
-                scanf("%c", &flagToContinue);
-                iflagToContinue = flagToContinue - '0';
-                if(iflagToContinue == 0)
-                    break;
-            }    
-            
-    }
+            recognize_from_microphone();
+        }    
+    
     }
 
     ps_free(ps);

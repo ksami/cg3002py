@@ -6,23 +6,11 @@ class Listen:
 
 	#params:
 	#q_listen: output from pocketsphinx
-	#q_listenctrl: input to pocketsphinx
-	def listen(self, q_listen, q_listenctrl):
-		process = subprocess.Popen(Listen.program, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	def listen(self, q_listen):
+		process = subprocess.Popen(Listen.program, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		print "listen running"
 		# Poll process for new output until finished
 		while process.poll() == None:
-			# send 1 for continue, 0 for kill
-			ctrl = q_listenctrl.get(block=True)
-			if ctrl == "kill":
-				ctrl = "0"
-			else:
-				ctrl = "1"
-
-			# will have error if process is dead but trying to write
-			if process.poll() == None:
-				process.stdin.write(ctrl)
-
 			# read output
 			nextline = process.stdout.readline()
 			if nextline == "" and process.poll() != None:
@@ -35,10 +23,10 @@ class Listen:
 		exitCode = process.returncode
 
 	def listenTest(self, cmd):
-		process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Poll process for new output until finished
-		while True:
+		while process.poll() == None:
 			nextline = process.stdout.readline()
 			if nextline == "" and process.poll() != None:
 				break
