@@ -113,8 +113,8 @@ class Navigation:
     # call this method when receive start and destination id
     def getShortestPath(self, start, end):
         tup = self.mapinfo.shortestPath(start, end)
-        self.coordX = tup.get(X)
-        self.coordY = tup.get(Y)
+        self.coordX = tup.get(COORDX)
+        self.coordY = tup.get(COORDY)
         self.destination = tup.get(DESTINATION)
 
     def execute(self, queue):
