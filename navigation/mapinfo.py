@@ -1,5 +1,6 @@
 
 import json
+import urllib2
 from math import sin, cos, degrees, atan2, sqrt, pi
 import sys
 from nodeinfo import NodeInfo
@@ -29,10 +30,15 @@ DISTANCE_THRESHOLD = 50
 
 # string constants
 MODE = "MODE"
-X = "X"
-Y = "Y"
+COORDX = "X"
+COORDY = "Y"
 LEFTORRIGHT = "LEFTORRIGHT"
 DESTINATION = "DESTINATION"
+
+baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
+building = 'COM1'
+level = '2'
+query = 'Building=' + building + '&' + 'Level=' + level
 
 class MapInfo:
 
@@ -49,7 +55,7 @@ class MapInfo:
 			self.mapList.append(nodeinfo)
 			
 			linkList = []
-			links = node[LINKTO].split(",")
+			links = node[LINKTO].split(", ")
 			for link in links:
 				linkList.append(int(link))
 			linkToList.append(linkList)
@@ -96,9 +102,9 @@ class MapInfo:
 			end = predecessors[end]
 		self.path.reverse()
 
-		coordX = self.maplist[self.path[self.current]].getX()
-		coordY = self.maplist[self.path[self.current]].getY()
-		destination = self.maplist[len(self.size) - 1].getName()
+		coordX = self.mapList[self.path[self.current]].getX()
+		coordY = self.mapList[self.path[self.current]].getY()
+		destination = self.mapList[self.size - 1].getName()
 
 		return {X : coordX, Y: coordY, DESTINATION: destination}
 
@@ -113,10 +119,10 @@ class MapInfo:
 			if(heading_angle < 0):
 				heading_angle += 360
 
-			startX = self.maplist[self.path[self.current]].getX()
-			startY = self.maplist[self.path[self.current]].getY()
-			endX = self.maplist[self.path[self.current+1]].getX()
-			endY = self.maplist[self.path[self.current+1]].getY()			
+			startX = self.mapList[self.path[self.current]].getX()
+			startY = self.mapList[self.path[self.current]].getY()
+			endX = self.mapList[self.path[self.current+1]].getX()
+			endY = self.mapList[self.path[self.current+1]].getY()			
 
 			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
@@ -127,7 +133,7 @@ class MapInfo:
 			if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
 				mode = GO_FORWARD
 
-				return {MODE : mode, X : coordX, Y : coordY}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				
 			else:
 				mode = TURN
@@ -136,7 +142,7 @@ class MapInfo:
 				if(cross_vector < 0):
 					isRight = LEFT
 
-				return {MODE : mode, X : coordX, Y : coordY, LEFTORRIGHT : isRight}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : isRight}
 
 
 		elif(mode == GO_FORWARD):
@@ -150,20 +156,20 @@ class MapInfo:
 			coordX += distance * cos(heading_angle)
 			coordY += distance * sin(heading_angle)
 
-			startX = self.maplist[self.path[self.current]].getX()
-			startY = self.maplist[self.path[self.current]].getY()
-			endX = self.maplist[self.path[self.current+1]].getX()
-			endY = self.maplist[self.path[self.current+1]].getY()				
+			startX = self.mapList[self.path[self.current]].getX()
+			startY = self.mapList[self.path[self.current]].getY()
+			endX = self.mapList[self.path[self.current+1]].getX()
+			endY = self.mapList[self.path[self.current+1]].getY()				
 
 			# check if it is along the path			
 			if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
 				mode = GO_FORWARD
-				return {MODE : mode, X : coordX, Y : coordY}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 			else:
 				self.current += 1
 				if(self.current == len(self.path) - 1):
 					mode = ARRIVE_DESTINATION
-					return {MODE : mode, X : coordX, Y : coordY}
+					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
 					mode = TURN
 
@@ -174,10 +180,10 @@ class MapInfo:
 					if(heading_angle < 0):
 						heading_angle += 360
 
-					startX = self.maplist[self.path[self.current]].getX()
-					startY = self.maplist[self.path[self.current]].getY()
-					endX = self.maplist[self.path[self.current+1]].getX()
-					endY = self.maplist[self.path[self.current+1]].getY()			
+					startX = self.mapList[self.path[self.current]].getX()
+					startY = self.mapList[self.path[self.current]].getY()
+					endX = self.mapList[self.path[self.current+1]].getX()
+					endY = self.mapList[self.path[self.current+1]].getY()			
 
 					edge_angle = atan2((endY - startY),(endX - startX))
 					edge_angle = degrees(edge_angle)
@@ -190,7 +196,7 @@ class MapInfo:
 
 					if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
 						mode = GO_FORWARD
-						return {MODE : mode, X : coordX, Y : coordY}
+						return {MODE : mode, COORDX : coordX, COORDY : coordY}
 					else:
 						mode = TURN
 						isRight = RIGHT
@@ -198,7 +204,7 @@ class MapInfo:
 						if(cross_vector < 0):
 							isRight = LEFT
 
-						return {MODE : mode, X : coordX, Y : coordY, LEFTORRIGHT : isRight}
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : isRight}
 
 
 def Dijkstra(graph,start,end=None):
@@ -264,3 +270,23 @@ def Dijkstra(graph,start,end=None):
 					predecessors[edge] = vertex
 
 		return (final_distances,predecessors)
+
+if __name__ == "__main__":
+    response = urllib2.urlopen(baseurl + query)
+    jsondata = response.read()
+    mapinfo = MapInfo(jsondata)
+    print mapinfo.shortestPath(1, 12)
+    print mapinfo.giveDirection(TURN, 0, 90, 0, 1260)
+
+
+
+
+
+
+
+
+
+
+
+
+
