@@ -243,14 +243,14 @@ class Navigation:
             ##### check state machine #####
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
             result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordY, self.coordY)
-            self.mode = result.get[MODE]
-            self.coordX = result.get[COORDX]
-            self.coordY = result.get[COORDY] 
+            self.mode = result[MODE]
+            self.coordX = result[COORDX]
+            self.coordY = result[COORDY] 
             feedback = ""
 
             if(self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
-                    isLeft = result.get[LEFTORRIGHT]
+                    isLeft = result[LEFTORRIGHT]
                     self.turn_time = time.time()
                     if(isLeft == LEFT):
                         feedback = "tl"
@@ -344,4 +344,4 @@ if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
     getShortestPath(navi, 1, 12)
-    exe(navi, queu)
+    exe(navi, queue)

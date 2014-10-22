@@ -257,11 +257,12 @@ def executeInit():
 		istartpt = strToInt(startpt)
 		iendpt = strToInt(endpt)
 
-		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
-		p_navisp.start()
-		p_navisp.join()
-
+		#p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
+		#p_navisp.start()
+		#p_navisp.join()
+		_navi.getShortestPath(istartpt, iendpt)
 		print "navi id: ", id(_navi)
+		print "navi x: ", _navi.coordY
 		print "navi map: ", _navi.mapinfo.path
 		print "navi map id: ", id(_navi.mapinfo.path)
 
@@ -289,6 +290,7 @@ def executeNavi():
 	if p_navi == None:
 		p_navi = createProcess(navigation.main.execute, (_navi, q_navi))
 		print "navi exe id: ", id(_navi)
+		print "navi exe x: ", _navi.coordY
 		print "navi exe map: ", _navi.mapinfo.path
 		print "navi exe map id: ", id(_navi.mapinfo.path)
 		p_navi.start()
