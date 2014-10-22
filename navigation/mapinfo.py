@@ -129,6 +129,8 @@ class MapInfo:
 			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
 
+			print "heading", heading_angle, "edge", edge_angle
+
 			if(edge_angle < 0):
 				edge_angle += 360
 
