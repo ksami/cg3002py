@@ -1,5 +1,4 @@
 # Main file handling multiple processes
-# TODO: feedback to user on every state change?
 
 import multiprocessing
 import time
@@ -75,6 +74,26 @@ def strToInt(input):
 	return int(output)
 
 
+# Return corrected pronounciation for words
+def correctInput(input):
+	mapping = {
+		"zeero": "zero",
+		"to": "two",
+		"tree": "three",
+		"sex": "six",
+	}
+	outputList = []
+	inputList = input.split()
+
+	for word in inputList:
+		if word in mapping.keys():
+			outputList.append(mapping[word])
+		else
+			outputList.append(word)
+
+	return " ".join(outputList)
+
+
 # Get user input from speech to text
 def getUserInput(cmd):
 	isCancel = False
@@ -100,6 +119,11 @@ def getUserInput(cmd):
 		
 		# Confirm input
 		if userInput is not None:
+			if userInput == "no":
+				userInput = "two"
+
+			userInput = correctInput(userInput)
+
 			isConfirmed = False
 			
 			if (isConfirmed == False) and (isCancel == False):
@@ -121,10 +145,11 @@ def getUserInput(cmd):
 					#ignore
 					pass
 				
-				#enough to check for first char
-				if confirm[0] == "y":
-					isConfirmed = True
-					isDone = True
+				if confirm is not None:
+					#enough to check for first char
+					if confirm[0] == "y":
+						isConfirmed = True
+						isDone = True
 
 	if isCancel = True:
 		return -1
@@ -190,6 +215,7 @@ def executeInit():
 	print "in init state"
 	#ask user for end location and confirm
 	#get map
+	isCancel = False
 	
 	if p_listen == None:
 		p_listen = createProcess(audio.main.listen, (q_listen,))
@@ -197,8 +223,14 @@ def executeInit():
 
 	
 	startpt = getUserInput("sp")
-	endpt = getUserInput("ep")
+	if startpt == -1:
+		isCancel = True
 	
+	if isCancel == False:
+		endpt = getUserInput("ep")
+		if endpt == -1:
+			isCancel = True
+
 	
 	if p_listen.is_alive():
 		p_listen.terminate()
