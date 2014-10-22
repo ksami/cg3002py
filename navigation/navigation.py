@@ -242,9 +242,9 @@ class Navigation:
 
             ##### check state machine #####
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
-            result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordY, self.coordY)
+            result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordX, self.coordY)
             self.mode = result[MODE]
-            self.coordX = result[COORDX]
+            self.coordX = result[COORDX]S
             self.coordY = result[COORDY] 
             feedback = ""
 

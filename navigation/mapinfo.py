@@ -108,7 +108,7 @@ class MapInfo:
 		coordY = self.mapList[self.path[self.current]].getY()
 		destination = self.mapList[self.size - 1].getName()
 
-		return {X : coordX, Y: coordY, DESTINATION: destination}
+		return {COORDX : coordX, COORDY: coordY, DESTINATION: destination}
 
 	def giveDirection (self, mode, distance, heading, coordX, coordY):
 
