@@ -238,20 +238,21 @@ class Navigation:
                 isLeft = int(result.get['LEFTORRIGHT'])
                 self.turn_time = time.time()
                 if(isLeft == LEFT):
-                    feedback = "Stop! Turn left"
+                    feedback = "tl"
                 else:
-                    feedback = "Stop! Turn right"
+                    feedback = "tr"
 
         elif(self.mode == GO_FORWARD):
             if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
                 self.go_forward_time = time.time()
-                feedback = "Okay! Go forward!"
+                feedback = "gf"
 
         elif(self.mode == REACH_DESTINATION):
-            feedback = "Stop! You reach your destination" + self.destination 
+            feedback = "r," + self.destination 
             break
 
-        queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
+        #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
+        queue.put(feedback)
 
 
 def read_word(bus, sensor_address, adr):

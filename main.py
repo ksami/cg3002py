@@ -9,10 +9,10 @@ import smwmap
 import cpython
 import pedometer.test
 import comms.python.main
-#import navigation.main
+import navigation.main
 import audio.main
 from comms.python.comms import Comms
-#from navigation.navigation import Navigation
+from navigation.navigation import Navigation
 from audio.textspeech import Speak
 from state import State
 
@@ -21,16 +21,41 @@ TIMEOUT_WAIT = 10
 cameraExe = "./cprocess.o"
 mapName = "COM1"
 mapFloor = "2"
-sendStr = "xbee string to send"
 
 _systemState = State()
 _comms = Comms()
 _speak = Speak()
 #TODO: need to ask user for building and level, currently hardcoded in navigation.py
-#_navi = Navigation()
+_navi = Navigation()
+
+
+# Creates a new process
+# params: function to call, tuple of arguments
+# returns: process
+def createProcess(function, args=()):
+	return multiprocessing.Process(target=function, args=args)
+
+# Creates a new queue
+# returns: queue
+def createQueue():
+	return multiprocessing.Queue()
+
+# Processes
+p_navi = None
+p_feedback = None
+p_listen = None
+p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
+
+# Start xbee receive
+p_receive.start()
+
+# Queues
+q_navi = createQueue()
+q_xbee = createQueue()
+q_listen = createQueue()
+
 
 def main():
-	setup()
 
 	while True:
 		currentState = _systemState.getCurrentState()
@@ -52,45 +77,7 @@ def main():
 		
 		else:
 			pass
-
-# Creates a new process
-# params: function to call, tuple of arguments
-# returns: process
-def createProcess(function, args=()):
-	return multiprocessing.Process(target=function, args=args)
-
-# Creates a new queue
-# returns: queue
-def createQueue():
-	return multiprocessing.Queue()
-
-
-def setup():
-	# Queues
-	# # global q_cam = createQueue()
-	global q_navi
-	global q_xbee
-	global q_listen
-	q_navi = createQueue()
-	q_xbee = createQueue()
-	q_listen = createQueue()
-	# global q_time = createQueue()
-
-	# Processes
-	# # global p_send = createProcess(function=comms.python.comm.send, args=(sendStr, comms))
-	global p_navi
-	global p_feedback
-	global p_receive
-	global p_listen
-	p_navi = None
-	p_feedback = None
-	p_listen = None
-	p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
-	# global p_camera = createProcess(function=cpython.execute, args=(q_cam, cameraExe))
-	# # global p_texttospeech = createProcess(function=audio.textspeech.speakq, args=(q_cam,))
-
-	# Start xbee receive
-	p_receive.start()
+	
 
 
 def executeOff():
@@ -122,9 +109,9 @@ def executeInit():
 	#ask user for end location and confirm
 	#get map
 	
-	#if p_listen == None:
-	p_listen = createProcess(audio.main.listen, (q_listen,))
-	p_listen.start()
+	if p_listen == None:
+		p_listen = createProcess(audio.main.listen, (q_listen,))
+		p_listen.start()
 
 	#boolean for returning to IDLE state
 	isCancel = False
@@ -257,8 +244,6 @@ def executeNavi():
 		p_navi = createProcess(navigation.main.execute, (_navi, q_navi))
 		p_navi.start()
 
-	#TODO: standardise strings used in p_navi and p_feedback
-	#currently p_navi giving dictionary, p_feedback taking string
 	if p_feedback == None:
 		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
 		p_feedback.start()

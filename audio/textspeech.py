@@ -2,7 +2,15 @@ import sys,os,time
 
 class Speak:
 	#Commands to read out
-	cmd_list = {"sp": "State starting position", "ep": "State your ending position", "c": "Did you say ", "gf": "Go Forward", "tl": "Turn Left", "tr": "Turn Right"}
+	cmd_list = {
+		"sp": "Please state starting position",
+		"ep": "Please state your ending position",
+		"r": "You have reached your destination ",
+		"c": "Did you say ",
+		"gf": "Go Forward",
+		"tl": "Turn Left",
+		"tr": "Turn Right"
+	}
 	program = "espeak -s 155 \"{}\" > /dev/null 2>&1"
 
 	def __init__(self):
@@ -14,12 +22,12 @@ class Speak:
 			#Do nothing
 			pass
 		else:
-			#cmd = "c,stringtoconfirm"
-			if cmd[0] == "c":
+			#cmd = "c,stringtoconfirm" or "r,destination"
+			if cmd[0] == "c" or cmd[0] == "r":
 				#slice from comma to end
 				strtoconfirm = Speak.cmd_list[cmd[0]] + cmd[2:]
 				command = Speak.program.format(strtoconfirm)
-				self.prevcmd = "c"
+				self.prevcmd = cmd[0]
 			else:
 				command = Speak.program.format(Speak.cmd_list[cmd])
 				self.prevcmd = cmd
@@ -35,12 +43,12 @@ class Speak:
 				#Do nothing
 				pass
 			else:
-				#cmd = "c,stringtoconfirm"
-				if cmd[0] == "c":
+				#cmd = "c,stringtoconfirm" or "r,destination"
+				if cmd[0] == "c" or cmd[0] == "r":
 					#slice from comma to end
 					strtoconfirm = Speak.cmd_list[cmd[0]] + cmd[2:]
 					command = Speak.program.format(strtoconfirm)
-					self.prevcmd = "c"
+					self.prevcmd = cmd[0]
 				else:
 					command = Speak.program.format(Speak.cmd_list[cmd])
 					self.prevcmd = cmd
