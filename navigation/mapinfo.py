@@ -102,6 +102,8 @@ class MapInfo:
 			end = predecessors[end]
 		self.path.reverse()
 
+		print self.path
+
 		coordX = self.mapList[self.path[self.current]].getX()
 		coordY = self.mapList[self.path[self.current]].getY()
 		destination = self.mapList[self.size - 1].getName()
