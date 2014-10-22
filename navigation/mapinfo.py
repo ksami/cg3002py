@@ -143,6 +143,7 @@ class MapInfo:
 				mode = TURN
 				isRight = RIGHT
 				cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
+				print cross_vector
 				if(cross_vector < 0):
 					isRight = LEFT
 
