@@ -254,21 +254,24 @@ class Navigation:
                     self.turn_time = time.time()
                     if(isLeft == LEFT):
                         feedback = "tl"
+                        print feedback
                     else:
-                        feedback = "tr"
+                        feedback = "tr"                        
+                        print feedback
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     self.total_distance = 0
                     feedback = "gf"
+                    print feedback
 
             elif(self.mode == REACH_DESTINATION):
                 feedback = "r," + self.destination 
+                print feedback
                 break
 
             #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
-            print feedback
             queue.put(feedback)
 
 
