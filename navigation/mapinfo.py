@@ -1,7 +1,7 @@
 
 import json
 import urllib2
-from math import sin, cos, degrees, atan2, sqrt, pi
+from math import sin, cos, degrees, atan2, sqrt, pi, radians
 import sys
 from nodeinfo import NodeInfo
 from priodict import priorityDictionary
@@ -142,7 +142,7 @@ class MapInfo:
 			else:
 				mode = TURN
 				isRight = RIGHT
-				cross_vector = cos(edge_angle) * sin(heading_angle) - cos(heading_angle) * sin(edge_angle)
+				cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
 				if(cross_vector < 0):
 					isRight = LEFT
 
@@ -157,8 +157,8 @@ class MapInfo:
 			if(heading_angle < 0):
 				heading_angle += 360
 
-			coordX += distance * cos(heading_angle)
-			coordY += distance * sin(heading_angle)
+			coordX += distance * cos(radians(heading_angle))
+			coordY += distance * sin(radians(heading_angle))
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
@@ -204,7 +204,7 @@ class MapInfo:
 					else:
 						mode = TURN
 						isRight = RIGHT
-						cross_vector = cos(edge_angle) * sin(heading_angle) - cos(heading_angle) * sin(edge_angle)
+						cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
 						if(cross_vector < 0):
 							isRight = LEFT
 
