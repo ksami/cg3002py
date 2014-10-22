@@ -268,6 +268,7 @@ class Navigation:
                 break
 
             #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
+            print feedback
             queue.put(feedback)
 
 
