@@ -217,6 +217,8 @@ def executeInit():
 	#ask user for end location and confirm
 	#get map
 	isCancel = False
+
+	global p_listen
 	
 	if p_listen == None:
 		p_listen = createProcess(audio.main.listen, (q_listen,))
@@ -265,6 +267,9 @@ def executeNavi():
 	# if p_camera == None:
 	# 	p_camera = createProcess(camera, (q_cam))
 	# 	p_camera.start() #TODO might take a long time to start
+
+	global p_navi
+	global p_feedback
 
 	#if process has not been created before
 	if p_navi == None:
