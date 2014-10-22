@@ -331,3 +331,17 @@ def GetHeading(most_active_axis, compass_val):
         heading -= 2*math.pi
 
     return math.degrees(heading)
+
+def getShortestPath(navi, start, end):
+    navi.getShortestPath(start, end)
+
+def exe(navi, queue):
+    navi.execute(queue)
+
+import multiprocessing
+
+if __name__ == "__main__":
+    navi = Navigation()
+    queue = multiprocessing.Queue()
+    getShortestPath(navi, 1, 12)
+    exe(navi, queu)
