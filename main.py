@@ -260,6 +260,8 @@ def executeInit():
 		p_navisp.start()
 		p_navisp.join()
 
+		print "navi id: ", id(_navi)
+
 		# Change to NAVI state
 		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
 		p_send.start()
@@ -283,6 +285,7 @@ def executeNavi():
 	#if process has not been created before
 	if p_navi == None:
 		p_navi = createProcess(navigation.main.execute, (_navi, q_navi))
+		print "navi exe id: ", id(_navi)
 		p_navi.start()
 
 	if p_feedback == None:
