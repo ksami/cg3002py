@@ -33,8 +33,8 @@ hmc_address = 0x1e  # HMC5883l i2c address
 
 # constants for map
 baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
-building = 'yimelo'
-level = '5'
+building = 'COM1'
+level = '2'
 query = 'Building=' + building + '&' + 'Level=' + level
 
 # mode
@@ -45,8 +45,8 @@ ARRIVE_DESTINATION = 3
 
 # string constants
 MODE = "MODE"
-X = "X"
-Y = "Y"
+COORDX = "X"
+COORDY = "Y"
 LEFTORRIGHT = "LEFTORRIGHT"
 DESTINATION = "DESTINATION"
 
@@ -106,8 +106,6 @@ class Navigation:
         self.heading = 0
 
         # download map
-        building = bldg
-        level = lvl
         response = urllib2.urlopen(baseurl + query)
         jsondata = response.read()
         self.mapinfo = MapInfo(jsondata)
@@ -246,8 +244,8 @@ class Navigation:
         self.heading = GetHeading(self.most_active_axis, self.compass_val)
         result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordY, self.coordY)
         self.mode = result.get[MODE]
-        self.coordX = result.get[X]
-        self.coordY = result.get[Y]
+        self.coordX = result.get[COORDX]
+        self.coordY = result.get[COORDY] 
         feedback = ""
 
         if(self.mode == TURN):
