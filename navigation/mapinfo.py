@@ -121,6 +121,7 @@ class MapInfo:
 			if(heading_angle < 0):
 				heading_angle += 360
 
+			print "mode", mode
 			print self.current
 			print self.path[self.current]
 			print self.mapList[self.path[self.current]].getX()
