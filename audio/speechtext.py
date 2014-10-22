@@ -2,7 +2,7 @@ import sys,os
 import subprocess
 
 class Listen:
-	program = "/home/pi/cg3002py/audio/cont -samprate 48000 -dict /home/pi/pocketsphinx-0.8/model/lm/en_US/cmu07a.dic -nfft 2048"
+	program = "exec /home/pi/cg3002py/audio/cont -samprate 48000 -dict /home/pi/pocketsphinx-0.8/model/lm/en_US/cmu07a.dic -nfft 2048"
 
 	#params:
 	#q_listen: output from pocketsphinx
@@ -43,14 +43,7 @@ class Listen:
 		print "exitCode: ", exitCode
 
 
-# test with python speechtext.py cprocess.o
+# test with python speechtext.py
 if __name__ == "__main__":
-	#program = "sudo /home/pi/cg3002py/audio/cont -samprate 48000 -dict /home/pi/pocketsphinx-0.8/model/lm/en_US/cmu07a.dic -nfft 2048"
-	#os.system(program)
 	listen = Listen()
 	listen.listenTest(Listen.program)
-	#if len(sys.argv) < 2:
-	#	print "run with python speechtext.py cprocess.o"
-	#else:
-	#	print "executing {program}".format(program=sys.argv[1])
-	#	listen.listenTest(sys.argv[1])

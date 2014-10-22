@@ -11,7 +11,7 @@ class Speak:
 		"tl": "Turn Left",
 		"tr": "Turn Right"
 	}
-	program = "espeak -s 155 \"{}\" > /dev/null 2>&1"
+	program = "exec espeak -s 155 \"{}\" > /dev/null 2>&1"
 
 	def __init__(self):
 		self.prevcmd = ""

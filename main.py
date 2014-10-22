@@ -55,6 +55,26 @@ q_xbee = createQueue()
 q_listen = createQueue()
 
 
+
+# Parses a string from the output of speechtotext into int
+def strToInt(input):
+	outputList = []
+
+	# "1 2 3(2)" into ["1", "2", "3(2)"]
+	inputList = input.split()
+
+	# ["1", "2", "3(2)"] into ["1", "2", "3"]
+	for i in xrange(0, len(inputList)):
+		# ignore ()
+		outputList.append(inputList[i][0])
+
+	# ["1", "2", "3"] into "123"
+	output = "".join(outputList)
+
+	# "123" into 123
+	return int(output)
+
+
 def main():
 
 	while True:
@@ -78,7 +98,6 @@ def main():
 		else:
 			pass
 	
-
 
 def executeOff():
 	print "in off state"
@@ -220,8 +239,10 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
-		# TODO: convert startpt and endpt to integer before giving to navi
-		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, startpt, endpt))
+		istartpt = strToInt(startpt)
+		iendpt = strToInt(endpt)
+
+		p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
 		p_navisp.start()
 		p_navisp.join()
 
