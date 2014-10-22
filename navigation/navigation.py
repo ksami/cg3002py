@@ -113,8 +113,8 @@ class Navigation:
     # call this method when receive start and destination id
     def getShortestPath(self, start, end):
         tup = self.mapinfo.shortestPath(start, end)
-        self.coordX = tup.get(X)
-        self.coordY = tup.get(Y)
+        self.coordX = tup.get(COORDX)
+        self.coordY = tup.get(COORDY)
         self.destination = tup.get(DESTINATION)
 
     def execute(self, queue):
@@ -278,7 +278,7 @@ def read_word(bus, sensor_address, adr):
     return val
 
 def read_word_2c(bus, sensor_address, adr):
-    val = read_word(sensor_address, adr)
+    val = read_word(bus, sensor_address, adr)
     if (val >= 0x8000):
         return -((65535 - val) + 1)
     else:

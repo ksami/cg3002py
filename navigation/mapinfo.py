@@ -48,6 +48,8 @@ class MapInfo:
 		self.mapList = [] # list of nodes
 		self.adjacencyList = {} # dictionary of rooms that is linked to the room in index i
 		linkToList = []
+		self.path = []
+		self.current = 0
 		self.size = 0
 
 		for node in mapinfo[MAP] :
@@ -93,9 +95,7 @@ class MapInfo:
 
 		start = start - 1
 		end = end - 1
-		self.current = 0
 		final_distances,predecessors = Dijkstra(self.adjacencyList,start,end)
-		self.path = []
 		while 1:
 			self.path.append(end)
 			if end == start: break
@@ -122,7 +122,7 @@ class MapInfo:
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
-			endY = self.mapList[self.path[self.current+1]].getY()			
+			endY = self.mapList[self.path[self.current+1]].getY()
 
 			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
@@ -159,7 +159,7 @@ class MapInfo:
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
-			endY = self.mapList[self.path[self.current+1]].getY()				
+			endY = self.mapList[self.path[self.current+1]].getY()
 
 			# check if it is along the path			
 			if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
