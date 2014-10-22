@@ -213,8 +213,8 @@ def executeIdle():
 	p_speak.join()
 	#nothing
 
-	#hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_CLOSE
+	hand = q_xbee.get(block=True)
+	#hand = comms.python.main.HAND_CLOSE
 	print "hand: ", hand
 	if hand == comms.python.main.HAND_CLOSE:
 		_systemState.changeState()
