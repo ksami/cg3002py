@@ -272,7 +272,8 @@ class Navigation:
                 break
 
             #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
-            queue.put(feedback)
+            if feedback != "":
+                queue.put(feedback)
 
 
 def read_word(bus, sensor_address, adr):
