@@ -36,5 +36,25 @@ def main():
 		worker3.join()
 
 
+# Parses a string from the output of speechtotext into int
+def strToInt(input):
+	outputList = []
+
+	# "1 2 3(2)" into ["1", "2", "3(2)"]
+	inputList = input.split()
+
+	# ["1", "2", "3(2)"] into ["1", "2", "3"]
+	for i in xrange(0, len(inputList)):
+		# ignore ()
+		outputList.append(inputList[i][0])
+
+	# ["1", "2", "3"] into "123"
+	output = "".join(outputList)
+
+	# "123" into 123
+	return int(output)
+
 if __name__ == "__main__":
-	main()
+	#main()
+	ret = strToInt("1 2 3(2)")
+	print ret
