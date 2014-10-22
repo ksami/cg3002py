@@ -58,15 +58,26 @@ p_receive.start()
 
 # Parses a string from the output of speechtotext into int
 def strToInt(input):
+	mapping = {
+		"zero": "0",
+		"one": "1",
+		"two": "2",
+		"three": "3",
+		"four": "4",
+		"five": "5",
+		"six": "6",
+		"seven": "7",
+		"eight": "8",
+		"nine": "9"
+	}
 	outputList = []
 
-	# "1 2 3(2)" into ["1", "2", "3(2)"]
-	inputList = input.split()
+	# "one two" into ["one", "two"]
+	inputList = input.split(" ")
 
-	# ["1", "2", "3(2)"] into ["1", "2", "3"]
+	# ["one", "two"] into ["1", "2"]
 	for i in xrange(0, len(inputList)):
-		# ignore ()
-		outputList.append(inputList[i][0])
+		outputList.append(mapping[inputList[i]])
 
 	# ["1", "2", "3"] into "123"
 	output = "".join(outputList)
@@ -79,9 +90,10 @@ def strToInt(input):
 def correctInput(input):
 	mapping = {
 		"zeero": "zero",
+		"no": "two",
 		"to": "two",
 		"tree": "three",
-		"sex": "six",
+		"sex": "six"
 	}
 	outputList = []
 	inputList = input.split()
@@ -120,9 +132,6 @@ def getUserInput(cmd):
 		
 		# Confirm input
 		if userInput is not None:
-			if userInput == "no":
-				userInput = "two"
-
 			userInput = correctInput(userInput)
 
 			isConfirmed = False
