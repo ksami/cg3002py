@@ -3,13 +3,21 @@ import sys,os,time
 class Speak:
 	#Commands to read out
 	cmd_list = {
-		"sp": "Please state starting position",
-		"ep": "Please state your ending position",
+		"sb": "State starting building",
+		"sl": "State starting level",
+		"sn": "State starting node",
+		"sp": "Please state starting position", #for debugging so that no need to go tru so many steps
+		"ep": "Please state your ending position",  #for debugging so that no need to go tru so many steps
+		"eb": "State ending building",
+		"el": "State ending level",
+		"en": "State ending node",
 		"r": "You have reached your destination ",
 		"c": "Did you say ",
 		"gf": "Go Forward",
 		"tl": "Turn Left",
-		"tr": "Turn Right"
+		"tr": "Turn Right",
+		"is": "Welcome. Clench your fist to start",
+		"ns": "Starting navigation",
 	}
 	program = "exec espeak -s 155 \"{}\" > /dev/null 2>&1"
 
