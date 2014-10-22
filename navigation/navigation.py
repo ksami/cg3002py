@@ -240,35 +240,35 @@ class Navigation:
                 self.time_window = time.time()   
 
 
-        ##### check state machine #####
-        self.heading = GetHeading(self.most_active_axis, self.compass_val)
-        result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordY, self.coordY)
-        self.mode = result.get[MODE]
-        self.coordX = result.get[COORDX]
-        self.coordY = result.get[COORDY] 
-        feedback = ""
+            ##### check state machine #####
+            self.heading = GetHeading(self.most_active_axis, self.compass_val)
+            result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordY, self.coordY)
+            self.mode = result.get[MODE]
+            self.coordX = result.get[COORDX]
+            self.coordY = result.get[COORDY] 
+            feedback = ""
 
-        if(self.mode == TURN):
-            if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
-                isLeft = result.get[LEFTORRIGHT]
-                self.turn_time = time.time()
-                if(isLeft == LEFT):
-                    feedback = "tl"
-                else:
-                    feedback = "tr"
+            if(self.mode == TURN):
+                if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
+                    isLeft = result.get[LEFTORRIGHT]
+                    self.turn_time = time.time()
+                    if(isLeft == LEFT):
+                        feedback = "tl"
+                    else:
+                        feedback = "tr"
 
-        elif(self.mode == GO_FORWARD):
-            if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
-                self.go_forward_time = time.time()
-                self.total_distance = 0
-                feedback = "gf"
+            elif(self.mode == GO_FORWARD):
+                if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
+                    self.go_forward_time = time.time()
+                    self.total_distance = 0
+                    feedback = "gf"
 
-        elif(self.mode == REACH_DESTINATION):
-            feedback = "r," + self.destination 
-            break
+            elif(self.mode == REACH_DESTINATION):
+                feedback = "r," + self.destination 
+                break
 
-        #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
-        queue.put(feedback)
+            #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
+            queue.put(feedback)
 
 
 def read_word(bus, sensor_address, adr):
