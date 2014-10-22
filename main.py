@@ -39,6 +39,12 @@ def createProcess(function, args=()):
 def createQueue():
 	return multiprocessing.Queue()
 
+
+# Queues
+q_navi = createQueue()
+q_xbee = createQueue()
+q_listen = createQueue()
+
 # Processes
 p_navi = None
 p_feedback = None
@@ -47,11 +53,6 @@ p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _com
 
 # Start xbee receive
 p_receive.start()
-
-# Queues
-q_navi = createQueue()
-q_xbee = createQueue()
-q_listen = createQueue()
 
 
 
@@ -88,7 +89,7 @@ def correctInput(input):
 	for word in inputList:
 		if word in mapping.keys():
 			outputList.append(mapping[word])
-		else
+		else:
 			outputList.append(word)
 
 	return " ".join(outputList)
@@ -151,7 +152,7 @@ def getUserInput(cmd):
 						isConfirmed = True
 						isDone = True
 
-	if isCancel = True:
+	if isCancel == True:
 		return -1
 	else:
 		return userInput
