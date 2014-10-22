@@ -16,7 +16,7 @@ class Listen:
 		process = subprocess.Popen(Listen.program, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
 		self.pid = process.pid
 		print "listen running"
-		signal.signal(signal.SIGTERM, signal_term_handler)
+		signal.signal(signal.SIGTERM, self.signal_term_handler)
 		# Poll process for new output until finished
 		while process.poll() == None:
 			# read output
