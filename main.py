@@ -75,6 +75,63 @@ def strToInt(input):
 	return int(output)
 
 
+# Get user input from speech to text
+def getUserInput(cmd):
+	isCancel = False
+	isDone = False
+	isConfirmed = False
+	
+	while (isConfirmed == False) and (isDone == False) and (isCancel == False):
+		p_speak = createProcess(audio.main.speak, (_speak, cmd))
+		p_speak.start()
+		p_speak.join()
+		
+		userInput = q_listen.get(block=True)
+
+		# check for terminate
+		try:
+			hand = q_xbee.get(block=False)
+			if hand == comms.python.main.HAND_OPEN:
+				isCancel = True
+		# Queue.empty
+		except Exception:
+			#ignore
+			pass
+		
+		# Confirm input
+		if userInput is not None:
+			isConfirmed = False
+			
+			if (isConfirmed == False) and (isCancel == False):
+				confirmInput = "c," + userInput
+
+				p_speak = createProcess(audio.main.speak, (_speak, confirmInput))
+				p_speak.start()
+				p_speak.join()
+
+				confirm = q_listen.get(block=True)
+				
+				# check for terminate
+				try:
+					hand = q_xbee.get(block=False)
+					if hand == comms.python.main.HAND_OPEN:
+						isCancel = True
+				# Queue.empty
+				except Exception:
+					#ignore
+					pass
+				
+				#enough to check for first char
+				if confirm[0] == "y":
+					isConfirmed = True
+					isDone = True
+
+	if isCancel = True:
+		return -1
+	else:
+		return userInput
+
+
 def main():
 
 	while True:
@@ -101,6 +158,9 @@ def main():
 
 def executeOff():
 	print "in off state"
+	p_speak = createProcess(audio.main.speak, (_speak, "os"))
+	p_speak.start()
+	p_speak.join()
 	#send device ready to arduino
 	#handle timeout and repeated sending
 
@@ -113,6 +173,9 @@ def executeOff():
 
 def executeIdle():
 	print "in idle state"
+	p_speak = createProcess(audio.main.speak, (_speak, "is"))
+	p_speak.start()
+	p_speak.join()
 	#nothing
 
 	hand = q_xbee.get(block=True)
@@ -132,103 +195,10 @@ def executeInit():
 		p_listen = createProcess(audio.main.listen, (q_listen,))
 		p_listen.start()
 
-	#boolean for returning to IDLE state
-	isCancel = False
 	
-	# Get and confirm start point
-	isDone = False
-	isConfirmed = False
+	startpt = getUserInput("sp")
+	endpt = getUserInput("ep")
 	
-	while (isConfirmed == False) and (isDone == False) and (isCancel == False):
-		p_speak = createProcess(audio.main.speak, (_speak, "sp"))
-		p_speak.start()
-		p_speak.join()
-		
-		startpt = q_listen.get(block=True)
-
-		# check for terminate
-		try:
-			hand = q_xbee.get(block=False)
-			if hand == comms.python.main.HAND_OPEN:
-				isCancel = True
-		# Queue.empty
-		except Exception:
-			#ignore
-			pass
-		
-		if startpt is not None:
-			isConfirmed = False
-			
-			if (isConfirmed == False) and (isCancel == False):
-				confirmstart = "c," + startpt
-
-				p_speak = createProcess(audio.main.speak, (_speak, confirmstart))
-				p_speak.start()
-				p_speak.join()
-
-				confirm = q_listen.get(block=True)
-				
-				# check for terminate
-				try:
-					hand = q_xbee.get(block=False)
-					if hand == comms.python.main.HAND_OPEN:
-						isCancel = True
-				# Queue.empty
-				except Exception:
-					#ignore
-					pass
-				
-				#enough to check for first char
-				if confirm[0] == "y":
-					isConfirmed = True
-					isDone = True
-	
-	
-	# Get and confirm end point
-	isDone = False
-	isConfirmed = False
-	
-	while (isConfirmed == False) and (isDone == False) and (isCancel == False):
-		p_speak = createProcess(audio.main.speak, (_speak, "ep"))
-		p_speak.start()
-		p_speak.join()
-		
-		endpt = q_listen.get(block=True)
-		
-		# check for terminate
-		try:
-			hand = q_xbee.get(block=False)
-			if hand == comms.python.main.HAND_OPEN:
-				isCancel = True
-		# Queue.empty
-		except Exception:
-			#ignore
-			pass
-		
-		if endpt is not None:
-			isConfirmed = False
-			
-			if (isConfirmed == False) and (isCancel == False):
-				confirmend = "c," + endpt
-				p_speak = createProcess(audio.main.speak, (_speak, confirmend))
-				p_speak.start()
-				p_speak.join()
-
-				confirm = q_listen.get(block=True)
-				
-				# check for terminate
-				try:
-					hand = q_xbee.get(block=False)
-					if hand == comms.python.main.HAND_OPEN:
-						isCancel = True
-				# Queue.empty
-				except Exception:
-					#ignore
-					pass
-				
-				if confirm[0] == "y":
-					isConfirmed = True
-					isDone = True
 	
 	if p_listen.is_alive():
 		p_listen.terminate()
@@ -255,6 +225,9 @@ def executeInit():
 
 def executeNavi():
 	print "in navi state"
+	p_speak = createProcess(audio.main.speak, (_speak, "ns"))
+	p_speak.start()
+	p_speak.join()
 	#navigate
 	# if p_camera == None:
 	# 	p_camera = createProcess(camera, (q_cam))
@@ -279,6 +252,9 @@ def executeNavi():
 
 def executeWait():
 	print "in wait state"
+	p_speak = createProcess(audio.main.speak, (_speak, "ws"))
+	p_speak.start()
+	p_speak.join()
 	#do nothing
 		
 	p_timer = createProcess(function=timer.timer, args=(q_time, TIMEOUT_WAIT))
@@ -321,12 +297,12 @@ def executeWait():
 	elif isTimeout == True:
 		if p_navi != None:
 			if p_navi.is_alive():
-				p_navi.terminate()  #TODO: handle termination SIGTERM or SIGKILL in navigation might not be necessary
+				p_navi.terminate()
 				p_navi.join()
 
 		if p_feedback != None:
 			if p_feedback.is_alive():
-				p_feedback.terminate()  #TODO: handle termination SIGTERM or SIGKILL in feedback
+				p_feedback.terminate()
 				p_feedback.join()
 
 		# if p_camera != None:
