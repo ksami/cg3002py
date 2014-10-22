@@ -244,7 +244,7 @@ class Navigation:
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
             result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordX, self.coordY)
             self.mode = result[MODE]
-            self.coordX = result[COORDX]S
+            self.coordX = result[COORDX]
             self.coordY = result[COORDY] 
             feedback = ""
 
