@@ -1,6 +1,6 @@
 
 import json
-import math
+from math import sin, cos, degrees, atan2, sqrt, pi
 import sys
 from nodeinfo import NodeInfo
 from priodict import priorityDictionary
@@ -15,10 +15,17 @@ LINKTO = 'linkTo'
 INFO = 'info'
 NORTHAT = 'northAt'
 
+LEFT = 0
+RIGHT = 1
+
 NODE = 0
 GO_FORWARD = 1
 TURN = 2
 ARRIVE_DESTINATION = 3
+
+ANGLE_THRESHOLD = 10
+CORRIDOR_THRESHOLD = 273 / 2.0
+DISTANCE_THRESHOLD = 50
 
 class MapInfo:
 
@@ -46,7 +53,7 @@ class MapInfo:
 			dic = {} # a dictionary with key "index" and value "their corresponding distances from node i"
 			bigDic = {} # a dictionary with key i and value dic
 			for index in linkToList[i]:
-				distance = math.sqrt( (self.mapList[i].getX() - self.mapList[index-1].getX()) ** 2 +  (self.mapList[i].getY() - self.mapList[index-1].getY()) ** 2 ) 
+				distance = sqrt( (self.mapList[i].getX() - self.mapList[index-1].getX()) ** 2 +  (self.mapList[i].getY() - self.mapList[index-1].getY()) ** 2 ) 
 				vertex = {(index-1): distance}
 				dic.update(vertex)
 			bigDic = {i: dic}
@@ -115,7 +122,7 @@ class MapInfo:
 		minimumNodeID = 0
 
 		for mapItem in self.mapList:
-			distance = math.sqrt( (mapItem.getX() - coordX)**2 +  (mapItem.getY() - coordY)**2)
+			distance = sqrt( (mapItem.getX() - coordX)**2 +  (mapItem.getY() - coordY)**2)
 			if(distance < minimumDist):
 				minimumDist = distance
 				minimumNodeID = mapItem.getId()
@@ -124,65 +131,107 @@ class MapInfo:
 
 	def giveDirection (self, mode, distance, heading, coordX, coordY):
 
-		startX = self.maplist[self.path[self.current]].getX()
-		startY = self.maplist[self.path[self.current]].getY()
-		endX = self.maplist[self.path[self.current+1]].getX()
-		endY = self.maplist[self.path[self.current+1]].getY()			
-
-		if(mode == NODE):
-			mode = TURN
-
-		if(mode == GO_FORWARD):
-
-			self.coordX += distance * math.cos(edge_angle)
-			self.coordY += distance * math.sin(edge_angle)
-
-			while(self.current < len(self.path) - 1):
-
-				startX = self.maplist[self.path[self.current]].getX()
-				startY = self.maplist[self.path[self.current]].getY()
-				endX = self.maplist[self.path[self.current+1]].getX()
-				endY = self.maplist[self.path[self.current+1]].getY()			
-
-				#checking if that coordinates is along that edge
-				# need checking on that condition
-				if(  (startX <= self.coordX  <= endX) and (startY <= self.coordY <= endY) ): #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					break
-
-				self.current += 1
-
-			if(self.current == len(self.path) - 1):
-				mode = ARRIVE_DESTINATION
-
-			if( math.sqrt((endX-self.coordX)**2 + (endY-self.coordY)**2) <= 50 ):
-				mode = NODE
-
 		if(mode == TURN):
-				
-			vector1X = endX - startX
-			vector1Y = endY - startY
-			vector2X = self.maplist[self.path[self.current+2]].getX() - endX
-			vector2Y = self.maplist[self.path[self.current+2]].getY() - endY
-			
-			angle = math.atan2((vector2Y, vector2X) - math.atan2(vector1Y, vector1X))
-			angle = math.degrees(angle)
-			if(angle < 0):
-				mode = TURN_LEFT
+
+			# check the updated 
+			heading_angle = (self.degree + heading) % 360
+			heading_angle = 90 - heading_angle
+
+			if(heading_angle < 0):
+				heading_angle += 360
+
+			startX = self.maplist[self.path[self.current]].getX()
+			startY = self.maplist[self.path[self.current]].getY()
+			endX = self.maplist[self.path[self.current+1]].getX()
+			endY = self.maplist[self.path[self.current+1]].getY()			
+
+			edge_angle = atan2((vector2Y, vector2X) - atan2(vector1Y, vector1X))
+			edge_angle = degrees(edge_angle)
+
+			if(edge_angle < 0):
+				edge_angle += 360
+
+			if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
+				mode = GO_FORWARD
+
+				# return the json string
+
 			else:
-				mode = TURN_RIGHT
+				mode = TURN
+				isRight = RIGHT
+				cross_vector = cos(edge_angle) * sin(heading_angle) - cos(heading_angle) * sin(edge_angle)
+				if(cross_vector < 0):
+					isRight = LEFT
+
+				# return the json string
 
 
-		if( math.sqrt((endX-self.coordX)**2 + (endY-self.coordY)**2) <= THRESHOLD_DISTANCE ):
-			mode = ABOUT_REACH
+		elif(mode == GO_FORWARD):
+			# update coordinates
+			heading_angle = (self.degree + heading) % 360
+			heading_angle = 90 - heading_angle
 
-		angle = math.atan2((endY - startY),(endX - startX))
-		if(angle < 0):
-			angle += 2*math.pi
+			if(heading_angle < 0):
+				heading_angle += 360
 
-		angle = math.degrees(angle) + 90 - (heading + self.degree) 
+			coordX += distance * cos(heading_angle)
+			coordY += distance * sin(heading_angle)
 
-		return (mode, angle, self.maplist[self.path[self.current]].getName(), self.coordX, self.coordY)
+			startX = self.maplist[self.path[self.current]].getX()
+			startY = self.maplist[self.path[self.current]].getY()
+			endX = self.maplist[self.path[self.current+1]].getX()
+			endY = self.maplist[self.path[self.current+1]].getY()				
 
+			# check if it is along the path
+			onEdge = ( (startX == endX) and (startX - CORRIDOR_THRESHOLD <= coordX <= startX + CORRIDOR_THRESHOLD) and ((startY <= coordY <= endY) or (endY <= coordY <= startY)) ) or
+					 ( (startY == endY) and (startY - CORRIDOR_THRESHOLD <= coordY <= startX + CORRIDOR_THRESHOLD) and ((startX <= coordX <= endY) or (endY <= coordY <= startY)) ) or
+					 ()			
+			if(onEdge and sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
+					mode = GO_FORWARD
+					# return the json string with the updated coordinates
+			else:
+				self.current += 1
+				if(self.current == len(self.path) - 1):
+					mode = ARRIVE_DESTINATION
+					# return the json string
+				else:
+					mode = TURN
+
+					# check the updated 
+					heading_angle = (self.degree + heading) % 360
+					heading_angle = 90 - heading_angle
+
+					if(heading_angle < 0):
+						heading_angle += 360
+
+					startX = self.maplist[self.path[self.current]].getX()
+					startY = self.maplist[self.path[self.current]].getY()
+					endX = self.maplist[self.path[self.current+1]].getX()
+					endY = self.maplist[self.path[self.current+1]].getY()			
+
+					edge_angle = atan2((vector2Y, vector2X) - atan2(vector1Y, vector1X))
+					edge_angle = degrees(edge_angle)
+
+					if(edge_angle < 0):
+						edge_angle += 360
+
+					if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
+						mode = GO_FORWARD
+
+						coordX = startX
+						coordY = startY
+
+						# return the json string
+
+					else:
+						mode = TURN
+						isRight = RIGHT
+						cross_vector = cos(edge_angle) * sin(heading_angle) - cos(heading_angle) * sin(edge_angle)
+						if(cross_vector < 0):
+							isRight = LEFT
+
+
+						# return the json string
 
 def Dijkstra(graph,start,end=None):
 		"""

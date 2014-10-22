@@ -50,7 +50,7 @@ class Navigation:
 
         self.bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
-        self.mode = NODE
+        self.mode = TURN
         self.most_active_axis = 1
         self.coordX = 0
         self.coordY = 0
