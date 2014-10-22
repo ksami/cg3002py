@@ -278,7 +278,7 @@ def read_word(bus, sensor_address, adr):
     return val
 
 def read_word_2c(bus, sensor_address, adr):
-    val = read_word(sensor_address, adr)
+    val = read_word(bus, sensor_address, adr)
     if (val >= 0x8000):
         return -((65535 - val) + 1)
     else:
