@@ -303,11 +303,11 @@ def compare(most_active_axis, accel_1, accel_2):
 def getStrideLength(accel_list):
     accel_sum = 0
     for i in range(len(accel_list)):
-        accel_sum += accel_val.y
+        accel_sum += accel_list[i].y
     accel_avg = accel_sum / len(accel_list)
 
     for i in range(len(accel_list)):
-        accel_sum += (accel_val.y - accel_avg)
+        accel_sum += (accel_list[i].y - accel_avg)
     accel_sum /= len(accel_list)
 
     print "accel_sum", accel_sum
