@@ -12,7 +12,8 @@ PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HEIGHT = 1.76
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 0.415
+STRIDE_COEFFICIENT = 0.0264093915247045 
+# from walking in total of 14.4 meters and total_distance (without calibration) 545.260574691
 
 MINIMA = 0
 MAXIMA = 1
@@ -42,7 +43,12 @@ GO_FORWARD = 1
 TURN = 2
 ARRIVE_DESTINATION = 3
 
-THRESHOLD_DISTANCE = 500
+# string constants
+MODE = "MODE"
+X = "X"
+Y = "Y"
+LEFTORRIGHT = "LEFTORRIGHT"
+DESTINATION = "DESTINATION"
 
 class Navigation:
 
@@ -109,9 +115,9 @@ class Navigation:
     # call this method when receive start and destination id
     def getShortestPath(self, start, end):
         tup = self.mapinfo.shortestPath(start, end)
-        self.coordX = tup[0]
-        self.coordY = tup[1]
-        self.destination = tup[2]
+        self.coordX = tup.get(X)
+        self.coordY = tup.get(Y)
+        self.destination = tup.get(DESTINATION)
 
     def execute(self, queue):
         
@@ -169,11 +175,9 @@ class Navigation:
             compass_zout = read_word_2c(self.bus, hmc_address, 5) * SCALE
 
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
-            self.heading = GetHeading(self.most_active_axis, self.compass_val)
 
             # step detection - peak-to-peak detection
             if(not self.first_time):
-
                 if( math.fabs( compare(self.most_active_axis, self.sample_new, self.accel_val)) >= ACCEL_THRESHOLD):
                     self.sample_new = self.accel_val
                     self.accel_list.append(self.accel_val)
@@ -186,8 +190,13 @@ class Navigation:
                         
                         else:
 
+                            if(self.calculate_distance and self.mode == GO_FORWARD):
+                                self.total_distance += getStrideLength(self.accel_list)
+                                self.accel_list = []
+                                self.calculate_distance = False
+                                print "TOTAL DISTANCE", self.total_distance
+
                             if( compare(self.most_active_axis, self.accel_maxima, self.accel_val) >= self.peak_threshold ):
-                                #print "minima coming"
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
                                     self.num_steps += 1
@@ -195,7 +204,9 @@ class Navigation:
                                     self.accel_minima = self.accel_val
                                     self.time_window = time.time()
                                     print "PEAK DETECTED MINIMA", self.num_steps
-                                    peak_threshold = PEAK_THRESHOLD
+                                    self.peak_threshold = PEAK_THRESHOLD
+                                    self.calculate_distance = True
+
 
                     # looking for a maxima peak
                     if( self.peak_direction == MAXIMA ):
@@ -205,8 +216,13 @@ class Navigation:
 
                         else:
 
+                            if(self.calculate_distance and self.mode == GO_FORWARD):
+                                self.total_distance += getStrideLength(self.accel_list)
+                                self.accel_list = []
+                                self.calculate_distance = False
+                                print "TOTAL DISTANCE", self.total_distance
+
                             if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
-                                #print "maxima coming"
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
                                     self.num_steps += 1
@@ -214,7 +230,8 @@ class Navigation:
                                     self.accel_maxima = self.accel_val
                                     self.time_window = time.time()
                                     print "PEAK DETECTED MAXIMA", self.num_steps
-                                    peak_threshold = PEAK_THRESHOLD
+                                    self.peak_threshold = PEAK_THRESHOLD
+                                    self.calculate_distance = True
 
             else:
                 self.peak_direction = MINIMA
@@ -222,20 +239,20 @@ class Navigation:
                 self.accel_maxima = self.accel_val
                 self.first_time = False
                 self.sample_new = self.accel_val
-                self.time_window = time.time()        
+                self.time_window = time.time()   
 
 
         ##### check state machine #####
-
+        self.heading = GetHeading(self.most_active_axis, self.compass_val)
         result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordY, self.coordY)
-        self.mode = int(result.get['MODE'])
-        self.coordX = float(result.get['X'])
-        self.coordY = float(result.get['Y'])
+        self.mode = result.get[MODE]
+        self.coordX = result.get[X]
+        self.coordY = result.get[Y]
         feedback = ""
 
         if(self.mode == TURN):
             if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
-                isLeft = int(result.get['LEFTORRIGHT'])
+                isLeft = result.get[LEFTORRIGHT]
                 self.turn_time = time.time()
                 if(isLeft == LEFT):
                     feedback = "tl"
@@ -245,6 +262,7 @@ class Navigation:
         elif(self.mode == GO_FORWARD):
             if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
                 self.go_forward_time = time.time()
+                self.total_distance = 0
                 feedback = "gf"
 
         elif(self.mode == REACH_DESTINATION):
@@ -278,6 +296,20 @@ def compare(most_active_axis, accel_1, accel_2):
     
     if( most_active_axis == 2 ) :
         return accel_1.z - accel_2.z
+
+def getStrideLength(accel_list):
+    accel_sum = 0
+    for i in range(len(accel_list)):
+        accel_sum += accel_val.y
+    accel_avg = accel_sum / len(accel_list)
+
+    for i in range(len(accel_list)):
+        accel_sum += (accel_val.y - accel_avg)
+    accel_sum /= len(accel_list)
+
+    print "accel_sum", accel_sum
+
+    return STRIDE_COEFFICIENT * math.pow(accel_sum, 1/3.0)
 
 def GetHeading(most_active_axis, compass_val):
 

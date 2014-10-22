@@ -27,6 +27,13 @@ ANGLE_THRESHOLD = 10
 CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 50
 
+# string constants
+MODE = "MODE"
+X = "X"
+Y = "Y"
+LEFTORRIGHT = "LEFTORRIGHT"
+DESTINATION = "DESTINATION"
+
 class MapInfo:
 
 	def __init__ (self, jsonString):
@@ -59,7 +66,7 @@ class MapInfo:
 			bigDic = {i: dic}
 			self.adjacencyList.update(bigDic)
 
-		self.printSelf()
+		#self.printSelf()
 
 	def printSelf(self):
 		print "-\n-------map------\n"
@@ -76,22 +83,10 @@ class MapInfo:
 
 		print "linkto\n\n"
 
-	def getIndex(int id):
-		for i in len(self.size):
-			if self.maplist[i].getId() == id:
-				return i
-		return -1
-
 	def shortestPath(self, start, end):
-		"""
-		Find a single shortest path from the given start vertex
-		to the given end vertex.
-		The input has the same conventions as Dijkstra().
-		The output is a list of the vertices in order along
-		the shortest path.
-		"""
-		start = getIndex(start)
-		end = getIndex(end)
+
+		start = start - 1
+		end = end - 1
 		self.current = 0
 		final_distances,predecessors = Dijkstra(self.adjacencyList,start,end)
 		self.path = []
@@ -101,33 +96,11 @@ class MapInfo:
 			end = predecessors[end]
 		self.path.reverse()
 
-		self.coordX = self.maplist[self.path[self.current]].getX()
-		self.coordY = self.maplist[self.path[self.current]].getY()
+		coordX = self.maplist[self.path[self.current]].getX()
+		coordY = self.maplist[self.path[self.current]].getY()
+		destination = self.maplist[len(self.size) - 1].getName()
 
-		# just for debugging purposes
-		nodeList = []
-		for p in path:
-			nodeList.append(self.mapList[p].getId())
-
-		for i in range(len(path)-1):
-			print self.mapList[path[i]].getId(), self.mapList[path[i]].getName(), "---TO---", self.mapList[path[i+1]].getId(), self.mapList[path[i+1]].getName()
-
-		print "\n"
-
-		return nodeList
-
-	def shortestPathByCoordinates(self, coordX, coordY, endID):
-
-		minimumDist = sys.maxint
-		minimumNodeID = 0
-
-		for mapItem in self.mapList:
-			distance = sqrt( (mapItem.getX() - coordX)**2 +  (mapItem.getY() - coordY)**2)
-			if(distance < minimumDist):
-				minimumDist = distance
-				minimumNodeID = mapItem.getId()
-
-		return self.shortestPath(minimumNodeID, endID)
+		return {X : coordX, Y: coordY, DESTINATION: destination}
 
 	def giveDirection (self, mode, distance, heading, coordX, coordY):
 
@@ -145,7 +118,7 @@ class MapInfo:
 			endX = self.maplist[self.path[self.current+1]].getX()
 			endY = self.maplist[self.path[self.current+1]].getY()			
 
-			edge_angle = atan2((vector2Y, vector2X) - atan2(vector1Y, vector1X))
+			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
 
 			if(edge_angle < 0):
@@ -154,8 +127,8 @@ class MapInfo:
 			if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
 				mode = GO_FORWARD
 
-				# return the json string
-
+				return {MODE : mode, X : coordX, Y : coordY}
+				
 			else:
 				mode = TURN
 				isRight = RIGHT
@@ -163,7 +136,7 @@ class MapInfo:
 				if(cross_vector < 0):
 					isRight = LEFT
 
-				# return the json string
+				return {MODE : mode, X : coordX, Y : coordY, LEFTORRIGHT : isRight}
 
 
 		elif(mode == GO_FORWARD):
@@ -182,18 +155,15 @@ class MapInfo:
 			endX = self.maplist[self.path[self.current+1]].getX()
 			endY = self.maplist[self.path[self.current+1]].getY()				
 
-			# check if it is along the path
-			onEdge = ( (startX == endX) and (startX - CORRIDOR_THRESHOLD <= coordX <= startX + CORRIDOR_THRESHOLD) and ((startY <= coordY <= endY) or (endY <= coordY <= startY)) ) or
-					 ( (startY == endY) and (startY - CORRIDOR_THRESHOLD <= coordY <= startX + CORRIDOR_THRESHOLD) and ((startX <= coordX <= endY) or (endY <= coordY <= startY)) ) or
-					 ()			
-			if(onEdge and sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
-					mode = GO_FORWARD
-					# return the json string with the updated coordinates
+			# check if it is along the path			
+			if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
+				mode = GO_FORWARD
+				return {MODE : mode, X : coordX, Y : coordY}
 			else:
 				self.current += 1
 				if(self.current == len(self.path) - 1):
 					mode = ARRIVE_DESTINATION
-					# return the json string
+					return {MODE : mode, X : coordX, Y : coordY}
 				else:
 					mode = TURN
 
@@ -209,20 +179,18 @@ class MapInfo:
 					endX = self.maplist[self.path[self.current+1]].getX()
 					endY = self.maplist[self.path[self.current+1]].getY()			
 
-					edge_angle = atan2((vector2Y, vector2X) - atan2(vector1Y, vector1X))
+					edge_angle = atan2((endY - startY),(endX - startX))
 					edge_angle = degrees(edge_angle)
 
 					if(edge_angle < 0):
 						edge_angle += 360
 
+					coordX = startX
+					coordY = startY
+
 					if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
 						mode = GO_FORWARD
-
-						coordX = startX
-						coordY = startY
-
-						# return the json string
-
+						return {MODE : mode, X : coordX, Y : coordY}
 					else:
 						mode = TURN
 						isRight = RIGHT
@@ -230,8 +198,8 @@ class MapInfo:
 						if(cross_vector < 0):
 							isRight = LEFT
 
+						return {MODE : mode, X : coordX, Y : coordY, LEFTORRIGHT : isRight}
 
-						# return the json string
 
 def Dijkstra(graph,start,end=None):
 		"""
