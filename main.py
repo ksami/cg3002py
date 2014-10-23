@@ -235,12 +235,14 @@ def executeInit():
 		p_listen.start()
 
 	
-	startpt = getUserInput("sp")
+	#startpt = getUserInput("sp")
+	startpt = "one"
 	if startpt == -1:
 		isCancel = True
 	
 	if isCancel == False:
-		endpt = getUserInput("ep")
+		#endpt = getUserInput("ep")
+		endpt = "one two"
 		if endpt == -1:
 			isCancel = True
 
