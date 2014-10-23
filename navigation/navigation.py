@@ -15,6 +15,9 @@ HIGH_PASS = 0.8
 STRIDE_COEFFICIENT = 2.640939152 
 # from walking in total of 1440 centimeters and total_distance (without calibration) 545.260574691
 
+COMPASS_X_AXIS = -145
+COMPASS_Z_AXIS = -135
+
 MINIMA = 0
 MAXIMA = 1
 
@@ -255,14 +258,13 @@ class Navigation:
                 print "time ", time.time() - time_exe
 
             # reading compass values
-            compass_xout = read_word_2c(self.bus, hmc_address, 3)
+            compass_xout = read_word_2c(self.bus, hmc_address, 3) - COMPASS_X_AXIS
             compass_yout = read_word_2c(self.bus, hmc_address, 7) 
-            compass_zout = read_word_2c(self.bus, hmc_address, 5)
+            compass_zout = read_word_2c(self.bus, hmc_address, 5) - COMPASS_Z_AXIS
 
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
 
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
-D
             #self.heading = (self.heading_filter_list[0] + self.heading_filter_list[1] + self.heading_filter_list[2] + self.heading_filter_list[3] + self.heading) / 5
             #self.heading_filter_list.insert(self.heading_moving_index, self.heading)
 
