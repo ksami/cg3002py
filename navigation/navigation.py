@@ -213,6 +213,7 @@ class Navigation:
                                         # a maxima has been detected and a step is detected
                                         self.num_steps += 1
                                         self.peak_direction = MAXIMA
+                                        print "STRIDE", stride
                                         self.accel_minima = self.accel_val
                                         self.time_window = time.time()
                                         print "PEAK DETECTED MINIMA", self.num_steps
@@ -230,11 +231,12 @@ class Navigation:
 
                                 if(self.calculate_distance and self.mode == GO_FORWARD):
                                     stride = getStrideLength(self.accel_list)
+                                    print "STRIDE", stride
                                     self.distance += stride
                                     self.total_distance += stride
                                     self.accel_list = []
                                     self.calculate_distance = False
-                                    #print "TOTAL DISTANCE", self.total_distance
+                                    print "TOTAL DISTANCE", self.total_distance
 
                                 if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):

@@ -157,8 +157,8 @@ class MapInfo:
 			endY = self.mapList[self.path[self.current+1]].getY()
 
 			if(time.time() - self.tcoord >= 3):
-				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
-				print "self current", self.current
+				#print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
+				#print "self current", self.current
 				self.tcoord = time.time()
 
 			# check if it is along the path			
