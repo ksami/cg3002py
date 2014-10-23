@@ -129,15 +129,6 @@ for i in range(4) :
     accel_val = Vector(accel_xout, accel_yout, accel_zout)
     accel_filter_list.append(accel_val)
 
-    compass_xout = read_word_2c(bus, hmc_address, 3)
-    compass_yout = read_word_2c(bus, hmc_address, 7) 
-    compass_zout = read_word_2c(bus, hmc_address, 5)
-
-    compass_val = Vector(compass_xout, compass_yout, compass_zout)
-    heading = GetHeading(most_active_axis, compass_val)
-
-    heading_filter_list.append(heading)
-
 # print "MOST ACTIVE AXIS: ", most_active_axis
 # print "\n---CALIBRATION STAGE---"
 
