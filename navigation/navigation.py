@@ -267,6 +267,8 @@ class Navigation:
 
             self.heading_moving_index = (self.heading_moving_index + 1) % 4
 
+            print "heading", heading
+
 
             ##### check state machine #####
             result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordX, self.coordY)

@@ -8,7 +8,7 @@ ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
 PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 0.0264093915247045 
+STRIDE_COEFFICIENT = 2.640939152
 # from walking in total of 14.4 meters and total_distance (without calibration) 545.260574691
 HEIGHT = 1.76
 
@@ -62,6 +62,29 @@ def getStrideLength(accel_list):
 
     return STRIDE_COEFFICIENT * math.pow(accel_sum, 1/3.0)
 
+def GetHeading(most_active_axis, compass_val):
+
+    heading = 0
+    
+    if(most_active_axis == 0): # x-axis 
+        heading = math.atan2(compass_val.z, compass_val.y)
+
+    if(most_active_axis == 1): # y-axis 
+        heading = math.atan2(compass_val.x, compass_val.z)
+
+    if(most_active_axis == 2): # z-axis 
+        heading = math.atan2(compass_val.y, compass_val.x)
+
+    heading += 0.0404
+
+    if(heading < 0):
+        heading += 2*math.pi
+
+    if(heading > 2*math.pi):
+        heading -= 2*math.pi
+
+    return math.degrees(heading)
+
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
 # Now wake the 6050 up as it starts in sleep mode
@@ -89,6 +112,8 @@ peak_threshold = 0
 sum_threshold = 0
 stride_length = 0
 total_distance = 0
+heading_filter_list = []
+heading_moving_index = 0
 calibrate_threshold = True
 calculate_distance = False
 
@@ -103,6 +128,15 @@ for i in range(4) :
 
     accel_val = Vector(accel_xout, accel_yout, accel_zout)
     accel_filter_list.append(accel_val)
+
+    compass_xout = read_word_2c(bus, hmc_address, 3)
+    compass_yout = read_word_2c(bus, hmc_address, 7) 
+    compass_zout = read_word_2c(bus, hmc_address, 5)
+
+    compass_val = Vector(compass_xout, compass_yout, compass_zout)
+    heading = GetHeading(most_active_axis, compass_val)
+
+    heading_filter_list.append(heading)
 
 # print "MOST ACTIVE AXIS: ", most_active_axis
 # print "\n---CALIBRATION STAGE---"
@@ -141,7 +175,7 @@ accel_offset_z = 0
 # print "\nCALIBRATION SIZE: " , calibration_size  
 # print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
 
-accel_graph = open('accel_graph_stride-length.txt', 'w')
+#accel_graph = open('accel_graph_stride-length.txt', 'w')
 print "STRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
 print "START!!"
 
@@ -151,8 +185,8 @@ first_time = True
 
 # execution stage
 
-time_elapsed = time.time()
-while(True):
+#time_elapsed = time.time()
+while(total_distance <= 2152):
 
     # filter accelerometer values
     accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
@@ -174,8 +208,29 @@ while(True):
     accel_val.z = (accel_filter_list[0].z + accel_filter_list[1].z + accel_filter_list[2].z + accel_filter_list[3].z + accel_val.z) / 5
 
     accel_filter_list.insert(moving_index, accel_val)
-
     moving_index = (moving_index + 1) % 4
+
+    # reading compass values
+    compass_xout = read_word_2c(self.bus, hmc_address, 3)
+    compass_yout = read_word_2c(self.bus, hmc_address, 7) 
+    compass_zout = read_word_2c(self.bus, hmc_address, 5)
+
+    compass_val = Vector(compass_xout, compass_yout, compass_zout)
+
+    heading = GetHeading(most_active_axis, compass_val)
+    heading = (heading_filter_list[0] + heading_filter_list[1] + heading_filter_list[2] + heading_filter_list[3] + heading) / 5
+    heading_filter_list.insert(heading_moving_index, heading)
+
+    heading_moving_index = (heading_moving_index + 1) % 4
+
+    print "heading", heading
+
+    heading_angle = (315 + heading) % 360
+    heading_angle = 90 - heading_angle
+
+    if(heading_angle < 0):
+        heading_angle += 360
+    print "converted heading", heading_angle
     
     # finding minima and maxima
     if(not first_time):
@@ -199,7 +254,7 @@ while(True):
                         print "stride length", stride_length
                         print "min", accel_minima.y, "max", accel_maxima.y
                         print "total distance:", total_distance
-                        accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
+                        #accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
                         calculate_distance = False
 
@@ -231,7 +286,7 @@ while(True):
                         print "stride length", stride_length
                         print "min", accel_minima.y, "max", accel_maxima.y
                         print "total distance:", total_distance
-                        accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
+                        #accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
                         calculate_distance = False
 
@@ -255,5 +310,5 @@ while(True):
         sample_new = accel_val
         time_window = time.time()
 
-accel_graph.close()
+#accel_graph.close()
 print "total distance:", total_distance
