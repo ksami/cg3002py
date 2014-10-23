@@ -51,6 +51,7 @@ class MapInfo:
 		self.path = []
 		self.current = 0
 		self.size = 0
+		self.tcoord = 0
 
 		for node in mapinfo[MAP] :
 			nodeinfo = NodeInfo(int(node[NODEID]), int(node[X]), int(node[Y]), node[NODENAME])	
@@ -153,8 +154,11 @@ class MapInfo:
 			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
-			
-			print coordX, coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
+
+			if(time.time() - self.tcoord >= 3):
+				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
+				print "self current", self.current
+				self.tcoord = time.time()
 
 			# check if it is along the path			
 			if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
