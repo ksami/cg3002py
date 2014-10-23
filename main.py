@@ -15,7 +15,7 @@ from navigation.navigation import Navigation
 from audio.textspeech import Speak
 from state import State
 
-TIMEOUT_WAIT = 10
+TIMEOUT_WAIT = 5
 
 cameraExe = "./cprocess.o"
 mapName = "COM1"
@@ -235,12 +235,14 @@ def executeInit():
 		p_listen.start()
 
 	
-	startpt = getUserInput("sp")
+	#startpt = getUserInput("sp")
+	startpt = "one"
 	if startpt == -1:
 		isCancel = True
 	
 	if isCancel == False:
-		endpt = getUserInput("ep")
+		#endpt = getUserInput("ep")
+		endpt = "one two"
 		if endpt == -1:
 			isCancel = True
 
@@ -333,8 +335,10 @@ def executeWait():
 			
 		try:
 			timerup = q_timer.get(block=False)
-			if (timerup is not None) and (timerup == TIMEOUT_WAIT):
-				isTimeout = True
+			if timerup != None:
+				print "timer: ", timerup
+				if timerup == TIMEOUT_WAIT:
+					isTimeout = True
 		# Queue.empty
 		except Exception:
 			#ignore

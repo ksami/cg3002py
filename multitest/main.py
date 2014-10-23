@@ -54,7 +54,28 @@ def strToInt(input):
 	# "123" into 123
 	return int(output)
 
+
+def timer():
+	q_timer = createQueue()
+	timer = createProcess(function=worker.timer, args=(q_timer, 5))
+	timer.start()
+
+	while True:
+		try:
+			msg = q_timer.get(block=False)
+			if msg != None:
+				print "type:",type(msg)
+				print "msg:",msg
+				if msg == 5:
+					print "done"
+					break
+		except Exception, e:
+			print "exception: ", e
+
+
+
 if __name__ == "__main__":
 	#main()
-	ret = strToInt("1 2 3(2)")
-	print ret
+	#ret = strToInt("1 2 3(2)")
+	#print ret
+	timer()

@@ -16,8 +16,9 @@ def alarm(x):
 # params: queue, num of seconds
 def timer(q, x):
 	try:
-		time.sleep(x)
-		q.put(x)
+		for i in xrange(1, x+1):
+			time.sleep(1)
+			q.put(i)
 	except KeyboardInterrupt:
 		#Ctrl-C
 		pass
