@@ -12,8 +12,8 @@ PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HEIGHT = 1.76
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 0.0264093915247045 
-# from walking in total of 14.4 meters and total_distance (without calibration) 545.260574691
+STRIDE_COEFFICIENT = 2.640939152 
+# from walking in total of 1440 centimeters and total_distance (without calibration) 545.260574691
 
 MINIMA = 0
 MAXIMA = 1
@@ -103,6 +103,8 @@ class Navigation:
         # used for compass heading
         self.compass_val = Vector(0, 0, 0)
         self.heading = 0
+        self.heading_filter_list = []
+        self.heading_moving_index = 0
 
         # download map
         response = urllib2.urlopen(baseurl + query)
@@ -133,6 +135,16 @@ class Navigation:
 
             self.accel_val = Vector(accel_xout, accel_yout, accel_zout)
             self.accel_filter_list.append(self.accel_val)
+
+            compass_xout = read_word_2c(self.bus, hmc_address, 3)
+            compass_yout = read_word_2c(self.bus, hmc_address, 7) 
+            compass_zout = read_word_2c(self.bus, hmc_address, 5)
+
+            self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
+            self.heading = GetHeading(self.most_active_axis, self.compass_val)
+
+            self.heading_filter_list.append(self.heading)
+
 
         print "STRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
         print "PEAK THRESHOLD", PEAK_THRESHOLD
@@ -249,8 +261,14 @@ class Navigation:
 
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
 
-            ##### check state machine #####
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
+            self.heading = (self.heading_filter_list[0] + self.heading_filter_list[1] + self.heading_filter_list[2] + self.heading_filter_list[3] + self.heading) / 5
+            self.heading_filter_list.insert(self.heading_moving_index, self.heading)
+
+            self.heading_moving_index = (self.heading_moving_index + 1) % 4
+
+
+            ##### check state machine #####
             result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordX, self.coordY)
             self.mode = result[MODE]
             self.coordX = result[COORDX]
@@ -265,25 +283,22 @@ class Navigation:
                     self.total_distance = 0
                     if(isLeft == LEFT):
                         feedback = "tl"
-                        print feedback
                     else:
-                        feedback = "tr"                        
-                        print feedback
+                        feedback = "tr"
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     self.distance = 0
                     feedback = "gf"
-                    print feedback
 
             elif(self.mode == REACH_DESTINATION):
                 feedback = "r," + self.destination 
-                print feedback
                 break
 
             #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
             if feedback != "":
+                print feedback
                 queue.put(feedback)
 
 
