@@ -262,12 +262,13 @@ class Navigation:
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
 
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
-            self.heading = (self.heading_filter_list[0] + self.heading_filter_list[1] + self.heading_filter_list[2] + self.heading_filter_list[3] + self.heading) / 5
-            self.heading_filter_list.insert(self.heading_moving_index, self.heading)
+D
+            #self.heading = (self.heading_filter_list[0] + self.heading_filter_list[1] + self.heading_filter_list[2] + self.heading_filter_list[3] + self.heading) / 5
+            #self.heading_filter_list.insert(self.heading_moving_index, self.heading)
 
             self.heading_moving_index = (self.heading_moving_index + 1) % 4
 
-            print "heading", heading
+            #print "heading", self.heading
 
 
             ##### check state machine #####

@@ -113,13 +113,11 @@ class MapInfo:
 	def giveDirection (self, mode, distance, heading, coordX, coordY):
 
 		if(mode == TURN):
+			print "raw: ", heading
+			# check the updated
+			heading_angle = (heading + 225) % 360
 
-			# check the updated 
-			heading_angle = (self.degree + heading) % 360
-			heading_angle = 90 - heading_angle
-
-			if(heading_angle < 0):
-				heading_angle += 360
+			#print "processed heading: ", heading_angle
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
@@ -129,13 +127,10 @@ class MapInfo:
 			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
 
-			print "heading", heading_angle, "edge_angle", edge_angle
+			#print "heading", heading_angle, "edge_angle", edge_angle
 
-			if(edge_angle < 0):
-				edge_angle += 360
-
-			if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
-				mode = GO_FORWARD
+			if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
+				#mode = GO_FORWARD
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				
