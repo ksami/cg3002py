@@ -217,21 +217,6 @@ while(total_distance <= 2152):
 
     compass_val = Vector(compass_xout, compass_yout, compass_zout)
     
-    heading = (heading_filter_list[0] + heading_filter_list[1] + heading_filter_list[2] + heading_filter_list[3] + heading) / 5
-    heading_filter_list.insert(heading_moving_index, heading)
-
-    heading = GetHeading(most_active_axis, compass_val)
-    heading_moving_index = (heading_moving_index + 1) % 4
-
-    print "heading", heading
-
-    heading_angle = (315 + heading) % 360
-    heading_angle = 90 - heading_angle
-
-    if(heading_angle < 0):
-        heading_angle += 360
-    print "converted heading", heading_angle
-    
     # finding minima and maxima
     if(not first_time):
         if( math.fabs( compare(most_active_axis, sample_new, accel_val)) >= ACCEL_THRESHOLD):
