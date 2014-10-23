@@ -255,7 +255,7 @@ class Navigation:
                     self.sample_new = self.accel_val
                     self.time_window = time.time()   
 
-                print "time ", time.time() - time_exe
+                #print "time ", time.time() - time_exe
 
             # reading compass values
             compass_xout = read_word_2c(self.bus, hmc_address, 3) - COMPASS_X_AXIS
