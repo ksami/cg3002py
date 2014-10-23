@@ -208,7 +208,7 @@ class Navigation:
                                     self.total_distance += stride
                                     self.accel_list = []
                                     self.calculate_distance = False
-                                    print "TOTAL DISTANCE", self.total_distance
+                                    #print "TOTAL DISTANCE", self.total_distance
 
                                 if( compare(self.most_active_axis, self.accel_maxima, self.accel_val) >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -237,7 +237,7 @@ class Navigation:
                                     self.total_distance += stride
                                     self.accel_list = []
                                     self.calculate_distance = False
-                                    print "TOTAL DISTANCE", self.total_distance
+                                    #print "TOTAL DISTANCE", self.total_distance
 
                                 if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -277,7 +277,8 @@ class Navigation:
 
 
             ##### check state machine #####
-            result = self.mapinfo.giveDirection(self.mode, self.total_distance, self.heading, self.coordX, self.coordY)
+            result = self.mapinfo.giveDirection(self.mode, self.distance, self.heading, self.coordX, self.coordY)
+            self.distance = 0
             self.mode = result[MODE]
             self.coordX = result[COORDX]
             self.coordY = result[COORDY] 
@@ -294,13 +295,11 @@ class Navigation:
                     else:
                         feedback = "tr"
 
-		    print feedback
+                    print feedback
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
-                    #print "X", self.coordX, "Y", self.coordY
                     self.go_forward_time = time.time()
-                    self.distance = 0
                     feedback = "gf"
 
             elif(self.mode == ARRIVE_DESTINATION):
