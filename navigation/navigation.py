@@ -301,6 +301,7 @@ class Navigation:
                     feedback = "gf"
 
             elif(self.mode == ARRIVE_DESTINATION):
+                print "REACH DESTINATION"
                 feedback = "r," + self.destination 
                 break
 
