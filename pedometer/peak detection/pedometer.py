@@ -186,7 +186,7 @@ first_time = True
 # execution stage
 
 #time_elapsed = time.time()
-while(total_distance <= 2152):
+while(True):
 
     # filter accelerometer values
     accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
@@ -209,13 +209,6 @@ while(total_distance <= 2152):
 
     accel_filter_list.insert(moving_index, accel_val)
     moving_index = (moving_index + 1) % 4
-
-    # reading compass values
-    compass_xout = read_word_2c(self.bus, hmc_address, 3)
-    compass_yout = read_word_2c(self.bus, hmc_address, 7) 
-    compass_zout = read_word_2c(self.bus, hmc_address, 5)
-
-    compass_val = Vector(compass_xout, compass_yout, compass_zout)
     
     # finding minima and maxima
     if(not first_time):
@@ -235,9 +228,9 @@ while(total_distance <= 2152):
                     if(calculate_distance):
                         stride_length = getStrideLength(accel_list)
                         total_distance += stride_length
-                        print "accel list", len(accel_list)
+                        #print "accel list", len(accel_list)
                         print "stride length", stride_length
-                        print "min", accel_minima.y, "max", accel_maxima.y
+                        #print "min", accel_minima.y, "max", accel_maxima.y
                         print "total distance:", total_distance
                         #accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
@@ -267,9 +260,9 @@ while(total_distance <= 2152):
                     if(calculate_distance):
                         stride_length = getStrideLength(accel_list)
                         total_distance += stride_length
-                        print "accel list", len(accel_list)
+                        #print "accel list", len(accel_list)
                         print "stride length", stride_length
-                        print "min", accel_minima.y, "max", accel_maxima.y
+                        #print "min", accel_minima.y, "max", accel_maxima.y
                         print "total distance:", total_distance
                         #accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
