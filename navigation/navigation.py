@@ -154,7 +154,7 @@ class Navigation:
         while(True):
         
             # mode GO_FORWARD will update the distance and heading
-            if(mode == GO_FORWARD):
+            if(self.mode == GO_FORWARD):
 
                 time_exe = time.time()
 
