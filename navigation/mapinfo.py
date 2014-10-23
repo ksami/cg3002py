@@ -127,7 +127,7 @@ class MapInfo:
 			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
 
-			#print "heading", heading_angle, "edge_angle", edge_angle
+			print "heading", heading_angle, "edge_angle", edge_angle
 
 			if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
 				#mode = GO_FORWARD
