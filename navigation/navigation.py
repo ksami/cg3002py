@@ -293,6 +293,7 @@ class Navigation:
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
+                    print "X", self.coordX, "Y", self.coordY
                     self.go_forward_time = time.time()
                     self.distance = 0
                     feedback = "gf"
@@ -303,7 +304,6 @@ class Navigation:
 
             #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
             if feedback != "":
-                print feedback
                 queue.put(feedback)
 
 
