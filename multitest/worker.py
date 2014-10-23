@@ -1,4 +1,5 @@
 import time
+import multiprocessing
 
 def work(q_frommain, q_tomain, x):
 	isKill = False
@@ -19,3 +20,8 @@ def work(q_frommain, q_tomain, x):
 			isKill = True
 
 	print "process " + str(x) + " exiting"
+
+def timer(queue, x):
+	for i in xrange(1, x+1):
+		time.sleep(1)
+		queue.put(i)
