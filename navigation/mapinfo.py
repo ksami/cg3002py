@@ -153,6 +153,8 @@ class MapInfo:
 			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
+			
+			print coordX, coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
 
 			# check if it is along the path			
 			if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
@@ -167,11 +169,7 @@ class MapInfo:
 					mode = TURN
 
 					# check the updated 
-					heading_angle = (self.degree + heading) % 360
-					heading_angle = 90 - heading_angle
-
-					if(heading_angle < 0):
-						heading_angle += 360
+					heading_angle = (heading + 225) % 360					
 
 					startX = self.mapList[self.path[self.current]].getX()
 					startY = self.mapList[self.path[self.current]].getY()
