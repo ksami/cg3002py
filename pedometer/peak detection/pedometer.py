@@ -216,11 +216,11 @@ while(total_distance <= 2152):
     compass_zout = read_word_2c(self.bus, hmc_address, 5)
 
     compass_val = Vector(compass_xout, compass_yout, compass_zout)
-
-    heading = GetHeading(most_active_axis, compass_val)
+    
     heading = (heading_filter_list[0] + heading_filter_list[1] + heading_filter_list[2] + heading_filter_list[3] + heading) / 5
     heading_filter_list.insert(heading_moving_index, heading)
 
+    heading = GetHeading(most_active_axis, compass_val)
     heading_moving_index = (heading_moving_index + 1) % 4
 
     print "heading", heading
