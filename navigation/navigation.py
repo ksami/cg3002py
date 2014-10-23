@@ -206,7 +206,7 @@ class Navigation:
                                     self.total_distance += stride
                                     self.accel_list = []
                                     self.calculate_distance = False
-                                    print "TOTAL DISTANCE", self.total_distance
+                                    #print "TOTAL DISTANCE", self.total_distance
 
                                 if( compare(self.most_active_axis, self.accel_maxima, self.accel_val) >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -234,7 +234,7 @@ class Navigation:
                                     self.total_distance += stride
                                     self.accel_list = []
                                     self.calculate_distance = False
-                                    print "TOTAL DISTANCE", self.total_distance
+                                    #print "TOTAL DISTANCE", self.total_distance
 
                                 if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -290,6 +290,8 @@ class Navigation:
                         feedback = "tl"
                     else:
                         feedback = "tr"
+
+		    print feedback
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
