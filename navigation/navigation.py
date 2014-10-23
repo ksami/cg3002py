@@ -298,7 +298,7 @@ class Navigation:
                     self.distance = 0
                     feedback = "gf"
 
-            elif(self.mode == REACH_DESTINATION):
+            elif(self.mode == ARRIVE_DESTINATION):
                 feedback = "r," + self.destination 
                 break
 
