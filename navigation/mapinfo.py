@@ -162,7 +162,11 @@ class MapInfo:
 				self.tcoord = time.time()
 
 			# check if it is along the path			
-			if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
+			#if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
+			onEdge = ( ((startY == endY) and (((startX <= coordX) and (coordX <= (endX - DISTANCE_THRESHOLD))) or ((coordX <= startX) and (coordX >= (endX + DISTANCE_THRESHOLD))))) or
+			     	   ((startX == endX) and (((startY <= coordY) and (coordY <= (endY - DISTANCE_THRESHOLD))) or ((coordY <= startY) and (coordY >= (endY + DISTANCE_THRESHOLD))))) )
+
+			if(onEdge):
 				mode = GO_FORWARD
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 			else:
@@ -179,7 +183,7 @@ class MapInfo:
 					startX = self.mapList[self.path[self.current]].getX()
 					startY = self.mapList[self.path[self.current]].getY()
 					endX = self.mapList[self.path[self.current+1]].getX()
-					endY = self.mapList[self.path[self.current+1]].getY()			
+					endY = self.mapList[self.path[self.current+1]].getY()
 
 					edge_angle = atan2((endY - startY),(endX - startX))
 					edge_angle = degrees(edge_angle)
