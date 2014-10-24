@@ -157,14 +157,14 @@ class MapInfo:
 			endY = self.mapList[self.path[self.current+1]].getY()
 
 			if(time.time() - self.tcoord >= 3):
+				print "node X", endX, "node Y", endY
 				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
-				print "self current", self.current
 				self.tcoord = time.time()
 
 			# check if it is along the path			
 			#if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
-			onEdge = ( ((startY == endY) and (((startX <= coordX) and (coordX <= (endX - DISTANCE_THRESHOLD))) or ((coordX <= startX) and (coordX >= (endX + DISTANCE_THRESHOLD))))) or
-			     	   ((startX == endX) and (((startY <= coordY) and (coordY <= (endY - DISTANCE_THRESHOLD))) or ((coordY <= startY) and (coordY >= (endY + DISTANCE_THRESHOLD))))) )
+			onEdge = ( ((startY == endY) and ( ((startX <= coordX) and (coordX <= (endX - DISTANCE_THRESHOLD))) or ((coordX <= startX) and (coordX >= (endX + DISTANCE_THRESHOLD))))) or
+			     	   ((startX == endX) and ( ((startY <= coordY) and (coordY <= (endY - DISTANCE_THRESHOLD))) or ((coordY <= startY) and (coordY >= (endY + DISTANCE_THRESHOLD))))) )
 
 			if(onEdge):
 				mode = GO_FORWARD
