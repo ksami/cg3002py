@@ -38,6 +38,7 @@ baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
 building = 'COM1'
 level = '2'
 query = 'Building=' + building + '&' + 'Level=' + level
+cached_map = "com1lvl2.json"
 
 # mode
 NODE = 0
@@ -111,8 +112,13 @@ class Navigation:
         self.heading_moving_index = 0
 
         # download map
-        response = urllib2.urlopen(baseurl + query)
-        jsondata = response.read()
+        try:
+            response = urllib2.urlopen(baseurl + query)
+            jsondata = response.read()
+        except urllib2.URLError:
+            with open(cached_map, "r") as f:
+                lines = f.readlines()
+                jsondata = "".join(lines)
         self.mapinfo = MapInfo(jsondata)
 
     # call this method when receive start and destination id
