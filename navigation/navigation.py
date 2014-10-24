@@ -308,7 +308,8 @@ class Navigation:
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
-                feedback = "r," + self.destination 
+                feedback = "r," + self.destination
+                queue.put(feedback)
                 break
 
             #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
