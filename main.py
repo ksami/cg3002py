@@ -15,7 +15,7 @@ from navigation.navigation import Navigation
 from audio.textspeech import Speak
 from state import State
 
-TIMEOUT_WAIT = 5
+TIMEOUT_WAIT = 10
 
 cameraExe = "./cprocess.o"
 mapName = "COM1"
