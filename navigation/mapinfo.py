@@ -27,7 +27,7 @@ ARRIVE_DESTINATION = 3
 
 ANGLE_THRESHOLD = 10
 CORRIDOR_THRESHOLD = 273 / 2.0
-DISTANCE_THRESHOLD = 50
+DISTANCE_THRESHOLD = 150
 
 # string constants
 MODE = "MODE"
@@ -163,10 +163,7 @@ class MapInfo:
 
 			# check if it is along the path			
 			#if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
-			onEdge = ( ((startY == endY) and ( ((startX <= coordX) and (coordX <= (endX - DISTANCE_THRESHOLD))) or ((coordX <= startX) and (coordX >= (endX + DISTANCE_THRESHOLD))))) or
-			     	   ((startX == endX) and ( ((startY <= coordY) and (coordY <= (endY - DISTANCE_THRESHOLD))) or ((coordY <= startY) and (coordY >= (endY + DISTANCE_THRESHOLD))))) )
-
-			if(onEdge):
+			if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
 				mode = GO_FORWARD
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 			else:
@@ -188,23 +185,22 @@ class MapInfo:
 					edge_angle = atan2((endY - startY),(endX - startX))
 					edge_angle = degrees(edge_angle)
 
-					if(edge_angle < 0):
-						edge_angle += 360
-
 					coordX = startX
 					coordY = startY
 
-					if( edge_angle - ANGLE_THRESHOLD <= heading_angle <= edge_angle + ANGLE_THRESHOLD):
+					if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
 						mode = GO_FORWARD
+						print "Go forward"
+
 						return {MODE : mode, COORDX : coordX, COORDY : coordY}
 					else:
 						mode = TURN
-						isRight = RIGHT
+						turning = LEFT
 						cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
 						if(cross_vector < 0):
-							isRight = LEFT
+							turning = RIGHT
 
-						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : isRight}
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
 
 
 def Dijkstra(graph,start,end=None):
