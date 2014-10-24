@@ -53,6 +53,8 @@ class MapInfo:
 		self.current = 0
 		self.size = 0
 		self.tcoord = 0
+		self.total_x = 0
+		self.total_y = 0
 
 		for node in mapinfo[MAP] :
 			nodeinfo = NodeInfo(int(node[NODEID]), int(node[X]), int(node[Y]), node[NODENAME])	
@@ -150,6 +152,8 @@ class MapInfo:
 
 			coordX += distance * cos(radians(heading_angle))
 			coordY += distance * sin(radians(heading_angle))
+			self.total_x += distance * cos(radians(heading_angle))
+			self.total_y += distance * sin(radians(heading_angle))
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
@@ -158,6 +162,7 @@ class MapInfo:
 
 			if(time.time() - self.tcoord >= 3):
 				print "current edge", self.current, "node X", endX, "node Y", endY
+				print "total x", self.total_x, "total_y", self.total_y
 				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
 				self.tcoord = time.time()
 
