@@ -118,7 +118,8 @@ class MapInfo:
 
 		if(mode == TURN):
 
-			heading_angle = (135 - heading)
+			a = (heading + 315) % 360
+			heading_angle = 90 - a
 			if(heading_angle < 0):
 				heading_angle += 360
 
@@ -192,7 +193,8 @@ class MapInfo:
 					mode = TURN
 
 					# check the updated 
-					heading_angle = (135 - heading)
+					a = (heading + 315) % 360
+					heading_angle = 90 - a
 					if(heading_angle < 0):
 						heading_angle += 360
 
