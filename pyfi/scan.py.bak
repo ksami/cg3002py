@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# Copyright 2004, 2005 Roman Joost <roman@bromeco.de> - Rotterdam, Netherlands
+# Copyright 2009 by Sean Robinson <seankrobinson@gmail.com>
+#
+# This file is part of Python WiFi
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+import errno
+import sys
+import json
+
+import pythonwifi.flags
+from pythonwifi.iwlibs import Wireless
+
+ifname = "wlan0"
+filename = "wifinodes.json"
+
+
+class WifiNodes:
+    def __init__(self, ifname):
+        self.nodes = {}
+        self.wifi = Wireless(ifname)
+
+    def addNode(self, mac, lvl, x, y):
+        key = "(" + x + "," + y + ")"
+        # if it already exists
+        if key in self.nodes.keys():
+            if mac in self.nodes[key].keys():
+                if (lvl < self.nodes[key][mac]["min"]):
+                    self.nodes[key][mac]["min"] = lvl
+                if (lvl > self.nodes[key][mac]["max"]):
+                    self.nodes[key][mac]["max"] = lvl
+            else:
+                self.nodes[key][mac] = {"min": lvl, "max": lvl}
+        else:
+            self.nodes[key] = {}
+            self.nodes[key][mac] = {"min": lvl, "max": lvl}
+
+    def scan(self, x, y):
+        try:
+            results = self.wifi.scan()
+        except IOError, (error_number, error_string):
+            if error_number != errno.EPERM:
+                sys.stderr.write(
+                    "%-8.16s  Interface doesn't support scanning : %s\n\n" %
+                    (self.wifi.ifname, error_string))
+        else:
+            if (len(results) == 0):
+                print "%-8.16s  Interface doesn't have " % (self.wifi.ifname, ) + \
+                      "a list of Peers/Access-Points"
+            else:
+                print "%-8.16s  Peers/Access-Points in range:"% (self.wifi.ifname, )
+                for ap in results:
+                    if (ap.quality.quality):
+                        print "MAC: %s   Signal level: %s/%s" % \
+                            (ap.bssid,
+                            ap.quality.getSignallevel(),
+                            "100")
+                        self.addNode(ap.bssid, ap.quality.getSignallevel(), x, y)
+                    else:
+                        print "    %s, unable to get quality" % (ap.bssid, )
+
+
+def main():
+    results = WifiNodes(ifname)
+
+    print "remember to run with sudo"
+    print "wifi scanning for ", ifname
+    print "enter -1 for x or y to write out results and exit"
+    print "================================================================"
+
+    while(True):
+        x = raw_input("Enter x-coord: ")
+        if x == "-1":
+            break
+        y = raw_input("y-coord: ")
+        if y == "-1":
+            break
+
+        results.scan(x, y)
+
+    # Write results to file
+    with open(filename, "w") as outfile:
+        json.dump(results.nodes, outfile, indent=4)
+
+
+if __name__ == "__main__":
+    main()
