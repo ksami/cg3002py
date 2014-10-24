@@ -118,7 +118,9 @@ class MapInfo:
 
 		if(mode == TURN):
 
-			heading_angle = (135 - heading) % 360
+			heading_angle = (135 - heading)
+			if(heading_angle < 0):
+				heading_angle += 360
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
@@ -131,7 +133,7 @@ class MapInfo:
 			if(edge_angle < 0):
 				edge_angle += 360
 
-			print "heading", heading_angle, "edge_angle", edge_angle
+			print "raw heading", heading, "heading_angle", heading_angle , "edge_angle", edge_angle
 
 			if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
 				mode = GO_FORWARD
@@ -190,7 +192,9 @@ class MapInfo:
 					mode = TURN
 
 					# check the updated 
-					heading_angle = (135 - heading) % 360
+					heading_angle = (135 - heading)
+					if(heading_angle < 0):
+						heading_angle += 360
 
 					startX = self.mapList[self.path[self.current]].getX()
 					startY = self.mapList[self.path[self.current]].getY()
