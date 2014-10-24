@@ -193,28 +193,28 @@ def main():
 
 def executeOff():
 	print "in off state"
-	#p_speak = createProcess(audio.main.speak, (_speak, "os"))
-	#p_speak.start()
-	#p_speak.join()
+	p_speak = createProcess(audio.main.speak, (_speak, "os"))
+	p_speak.start()
+	p_speak.join()
 	#send device ready to arduino
 	#handle timeout and repeated sending
 
-	#p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.DEVICE_READY},))
-	#p_send.start()
-	#p_send.join() #blocks until p_send's death == ard sends ack
+	p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.DEVICE_READY},))
+	p_send.start()
+	p_send.join() #blocks until p_send's death == ard sends ack
 
 	_systemState.changeState()
 
 
 def executeIdle():
 	print "in idle state"
-	#p_speak = createProcess(audio.main.speak, (_speak, "is"))
-	#p_speak.start()
-	#p_speak.join()
+	p_speak = createProcess(audio.main.speak, (_speak, "is"))
+	p_speak.start()
+	p_speak.join()
 	#nothing
 
-	#hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_CLOSE
+	hand = q_xbee.get(block=True)
+	#hand = comms.python.main.HAND_CLOSE
 	print "hand: ", hand
 	if hand == comms.python.main.HAND_CLOSE:
 		_systemState.changeState()
@@ -230,26 +230,30 @@ def executeInit():
 
 	global p_listen
 	
-	#if p_listen == None:
-	#	p_listen = createProcess(audio.main.listen, (q_listen,))
-	#	p_listen.start()
+	if p_listen == None:
+		p_listen = createProcess(audio.main.listen, (q_listen,))
+		p_listen.start()
 
 	
-	#startpt = getUserInput("sp")
-	startpt = "five"
+	startpt = getUserInput("sp")
+	#startpt = "five"
 	if startpt == -1:
 		isCancel = True
 	
 	if isCancel == False:
-		#endpt = getUserInput("ep")
-		endpt = "eight"
+		endpt = getUserInput("ep")
+		#endpt = "eight"
 		if endpt == -1:
 			isCancel = True
 
 	
-	#if p_listen.is_alive():
-	#	p_listen.terminate()
-	#	p_listen.join()
+	if p_listen.is_alive():
+		p_listen.terminate()
+		p_listen.join()
+		
+		#empty queue
+		while q_listen.empty() == False:
+			q_listen.get()
 
 	if isCancel == True:
 		_systemState.changeState(isHandOpen=True)
@@ -259,9 +263,10 @@ def executeInit():
 		istartpt = strToInt(startpt)
 		iendpt = strToInt(endpt)
 
-		#p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
-		#p_navisp.start()
-		#p_navisp.join()
+		# DONT CREATE NEW PROCESS FOR THIS
+		# p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
+		# p_navisp.start()
+		# p_navisp.join()
 		_navi.getShortestPath(istartpt, iendpt)
 		print "navi id: ", id(_navi)
 		print "navi x: ", _navi.coordY
@@ -269,17 +274,17 @@ def executeInit():
 		print "navi map id: ", id(_navi.mapinfo.path)
 
 		# Change to NAVI state
-		#p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
-		#p_send.start()
-		#p_send.join()
+		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
+		p_send.start()
+		p_send.join()
 		_systemState.changeState(isHandOpen=False)
 
 
 def executeNavi():
 	print "in navi state"
-	#p_speak = createProcess(audio.main.speak, (_speak, "ns"))
-	#p_speak.start()
-	#p_speak.join()
+	p_speak = createProcess(audio.main.speak, (_speak, "ns"))
+	p_speak.start()
+	p_speak.join()
 	#navigate
 	# if p_camera == None:
 	# 	p_camera = createProcess(camera, (q_cam))
