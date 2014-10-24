@@ -118,14 +118,14 @@ class MapInfo:
 
 		if(mode == TURN):
 
-			heading_angle = (heading + 225) % 360
+			heading_angle = (135 - heading) % 360
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
 
-			edge_angle = atan2((startY - endY),(startX - endX))
+			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
 
 			if(edge_angle < 0):
@@ -158,19 +158,19 @@ class MapInfo:
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
 			
-			angle = atan2((endY - startY),(endX - startX))
-			angle = degrees(edge_angle)
+			edge_angle = atan2((endY - startY),(endX - startX))
+			edge_angle = degrees(edge_angle)
 
-			if(angle < 0):
-				angle += 360
+			if(edge_angle < 0):
+				edge_angle += 360
 
-			coordX += distance * cos(radians(angle))
-			coordY += distance * sin(radians(angle))
-			self.total_x += distance * cos(radians(angle))
-			self.total_y += distance * sin(radians(angle))
+			coordX += distance * cos(radians(edge_angle))
+			coordY += distance * sin(radians(edge_angle))
+			self.total_x += distance * cos(radians(edge_angle))
+			self.total_y += distance * sin(radians(edge_angle))
 
 			if(time.time() - self.tcoord >= 7):
-				print "Edge angle", angle
+				print "Edge angle", edge_angle
 				print "current edge", self.current, "node X", endX, "node Y", endY
 				print "total x", self.total_x, "total_y", self.total_y
 				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
@@ -190,14 +190,14 @@ class MapInfo:
 					mode = TURN
 
 					# check the updated 
-					heading_angle = (heading + 225) % 360
+					heading_angle = (135 - heading) % 360
 
 					startX = self.mapList[self.path[self.current]].getX()
 					startY = self.mapList[self.path[self.current]].getY()
 					endX = self.mapList[self.path[self.current+1]].getX()
 					endY = self.mapList[self.path[self.current+1]].getY()
 
-					edge_angle = atan2((startY - endY),(startX - endX))
+					edge_angle = atan2((endY - startY),(endX - startX))
 					edge_angle = degrees(edge_angle)
 
 					if(edge_angle < 0):
