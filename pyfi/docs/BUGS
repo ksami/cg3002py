@@ -1,0 +1,5 @@
+Known Bugs:
+===========
+
+- egg install leads to weird result when scanning. If you discover this
+  problem, send an email to pythonwifi-dev@lists.berlios.de.
