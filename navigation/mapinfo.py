@@ -157,7 +157,7 @@ class MapInfo:
 			endY = self.mapList[self.path[self.current+1]].getY()
 
 			if(time.time() - self.tcoord >= 3):
-				print "node X", endX, "node Y", endY
+				print "current edge", self.current, "node X", endX, "node Y", endY
 				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
 				self.tcoord = time.time()
 
