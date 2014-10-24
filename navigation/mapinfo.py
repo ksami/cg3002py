@@ -146,7 +146,7 @@ class MapInfo:
 				mode = TURN
 				turning = LEFT
 				cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
-				if(cross_vector < 0):
+				if(cross_vector > 0):
 					turning = RIGHT
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
@@ -221,7 +221,7 @@ class MapInfo:
 						mode = TURN
 						turning = LEFT
 						cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
-						if(cross_vector < 0):
+						if(cross_vector > 0):
 							turning = RIGHT
 
 						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
