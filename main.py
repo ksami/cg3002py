@@ -44,6 +44,7 @@ def createQueue():
 q_navi = createQueue()
 q_xbee = createQueue()
 q_listen = createQueue()
+q_time = createQueue()
 
 # Processes
 p_navi = None
@@ -339,7 +340,7 @@ def executeWait():
 			pass
 			
 		try:
-			timerup = q_timer.get(block=False)
+			timerup = q_time.get(block=False)
 			if timerup != None:
 				print "timer: ", timerup
 				if timerup == TIMEOUT_WAIT:
