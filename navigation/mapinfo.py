@@ -148,19 +148,23 @@ class MapInfo:
 
 		elif(mode == GO_FORWARD):
 			# update coordinates
-			heading_angle = (heading + 225) % 360
-
-			coordX += distance * cos(radians(heading_angle))
-			coordY += distance * sin(radians(heading_angle))
-			self.total_x += distance * cos(radians(heading_angle))
-			self.total_y += distance * sin(radians(heading_angle))
+			#heading_angle = (heading + 225) % 360
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
+			
+			edge_angle = atan2((endY - startY),(endX - startX))
+			edge_angle = degrees(edge_angle)
 
-			if(time.time() - self.tcoord >= 3):
+			coordX += distance * cos(radians(edge_angle))
+			coordY += distance * sin(radians(edge_angle))
+			self.total_x += distance * cos(radians(edge_angle))
+			self.total_y += distance * sin(radians(edge_angle))
+
+			if(time.time() - self.tcoord >= 7):
+				print "Edge angle", edge_angle
 				print "current edge", self.current, "node X", endX, "node Y", endY
 				print "total x", self.total_x, "total_y", self.total_y
 				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
@@ -180,7 +184,7 @@ class MapInfo:
 					mode = TURN
 
 					# check the updated 
-					heading_angle = (heading + 225) % 360					
+					heading_angle = (heading + 225) % 360
 
 					startX = self.mapList[self.path[self.current]].getX()
 					startY = self.mapList[self.path[self.current]].getY()

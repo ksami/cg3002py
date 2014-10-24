@@ -304,7 +304,6 @@ class Navigation:
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.turn_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
-                    print "-------------- TOTAL DISTANCE", self.total_distance
                     feedback = "gf"
 
             elif(self.mode == ARRIVE_DESTINATION):
