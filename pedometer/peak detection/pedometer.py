@@ -178,7 +178,7 @@ first_time = True
 # execution stage
 
 time_elapsed = time.time()
-while(time.time() - time_elapsed <= 20):
+while(time.time() - time_elapsed <= 30):
 
     # filter accelerometer values
     accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
