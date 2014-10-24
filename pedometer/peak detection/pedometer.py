@@ -8,8 +8,8 @@ ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
 PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
-#STRIDE_COEFFICIENT = 2.640939152
-STRIDE_COEFFICIENT = 1
+#STRIDE_COEFFICIENT = 
+STRIDE_COEFFICIENT = 1.319148936
 # from walking in total of 14.4 meters and total_distance (without calibration) 545.260574691
 HEIGHT = 1.76
 
