@@ -29,7 +29,7 @@ int main() {
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
-	Mat frame, grayFrames, rgbFrames, prevGrayFrame;
+	Mat frame, grayFrames, rgbFrames, prevRgbFrame, prevGrayFrame;
 	Mat opticalFlow = Mat(cap.get(CV_CAP_PROP_FRAME_HEIGHT), cap.get(CV_CAP_PROP_FRAME_HEIGHT), CV_32FC3);
 	cout << "prop frame width is: " << cap.get(CV_CAP_PROP_FRAME_WIDTH) << endl;
 	cout << "prop frame height is: " << cap.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
@@ -48,6 +48,7 @@ int main() {
 	//int rightdx = 0;
 	//int rightdy = 0;
 	//int rightmag = 0;
+	Point2f pt;
 	double dx, dy, mag;
 	double a1, a2, b1, b2, c1, c2, det;
 	double lineArr[MAX_COUNT][3];
@@ -81,6 +82,13 @@ int main() {
 	double angle;
 
 	time(&start);
+	// gets a grid of 8x8
+	for (i=0; i<HEIGHT; i+=16){
+		for (k=0; k<WIDTH; k+=16){
+			pt = Point(k, i);
+			points2.push_back(pt);
+		}
+	}
 
 	while (1) {
 		cap >> frame;
@@ -92,15 +100,15 @@ int main() {
                 fps = counter / sec;
                 cout << "FPS: " << fps << endl;
 
-		frame.copyTo(rgbFrames);
-		cvtColor(rgbFrames, grayFrames, CV_BGR2GRAY);
+		//frame.copyTo(rgbFrames);
+		cvtColor(frame, rgbFrames, CV_BGR2GRAY);
 
 		if (needToInit) {
-			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 5, Mat(), 3, 0, 0.04);
+			//goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 5, Mat(), 3, 0, 0.04);
 			needToInit = false;
 		} else if (!points2.empty()) {
 			//cout << "\n\n\nCalculating  calcOpticalFlowPyrLK\n\n\n\n\n";
-			calcOpticalFlowPyrLK(prevGrayFrame, grayFrames, points2, points1, status, err, winSize, 3, termcrit, 0, 0.001);
+			calcOpticalFlowPyrLK(prevRgbFrame, rgbFrames, points2, points1, status, err, winSize, 3, termcrit, 0, 0.001);
 			cout << "points2[0].x: " << points2[0].x << endl;
 			cout << "points1[0].x: " << points1[0].x << endl;
 			// points2 is previous feature points, points1 is current
@@ -174,7 +182,7 @@ int main() {
 			}
 			//cout << "foe.x: " << foe.x << ", foex: " << foex << endl;
 			//cout << "foe.y: " << foe.y << ", foey: " << foey << endl;
-			cout << "numFoe: " << numFoe << endl;
+			//cout << "numFoe: " << numFoe << endl;
 			foe.x = foex / numFoe;
 			foe.y = foey / numFoe;
 			//draw foe
@@ -197,7 +205,7 @@ int main() {
 			foey = 0.0;
 			numFoe = 0.0;
 
-			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
+			//goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
 
 		}
 		// Show the boundaries
@@ -226,12 +234,13 @@ int main() {
 		//centmag = centdx = centdy = 0;
 		
 
+		//imshow(rawWindow, grayFrames);
 		imshow(rawWindow, rgbFrames);
 		//imshow(opticalFlowWindow, opticalFlow);
 
-		std::swap(points2, points1);
-		points1.clear();
-		grayFrames.copyTo(prevGrayFrame);
+		//std::swap(points2, points1);
+		//points1.clear();
+		rgbFrames.copyTo(prevRgbFrame);
 
 		keyPressed = waitKey(10);
 		if (keyPressed == 27) {
