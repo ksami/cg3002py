@@ -17,7 +17,7 @@ using namespace std;
 #define HEIGHT 64
 #define LEFT 60
 #define RIGHT 68
-#define THRESHOLD 30
+#define THRESHOLD 15
 char rawWindow[] = "Raw Video";
 //char opticalFlowWindow[] = "Optical Flow Window";
 char imageFileName[32];
@@ -94,10 +94,15 @@ int main() {
 		} else if (!points2.empty()) {
 			//cout << "\n\n\nCalculating  calcOpticalFlowPyrLK\n\n\n\n\n";
 			calcOpticalFlowPyrLK(prevGrayFrame, grayFrames, points2, points1, status, err, winSize, 3, termcrit, 0, 0.001);
-			cout << "status[0]: " << status[0] << endl;
-			cout << "err[0]: " << err[0] << endl;
-			cout << "points2[0].x: " << points2[0].x << endl;
-			cout << "points1[0].x: " << points1[0].x << endl;
+			//cout << "status[0]: " << (int) status[0] << endl;
+			//cout << "err[0]: " << err[0] << endl;
+			//cout << "points2[0].x: " << points2[0].x << endl;
+			//cout << "points1[0].x: " << points1[0].x << endl;
+
+			//ignore weird pattern of triple same readings
+			if (points2[0].x == points1[0].x)
+				continue;
+
 			// points2 is previous feature points, points1 is current
 			for (i = 0; i < points2.size(); i++) {
 				//cout << "Optical Flow Difference... X is " << int(points1[i].x - points2[i].x) << "\t Y is " << int(points1[i].y - points2[i].y) << "\t\t" << i	<< "\n";
@@ -153,15 +158,15 @@ int main() {
 			}
 			//cout << "foe.x: " << foe.x << ", foex: " << foex << endl;
 			//cout << "foe.y: " << foe.y << ", foey: " << foey << endl;
-			cout << "numFoe: " << numFoe << endl;
+			//cout << "numFoe: " << numFoe << endl;
 			foe.x = foex / numFoe;
 			foe.y = foey / numFoe;
 			//draw foe
-			circle(rgbFrames, foe, 10, Scalar(255, 255, 255), 1, 1, 0);
-			circle(rgbFrames, Point(32,32), 5, Scalar(255, 255, 255), 1, -1, 0);
+			circle(rgbFrames, foe, 6, Scalar(255, 255, 255), 1, 1, 0);
+			circle(rgbFrames, Point(WIDTH/2, HEIGHT/2), 4, Scalar(255, 255, 255), 1, -1, 0);
 			//cout << "foe: (" << foe.x << ", " << foe.y << ")" << endl;
 
-			//cout << "ttcArr { ";
+			cout << "ttcArr { ";
 			// calculate ttc for each point: distance from FoE / magnitude of optical flow vector
 			for (i=0; i<points2.size(); i++) {
 				dx = foe.x - points1[i].x;
@@ -171,16 +176,16 @@ int main() {
 				
 				// draw ttc with color
 				if (ttcArr[i] > THRESHOLD){
-					//blue
-					circle(rgbFrames, points1[i], 5, Scalar(255, 0, 0), 1, 1, 0);
-				} else {
 					//red
 					circle(rgbFrames, points1[i], 5, Scalar(0, 0, 255), 1, 1, 0);
+				} else {
+					//blue
+					circle(rgbFrames, points1[i], 5, Scalar(255, 0, 0), 1, 1, 0);
 				}
 
-			//	cout << ttcArr[i] << ", ";
+				cout << ttcArr[i] << ", ";
 			}
-			//cout << "}" << endl;
+			cout << "}" << endl;
 
 			foex = 0.0;
 			foey = 0.0;
