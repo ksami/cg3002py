@@ -83,8 +83,8 @@ int main() {
 
 	time(&start);
 	// gets a grid of 8x8
-	for (i=0; i<HEIGHT; i+=16){
-		for (k=0; k<WIDTH; k+=16){
+	for (i=16; i<HEIGHT; i+=32){
+		for (k=16; k<WIDTH; k+=32){
 			pt = Point(k, i);
 			points2.push_back(pt);
 		}
