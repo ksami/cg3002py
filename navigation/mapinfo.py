@@ -157,12 +157,10 @@ class MapInfo:
 
 		elif(mode == GO_FORWARD):
 
-			startX = self.mapList[self.path[self.current]].getX()
-			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
 			
-			edge_angle = atan2((endY - startY),(endX - startX))
+			edge_angle = atan2((endY - coordY),(endX - coordX))
 			edge_angle = degrees(edge_angle)
 
 			if(edge_angle < 0):
@@ -177,6 +175,7 @@ class MapInfo:
 					mode = GO_FORWARD
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
+					self.numSteps = 0
 					heading_angle = 90 - (heading + self.degree) % 360
 					if(heading_angle < 0):
 						heading_angle += 360
