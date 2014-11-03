@@ -193,7 +193,11 @@ int main() {
 
 			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
 
+		} else {
+			// points2 is empty
+			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 5, Mat(), 3, 0, 0.04);
 		}
+
 		imshow(rawWindow, rgbFrames);
 		//imshow(opticalFlowWindow, opticalFlow);
 
@@ -201,6 +205,7 @@ int main() {
 		points2.clear();
 		points2.swap(points1);
 		//points1.clear();
+
 		grayFrames.copyTo(prevGrayFrame);
 
 		keyPressed = waitKey(10);
