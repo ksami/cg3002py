@@ -12,7 +12,7 @@
 using namespace cv;
 using namespace std;
 
-#define MAX_COUNT 32
+#define MAX_COUNT 500
 #define WIDTH 64
 #define HEIGHT 64
 #define LEFT 60
@@ -90,6 +90,7 @@ int main() {
 
 		if (needToInit) {
 			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 5, Mat(), 3, 0, 0.04);
+			//cornerSubPix(grayFrames, points1, subPixWinSize, Size(-1, -1), termcrit);
 			needToInit = false;
 		} else if (!points2.empty()) {
 			//cout << "\n\n\nCalculating  calcOpticalFlowPyrLK\n\n\n\n\n";
@@ -159,8 +160,10 @@ int main() {
 			//cout << "foe.x: " << foe.x << ", foex: " << foex << endl;
 			//cout << "foe.y: " << foe.y << ", foey: " << foey << endl;
 			//cout << "numFoe: " << numFoe << endl;
+
 			foe.x = foex / numFoe;
 			foe.y = foey / numFoe;
+
 			//draw foe
 			circle(rgbFrames, foe, 6, Scalar(255, 255, 255), 1, 1, 0);
 			circle(rgbFrames, Point(WIDTH/2, HEIGHT/2), 4, Scalar(255, 255, 255), 1, -1, 0);
@@ -173,14 +176,18 @@ int main() {
 				dy = foe.y - points1[i].y;
 				mag = sqrt((dx*dx) + (dy*dy));
 				ttcArr[i] = mag / magArr[i];
+
+				// ignore INF and NaN values (usually all appear together)
+				if (!isfinite(ttcArr[i]))
+					break;
 				
 				// draw ttc with color
 				if (ttcArr[i] > THRESHOLD){
-					//red
-					circle(rgbFrames, points1[i], 5, Scalar(0, 0, 255), 1, 1, 0);
+					//blue, still far away
+					circle(rgbFrames, points1[i], 3, Scalar(255, 0, 0), 1, 1, 0);
 				} else {
-					//blue
-					circle(rgbFrames, points1[i], 5, Scalar(255, 0, 0), 1, 1, 0);
+					//red, near
+					circle(rgbFrames, points1[i], 3, Scalar(0, 0, 255), 1, 1, 0);
 				}
 
 				cout << ttcArr[i] << ", ";
@@ -192,10 +199,12 @@ int main() {
 			numFoe = 0.0;
 
 			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
+			cornerSubPix(grayFrames, points1, subPixWinSize, Size(-1, -1), termcrit);
 
 		} else {
 			// points2 is empty
 			goodFeaturesToTrack(grayFrames, points1, MAX_COUNT, 0.01, 5, Mat(), 3, 0, 0.04);
+			//cornerSubPix(grayFrames, points1, subPixWinSize, Size(-1, -1), termcrit);
 		}
 
 		imshow(rawWindow, rgbFrames);
