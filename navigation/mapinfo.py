@@ -20,26 +20,27 @@ NORTHAT = 'northAt'
 LEFT = 0
 RIGHT = 1
 
-NODE = 0
-GO_FORWARD = 1
-TURN = 2
-ARRIVE_DESTINATION = 3
+START_BUILDING = 1
+REACH_NODE = 2
+GO_FORWARD = 3
+TURN = 4
+REACH_DEST_BUILDING = 5
 
 ANGLE_THRESHOLD = 10
+WALKING_ANGLE_THRESHOLD = 20
 CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 150
+NUM_STEPS_CHECK = 3
 
 # string constants
 MODE = "MODE"
 COORDX = "X"
 COORDY = "Y"
+ANGLE = "ANGLE"
+CURRENT_NODE = "CURRENT_NODE"
 LEFTORRIGHT = "LEFTORRIGHT"
 DESTINATION = "DESTINATION"
-
-baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
-building = 'COM1'
-level = '2'
-query = 'Building=' + building + '&' + 'Level=' + level
+NUMBER_NODES = "NUMBER_NODES"
 
 class MapInfo:
 
@@ -52,6 +53,9 @@ class MapInfo:
 		self.path = []
 		self.current = 0
 		self.size = 0
+		self.num_steps = 0
+
+		# debug purpose
 		self.tcoord = 0
 		self.total_x = 0
 		self.total_y = 0
@@ -79,6 +83,7 @@ class MapInfo:
 			self.adjacencyList.update(bigDic)
 
 		#self.printSelf()
+		#print "\n\n\n"
 
 	def printSelf(self):
 		print "-\n-------map------\n"
@@ -99,6 +104,7 @@ class MapInfo:
 
 		start = start - 1
 		end = end - 1
+		
 		final_distances,predecessors = Dijkstra(self.adjacencyList,start,end)
 		while 1:
 			self.path.append(end)
@@ -110,16 +116,19 @@ class MapInfo:
 
 		coordX = self.mapList[self.path[self.current]].getX()
 		coordY = self.mapList[self.path[self.current]].getY()
-		destination = self.mapList[self.size - 1].getName()
 
-		return {COORDX : coordX, COORDY: coordY, DESTINATION: destination}
+		return {COORDX : coordX, COORDY: coordY}
 
-	def giveDirection (self, mode, distance, heading, coordX, coordY):
 
-		if(mode == TURN):
+	def giveDirection (self, mode, distance, heading, coordX, coordY, numSteps):
 
-			a = (heading + 315) % 360
-			heading_angle = 90 - a
+		if(mode == START_BUILDING):
+			return {MODE : mode , NUMBER_NODES : len(self.path)}
+
+		elif(mode == REACH_NODE):
+
+			# check the updated 
+			heading_angle = 90 - (heading + self.degree) % 360
 			if(heading_angle < 0):
 				heading_angle += 360
 
@@ -134,14 +143,9 @@ class MapInfo:
 			if(edge_angle < 0):
 				edge_angle += 360
 
-			print "raw heading", heading, "heading_angle", heading_angle , "edge_angle", edge_angle
-
 			if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
 				mode = GO_FORWARD
-				print "Go forward"
-
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
-				
 			else:
 				mode = TURN
 				turning = LEFT
@@ -149,12 +153,9 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
-
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, , ANGLE: fabs(edge_angle - heading_angle)}
 
 		elif(mode == GO_FORWARD):
-			# update coordinates
-			#heading_angle = (heading + 225) % 360
 
 			startX = self.mapList[self.path[self.current]].getX()
 			startY = self.mapList[self.path[self.current]].getY()
@@ -169,53 +170,19 @@ class MapInfo:
 
 			coordX += distance * cos(radians(edge_angle))
 			coordY += distance * sin(radians(edge_angle))
-			self.total_x += distance * cos(radians(edge_angle))
-			self.total_y += distance * sin(radians(edge_angle))
+			self.num_steps += numSteps
 
-			if(time.time() - self.tcoord >= 7):
-				print "Edge angle", edge_angle
-				print "current edge", self.current, "node X", endX, "node Y", endY
-				print "total x", self.total_x, "total_y", self.total_y
-				print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
-				self.tcoord = time.time()
-
-			# check if it is along the path			
-			#if(sqrt((endX - coordX)**2 + (endY - coordY)**2) >= DISTANCE_THRESHOLD):
 			if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
-				mode = GO_FORWARD
-				return {MODE : mode, COORDX : coordX, COORDY : coordY}
-			else:
-				self.current += 1
-				if(self.current == len(self.path) - 1):
-					mode = ARRIVE_DESTINATION
+				if(self.numSteps <= NUM_STEPS_CHECK):
+					mode = GO_FORWARD
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
-					mode = TURN
-
-					# check the updated 
-					a = (heading + 315) % 360
-					heading_angle = 90 - a
+					heading_angle = 90 - (heading + self.degree) % 360
 					if(heading_angle < 0):
 						heading_angle += 360
 
-					startX = self.mapList[self.path[self.current]].getX()
-					startY = self.mapList[self.path[self.current]].getY()
-					endX = self.mapList[self.path[self.current+1]].getX()
-					endY = self.mapList[self.path[self.current+1]].getY()
-
-					edge_angle = atan2((endY - startY),(endX - startX))
-					edge_angle = degrees(edge_angle)
-
-					if(edge_angle < 0):
-						edge_angle += 360
-
-					#coordX = startX
-					#coordY = startY
-
-					if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
+					if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
 						mode = GO_FORWARD
-						print "Go forward"
-
 						return {MODE : mode, COORDX : coordX, COORDY : coordY}
 					else:
 						mode = TURN
@@ -224,7 +191,126 @@ class MapInfo:
 						if(cross_vector > 0):
 							turning = RIGHT
 
-						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, , ANGLE: fabs(edge_angle - heading_angle)}	
+
+
+			else:	
+				self.current += 1
+				if(self.current == len(self.path) - 1):
+					mode = REACH_DEST_BUILDING
+					return {MODE : mode, COORDX : coordX, COORDY : coordY}
+				else:
+					mode = REACH_NODE
+					return {MODE : mode, COORDX : coordX, COORDY : coordY, CURRENT_NODE : (self.current+1)}
+
+
+
+	# def giveDirection (self, mode, distance, heading, coordX, coordY):
+
+	# 	if(mode == TURN):
+
+	# 		a = (heading + self.degree) % 360
+	# 		heading_angle = 90 - a
+	# 		if(heading_angle < 0):
+	# 			heading_angle += 360
+
+	# 		startX = self.mapList[self.path[self.current]].getX()
+	# 		startY = self.mapList[self.path[self.current]].getY()
+	# 		endX = self.mapList[self.path[self.current+1]].getX()
+	# 		endY = self.mapList[self.path[self.current+1]].getY()
+
+	# 		edge_angle = atan2((endY - startY),(endX - startX))
+	# 		edge_angle = degrees(edge_angle)
+
+	# 		if(edge_angle < 0):
+	# 			edge_angle += 360
+
+	# 		print "raw heading", heading, "heading_angle", heading_angle , "edge_angle", edge_angle
+
+	# 		if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
+	# 			mode = GO_FORWARD
+	# 			print "Go forward"
+
+	# 			return {MODE : mode, COORDX : coordX, COORDY : coordY}
+				
+	# 		else:
+	# 			mode = TURN
+	# 			turning = LEFT
+	# 			cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
+	# 			if(cross_vector > 0):
+	# 				turning = RIGHT
+
+	# 			return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
+
+
+	# 	elif(mode == GO_FORWARD):
+
+	# 		startX = self.mapList[self.path[self.current]].getX()
+	# 		startY = self.mapList[self.path[self.current]].getY()
+	# 		endX = self.mapList[self.path[self.current+1]].getX()
+	# 		endY = self.mapList[self.path[self.current+1]].getY()
+			
+	# 		edge_angle = atan2((endY - startY),(endX - startX))
+	# 		edge_angle = degrees(edge_angle)
+
+	# 		if(edge_angle < 0):
+	# 			edge_angle += 360
+
+	# 		coordX += distance * cos(radians(edge_angle))
+	# 		coordY += distance * sin(radians(edge_angle))
+	# 		self.total_x += distance * cos(radians(edge_angle))
+	# 		self.total_y += distance * sin(radians(edge_angle))
+
+	# 		# if(time.time() - self.tcoord >= 7):
+	# 		# 	print "Edge angle", edge_angle
+	# 		# 	print "current edge", self.current, "node X", endX, "node Y", endY
+	# 		# 	print "total x", self.total_x, "total_y", self.total_y
+	# 		# 	print "x", coordX, "y", coordY, "--- meters away", sqrt((endX - coordX)**2 + (endY - coordY)**2)
+	# 		# 	self.tcoord = time.time()
+
+	# 		# check if it is along the path
+
+	# 		if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
+	# 			mode = GO_FORWARD
+	# 			return {MODE : mode, COORDX : coordX, COORDY : coordY}
+	# 		else:
+
+	# 			self.current += 1
+	# 			if(self.current == len(self.path) - 1):
+	# 				mode = ARRIVE_DESTINATION
+	# 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
+	# 			else:
+	# 				mode = TURN
+
+	# 				# check the updated 
+	# 				a = (heading + self.degree) % 360
+	# 				heading_angle = 90 - a
+	# 				if(heading_angle < 0):
+	# 					heading_angle += 360
+
+	# 				startX = self.mapList[self.path[self.current]].getX()
+	# 				startY = self.mapList[self.path[self.current]].getY()
+	# 				endX = self.mapList[self.path[self.current+1]].getX()
+	# 				endY = self.mapList[self.path[self.current+1]].getY()
+
+	# 				edge_angle = atan2((endY - startY),(endX - startX))
+	# 				edge_angle = degrees(edge_angle)
+
+	# 				if(edge_angle < 0):
+	# 					edge_angle += 360
+
+	# 				if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
+	# 					mode = GO_FORWARD
+
+	# 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
+	# 				else:
+	# 					mode = TURN
+	# 					turning = LEFT
+	# 					cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
+	# 					if(cross_vector > 0):
+	# 						turning = RIGHT
+
+	# 					return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning}
 
 
 def Dijkstra(graph,start,end=None):
@@ -290,14 +376,6 @@ def Dijkstra(graph,start,end=None):
 					predecessors[edge] = vertex
 
 		return (final_distances,predecessors)
-
-if __name__ == "__main__":
-    response = urllib2.urlopen(baseurl + query)
-    jsondata = response.read()
-    mapinfo = MapInfo(jsondata)
-    print mapinfo.shortestPath(1, 12)
-    print mapinfo.giveDirection(TURN, 0, 90, 0, 1260)
-
 
 
 

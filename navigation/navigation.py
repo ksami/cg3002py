@@ -5,26 +5,26 @@ import math
 import time
 import sys
 from vector import Vector
-from mapinfo import MapInfo
+from mapinfolist import MapInfoList
 
+# Calibration constants
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
 PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
-HEIGHT = 1.76
 HIGH_PASS = 0.8
 STRIDE_COEFFICIENT = 1.319148936
-#STRIDE_COEFFICIENT = 2.640939152 
-# from walking in total of 1440 centimeters and total_distance (without calibration) 545.260574691
-
 COMPASS_X_AXIS = -145
 COMPASS_Z_AXIS = -135
 
+# Peak-to-peak detection modes
 MINIMA = 0
 MAXIMA = 1
 
+# Feedback time
 GO_FORWARD_UPDATE_TIME = 6
 TURN_UPDATE_TIME = 3
 
+# Turning directions
 LEFT = 0
 RIGHT = 1
 
@@ -33,25 +33,27 @@ power_mgmt_1 = 0x6b # Power management registers
 mpu_address = 0x68  # MPU6050 i2c address
 hmc_address = 0x1e  # HMC5883l i2c address
 
-# constants for map
-baseurl = 'http://showmyway.comp.nus.edu.sg/getMapInfo.php?'
-building = 'COM1'
-level = '2'
-query = 'Building=' + building + '&' + 'Level=' + level
-cached_map = "com1lvl2.json"
+# state machine mode
+START_JOURNEY = 0
+START_BUILDING = 1
+REACH_NODE = 2
+GO_FORWARD = 3
+TURN = 4
+REACH_DEST_BUILDING = 5
+ARRIVE_DESTINATION = 6
 
-# mode
-NODE = 0
-GO_FORWARD = 1
-TURN = 2
-ARRIVE_DESTINATION = 3
-
-# string constants
+# Dictionary key
 MODE = "MODE"
 COORDX = "X"
 COORDY = "Y"
+ANGLE = "ANGLE"
+NODE_NAME = "NODE_NAME"
 LEFTORRIGHT = "LEFTORRIGHT"
 DESTINATION = "DESTINATION"
+NUMBER_NODES = "NUMBER_NODES"
+CURRENT_NODE = "CURRENT_NODE"
+NUMBER_OF_BUILDINGS = "NUMBER_OF_BUILDINGS"
+CURRENT_BUILDING = "CURRENT_BUILDING"
 
 class Navigation:
 
@@ -59,7 +61,7 @@ class Navigation:
 
         self.bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
-        self.mode = TURN
+        self.mode = START_JOURNEY
         self.most_active_axis = 1
         self.coordX = 0
         self.coordY = 0
@@ -112,21 +114,13 @@ class Navigation:
         self.heading_moving_index = 0
 
         # download map
-        try:
-            response = urllib2.urlopen(baseurl + query)
-            jsondata = response.read()
-        except urllib2.URLError:
-            with open(cached_map, "r") as f:
-                lines = f.readlines()
-                jsondata = "".join(lines)
-        self.mapinfo = MapInfo(jsondata)
+        self.mapinfolist = MapInfoList()
 
     # call this method when receive start and destination id
     def getShortestPath(self, start, end):
         tup = self.mapinfo.shortestPath(start, end)
         self.coordX = tup.get(COORDX)
         self.coordY = tup.get(COORDY)
-        self.destination = tup.get(DESTINATION)
 
     def execute(self, queue):
         
@@ -272,34 +266,49 @@ class Navigation:
             compass_zout = read_word_2c(self.bus, hmc_address, 5) - COMPASS_Z_AXIS
 
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
-
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
-
             self.heading_moving_index = (self.heading_moving_index + 1) % 4
 
-            #print "heading", self.heading
-
-
             ##### check state machine #####
-            result = self.mapinfo.giveDirection(self.mode, self.distance, self.heading, self.coordX, self.coordY)
+            result = self.mapinfolist.giveDirection(self.distance, self.heading, self.coordX, self.coordY, self.num_steps)
+            self.num_steps = 0
             self.distance = 0
             self.mode = result[MODE]
             self.coordX = result[COORDX]
             self.coordY = result[COORDY] 
             feedback = ""
 
-            if(self.mode == TURN):
+            if(self.mode == START_JOURNEY):
+                numberBuildings = result[NUMBER_OF_BUILDINGS]
+                feedback = "You have to walk through " + numberBuildings + " buildings"
+
+            elif(self.mode == START_BUILDING):
+                numberNodes = result[NUMBER_NODES]
+                currentBuilding = result[CURRENT_BUILDING]
+                building = "COM 1"
+                level = 2
+
+                if(currentBuilding == 1):
+                    building = "COM 2"
+                    level = 2
+                elif(currentBuilding == 2):
+                    building = "COM 2"
+                    level = 3
+                feedback = "You are currently at building " + building + " level " + level + " You have to walk pass " + numberNodes + " Now starting at node 1"
+
+            elif(self.mode == REACH_NODE):
+                currentNode = result[CURRENT_NODE]
+                feedback = "You have reached node " + currentNode
+
+            elif (self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
                     isLeft = result[LEFTORRIGHT]
+                    angle = result[ANGLE]
                     self.turn_time = time.time()
-                    self.distance = 0
-                    self.total_distance = 0
                     if(isLeft == LEFT):
-                        feedback = "tl"
+                        feedback = "Turn left by " + angle + " degrees"
                     else:
-                        feedback = "tr"
-
-                    print feedback
+                        feedback = "Turn right by " + angle + " degrees"
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.go_forward_time >= GO_FORWARD_UPDATE_TIME):
@@ -308,11 +317,10 @@ class Navigation:
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
-                feedback = "r," + self.destination
+                feedback = "r, "
                 queue.put(feedback)
                 break
 
-            #queue.put({'feedback': feedback, 'coordX', self.coordX, 'coordY', self.coordY)
             if feedback != "":
                 queue.put(feedback)
 
