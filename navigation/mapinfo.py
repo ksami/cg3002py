@@ -127,7 +127,7 @@ class MapInfo:
 
 		elif(mode == REACH_NODE):
 
-			# check the updated 
+			# check the updated heading
 			heading_angle = 90 - (heading + self.degree) % 360
 			if(heading_angle < 0):
 				heading_angle += 360
@@ -171,6 +171,8 @@ class MapInfo:
 			self.num_steps += numSteps
 
 			if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
+
+				# heading error detection while walking
 				if(self.numSteps <= NUM_STEPS_CHECK):
 					mode = GO_FORWARD
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
@@ -191,7 +193,6 @@ class MapInfo:
 							turning = RIGHT
 
 						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, , ANGLE: fabs(edge_angle - heading_angle)}	
-
 
 			else:	
 				self.current += 1
