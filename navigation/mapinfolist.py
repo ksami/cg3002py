@@ -6,7 +6,7 @@ cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
 NODE_ID_1_2 = 16
-NODE_ID_2_1 = 10
+NODE_ID_2_1 = 11
 
 NODE_BETWEEN_BUILDINGS = [[0, NODE_ID_0_1, 0], [NODE_ID_1_0, 0, NODE_ID_1_2], [0, NODE_ID_2_1, 0]]
 
@@ -52,32 +52,32 @@ class MapInfoList:
 
 	def shortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
 
-		self.startMap = 0   	
-		self.endMap = 2
+		startMap = 0   	
+		endMap = 2
 
 		if(startBuilding == 2 and startLevel == 2):
-			self.startMap = 1
+			startMap = 1
 		elif(startBuilding == 2 and startLevel == 3):
-			self.startMap = 2
+			startMap = 2
 
 		if(endBuilding == 1 and endLevel == 2):
-			self.endMap = 0
+			endMap = 0
 		elif(endBuilding == 2 and endLevel == 2):
-			self.endMap = 1
+			endMap = 1
 
 		start = []
 		end = []
 		self.building = []
 
-		index = self.startMap
+		index = startMap
 		direction = 1
-		if(self.startMap > self.endMap):
+		if(startMap > endMap):
 			direction = -1
 
-		start.append(startNode)	
 		self.building.append(index)
 
-		while(index != self.endMap):
+		start.append(startNode)
+		while(index != endMap):
 			end.append(NODE_BETWEEN_BUILDINGS[index][index+direction])
 			start.append(NODE_BETWEEN_BUILDINGS[index+direction][index])
 			self.building.append(index+direction)
@@ -85,13 +85,14 @@ class MapInfoList:
 		end.append(endNode)
 
 		for i in range(len(start)):
-			print self.building[i]
+			print "\nBuilding: ", self.building[i], "\n"
 			self.mapinfoList[self.building[i]].shortestPath(start[i], end[i])
 
 	def giveDirection (self, distance, heading, coordX, coordY, numSteps):
 
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
+			self.currentMap = 0
 			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building)}
 
 		else:
@@ -123,6 +124,6 @@ class MapInfoList:
 
 if __name__ == "__main__":
 	mapi = MapInfoList()
-	mapi.shortestPath(2, 3, 1, 1, 2, 12)
+	mapi.shortestPath(2, 3, 1, 1, 2, 1)
 
 

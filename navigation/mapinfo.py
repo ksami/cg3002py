@@ -112,18 +112,16 @@ class MapInfo:
 			end = predecessors[end]
 		self.path.reverse()
 
-		print self.path
-
-		coordX = self.mapList[self.path[self.current]].getX()
-		coordY = self.mapList[self.path[self.current]].getY()
-
-		return {COORDX : coordX, COORDY: coordY}
-
+		for p in self.path:
+			print self.mapList[p].getName(), "----"
 
 	def giveDirection (self, mode, distance, heading, coordX, coordY, numSteps):
 
 		if(mode == START_BUILDING):
-			return {MODE : mode , NUMBER_NODES : len(self.path)}
+			self.current = 0
+			coordX = self.mapList[self.path[self.current]].getX()
+			coordY = self.mapList[self.path[self.current]].getY()
+			return {MODE : mode , NUMBER_NODES : len(self.path), COORDX : coordX, COORDY : coordY}
 
 		elif(mode == REACH_NODE):
 

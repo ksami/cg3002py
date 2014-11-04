@@ -117,10 +117,8 @@ class Navigation:
         self.mapinfolist = MapInfoList()
 
     # call this method when receive start and destination id
-    def getShortestPath(self, start, end):
-        tup = self.mapinfo.shortestPath(start, end)
-        self.coordX = tup.get(COORDX)
-        self.coordY = tup.get(COORDY)
+    def getShortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
+        tup = self.mapinfolist.shortestPath(startBuilding, startLevel, startNode, endBuilding, endLevel, endNode)
 
     def execute(self, queue):
         
