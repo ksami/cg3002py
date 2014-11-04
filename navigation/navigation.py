@@ -93,7 +93,7 @@ class Navigation:
         self.sample_new = Vector(0, 0, 0)
         self.time_window = 0
         self.peak_threshold = 0
-        
+
         # used for calculating the distance (stride-length and total distance within update time)
         self.accel_list = []
         self.distance = 0
@@ -237,7 +237,6 @@ class Navigation:
                                     self.total_distance += stride
                                     self.accel_list = []
                                     self.calculate_distance = False
-                                    #print "TOTAL DISTANCE", self.total_distance
 
                                 if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):

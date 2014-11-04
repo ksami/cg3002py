@@ -153,7 +153,7 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, , ANGLE: fabs(edge_angle - heading_angle)}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: fabs(edge_angle - heading_angle)}
 
 		elif(mode == GO_FORWARD):
 
@@ -192,7 +192,7 @@ class MapInfo:
 						if(cross_vector > 0):
 							turning = RIGHT
 
-						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, , ANGLE: fabs(edge_angle - heading_angle)}	
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : fabs(edge_angle - heading_angle)}	
 
 			else:	
 				self.current += 1

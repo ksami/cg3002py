@@ -67,7 +67,7 @@ class MapInfoList:
 
 		start = []
 		end = []
-		self.building = []    	
+		self.building = []
 
 		index = self.startMap
 		direction = 1
@@ -85,8 +85,8 @@ class MapInfoList:
 		end.append(endNode)
 
 		for i in range(len(start)):
-			print building[i]
-			self.mapinfoList[building[i]].shortestPath(start[i], end[i])
+			print self.building[i]
+			self.mapinfoList[self.building[i]].shortestPath(start[i], end[i])
 
 	def giveDirection (self, distance, heading, coordX, coordY, numSteps):
 
@@ -109,8 +109,8 @@ class MapInfoList:
 				if(self.currentBuilding == len(self.building) - 1):
 					self.mode = ARRIVE_DESTINATION
 					for key in result.keys():
-        				if key == MODE:
-            				result[key] = ARRIVE_DESTINATION
+						if key == MODE:
+							result[key] = ARRIVE_DESTINATION
 					return result
 
 				else:
