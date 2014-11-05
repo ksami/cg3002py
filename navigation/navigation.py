@@ -149,7 +149,7 @@ class Navigation:
             self.heading_filter_list.append(self.heading)
 
 
-        print "STRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
+        print "\n\nSTRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
         print "PEAK THRESHOLD", PEAK_THRESHOLD
         print "TIME THRESHOLD", TIME_THRESHOLD
         print "START!!"
@@ -293,13 +293,13 @@ class Navigation:
                 elif(currentBuilding == 2):
                     building = "COM 2"
                     level = 3
-                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + "\nNow starting at node 1\n\n"
-                print "MODE: START_BUILDING ---\n\n" + feedback
+                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1\n\n"
+                print "\n\nMODE: START_BUILDING ---\n" + feedback
 
             elif(self.mode == REACH_NODE):
                 currentNode = result[CURRENT_NODE]
                 feedback = "You have reached node " + str(currentNode)
-                print "MODE: REACH_NODE ---\n\n" + feedback
+                print "\n\nMODE: REACH_NODE ---\n" + feedback
 
             elif (self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
@@ -310,19 +310,19 @@ class Navigation:
                         feedback = "Turn left by " + str(angle) + " degrees"
                     else:
                         feedback = "Turn right by " + str(angle) + " degrees"
-                    print "MODE: TURN ---\n\n" + feedback
+                    print "\n\nMODE: TURN ---\n" + feedback
 
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.go_forward_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     feedback = "gf"
-                    print "MODE: GO_FORWARD ---\n\n" + "Go forward"
+                    print "\n\nMODE: GO_FORWARD ---\n" + "Go forward"
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
                 feedback = "r, "
-                print "MODE: ARRIVE DESTINATION ---\n\n"
+                print "\n\nMODE: ARRIVE DESTINATION ---"
                 queue.put(feedback)
                 break
 
