@@ -27,9 +27,9 @@ TURN = 4
 REACH_DEST_BUILDING = 5
 
 ANGLE_THRESHOLD = 10
-WALKING_ANGLE_THRESHOLD = 20
+WALKING_ANGLE_THRESHOLD = 90
 CORRIDOR_THRESHOLD = 273 / 2.0
-DISTANCE_THRESHOLD = 150
+DISTANCE_THRESHOLD = 100
 NUM_STEPS_CHECK = 3
 
 # string constants
@@ -154,7 +154,9 @@ class MapInfo:
 				angle = edge_angle - heading_angle
 				if (angle < 0):
 					angle += 360
-					
+				if(angle > 360):
+					angle -= 360
+
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 
 		elif(mode == GO_FORWARD):
@@ -197,6 +199,8 @@ class MapInfo:
 						angle = edge_angle - heading_angle
 						if (angle < 0):
 							angle += 360
+						if(angle > 360):
+							angle -= 360
 
 						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}	
 
