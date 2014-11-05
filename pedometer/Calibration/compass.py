@@ -29,7 +29,7 @@ def read_word_2c(bus, sensor_address, adr):
         return val
 
 
-def GetHeading(compass_valx, compass_valy, compass_valz):
+def getHeading(compass_valx, compass_valy, compass_valz):
     
     heading = math.atan2(compass_valx, compass_valz)
     heading += 0.0404
