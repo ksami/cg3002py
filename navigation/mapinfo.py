@@ -163,6 +163,8 @@ class MapInfo:
 
 		elif(mode == GO_FORWARD):
 
+			startX = self.mapList[self.path[self.current]].getX()
+			startY = self.mapList[self.path[self.current]].getY()
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
 			
