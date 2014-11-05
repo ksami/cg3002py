@@ -201,7 +201,7 @@ class Navigation:
 
                                 if(self.calculate_distance and self.mode == GO_FORWARD):
                                     stride = getStrideLength(self.accel_list)
-                                    print "STRIDE", stride
+                                    print "\n--------------- STRIDE", stride
                                     self.distance += stride
                                     self.total_distance += stride
                                     self.accel_list = []
@@ -215,7 +215,7 @@ class Navigation:
                                         self.peak_direction = MAXIMA
                                         self.accel_minima = self.accel_val
                                         self.time_window = time.time()
-                                        print "PEAK DETECTED MINIMA", self.num_steps
+                                        print "\n--------------- PEAK DETECTED MINIMA", self.num_steps
                                         self.peak_threshold = PEAK_THRESHOLD
                                         self.calculate_distance = True
 
@@ -230,7 +230,7 @@ class Navigation:
 
                                 if(self.calculate_distance and self.mode == GO_FORWARD):
                                     stride = getStrideLength(self.accel_list)
-                                    print "STRIDE", stride
+                                    print "\n--------------- STRIDE", stride
                                     self.distance += stride
                                     self.total_distance += stride
                                     self.accel_list = []
@@ -243,7 +243,7 @@ class Navigation:
                                         self.peak_direction = MINIMA
                                         self.accel_maxima = self.accel_val
                                         self.time_window = time.time()
-                                        print "PEAK DETECTED MAXIMA", self.num_steps
+                                        print "\n--------------- PEAK DETECTED MAXIMA", self.num_steps
                                         self.peak_threshold = PEAK_THRESHOLD
                                         self.calculate_distance = True
 
@@ -277,7 +277,8 @@ class Navigation:
 
             if(self.mode == START_JOURNEY):
                 numberBuildings = result[NUMBER_OF_BUILDINGS]
-                feedback = "You have to walk through " + numberBuildings + " buildings"
+                feedback = "You have to walk through " + str(numberBuildings) + " buildings"
+                print "MODE: START_JOURNEY ---\n\n" + feedback + "\n\n"
 
             elif(self.mode == START_BUILDING):
                 numberNodes = result[NUMBER_NODES]
@@ -291,11 +292,13 @@ class Navigation:
                 elif(currentBuilding == 2):
                     building = "COM 2"
                     level = 3
-                feedback = "You are currently at building " + building + " level " + level + " You have to walk pass " + numberNodes + " Now starting at node 1"
+                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + "\nNow starting at node 1\n\n"
+                print "MODE: START_BUILDING ---\n\n" + feedback
 
             elif(self.mode == REACH_NODE):
                 currentNode = result[CURRENT_NODE]
-                feedback = "You have reached node " + currentNode
+                feedback = "You have reached node " + str(currentNode)
+                print "MODE: REACH_NODE ---\n\n" + feedback
 
             elif (self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
@@ -303,18 +306,22 @@ class Navigation:
                     angle = result[ANGLE]
                     self.turn_time = time.time()
                     if(isLeft == LEFT):
-                        feedback = "Turn left by " + angle + " degrees"
+                        feedback = "Turn left by " + str(angle) + " degrees"
                     else:
-                        feedback = "Turn right by " + angle + " degrees"
+                        feedback = "Turn right by " + str(angle) + " degrees"
+                    print "MODE: TURN ---\n\n" + feedback
+
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.go_forward_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     feedback = "gf"
+                    print "MODE: GO_FORWARD ---\n\n" + "Go forward"
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
                 feedback = "r, "
+                print "MODE: ARRIVE DESTINATION ---\n\n"
                 queue.put(feedback)
                 break
 
@@ -383,16 +390,10 @@ def GetHeading(most_active_axis, compass_val):
 
     return math.degrees(heading)
 
-def getShortestPath(navi, start, end):
-    navi.getShortestPath(start, end)
-
-def exe(navi, queue):
-    navi.execute(queue)
-
 import multiprocessing
 
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    getShortestPath(navi, 1, 12)
-    exe(navi, queue)
+    navi.getShortestPath(1, 2, 1, 1, 2, 31)
+    navi.execute()
