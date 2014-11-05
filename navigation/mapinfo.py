@@ -179,12 +179,12 @@ class MapInfo:
 					mode = GO_FORWARD
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
-					self.num_steps = 0
 					heading_angle = 90 - (heading + self.degree) % 360
 					if(heading_angle < 0):
 						heading_angle += 360
 
 					if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
+						self.num_steps = 0
 						mode = GO_FORWARD
 						return {MODE : mode, COORDX : coordX, COORDY : coordY}
 					else:

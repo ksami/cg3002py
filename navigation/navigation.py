@@ -202,7 +202,7 @@ class Navigation:
 
                                 if(self.calculate_distance and self.mode == GO_FORWARD):
                                     stride = getStrideLength(self.accel_list)
-                                    print "\n--------------- STRIDE", stride
+                                    print "--------------- STRIDE", stride
                                     self.distance += stride
                                     self.total_distance += stride
                                     self.accel_list = []
@@ -231,7 +231,7 @@ class Navigation:
 
                                 if(self.calculate_distance and self.mode == GO_FORWARD):
                                     stride = getStrideLength(self.accel_list)
-                                    print "\n--------------- STRIDE", stride
+                                    print "--------------- STRIDE", stride
                                     self.distance += stride
                                     self.total_distance += stride
                                     self.accel_list = []
@@ -294,12 +294,12 @@ class Navigation:
                     building = "COM 2"
                     level = 3
                 feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1\n\n"
-                print "\n\nMODE: START_BUILDING ---\n" + feedback
+                print "\n\n--- MODE: START_BUILDING ---\n" + feedback
 
             elif(self.mode == REACH_NODE):
                 currentNode = result[CURRENT_NODE]
                 feedback = "You have reached node " + str(currentNode)
-                print "\n\nMODE: REACH_NODE ---\n" + feedback
+                print "\n\n--- MODE: REACH_NODE ---\n" + feedback
 
             elif (self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
@@ -310,14 +310,14 @@ class Navigation:
                         feedback = "Turn left by " + str(angle) + " degrees"
                     else:
                         feedback = "Turn right by " + str(angle) + " degrees"
-                    print "\n\nMODE: TURN ---\n" + feedback
+                    print "\n\n--- MODE: TURN ---\n" + feedback
 
 
             elif(self.mode == GO_FORWARD):
                 if(time.time() - self.go_forward_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     feedback = "gf"
-                    print "\n\nMODE: GO_FORWARD ---\n" + "Go forward"
+                    print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward"
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
@@ -364,7 +364,7 @@ def getStrideLength(accel_list):
         accel_sum += (accel_list[i].y - accel_avg)
     accel_sum /= len(accel_list)
 
-    print "accel_sum", accel_sum
+    #print "accel_sum", accel_sum
 
     return STRIDE_COEFFICIENT * math.pow(accel_sum, 1/3.0)
 
