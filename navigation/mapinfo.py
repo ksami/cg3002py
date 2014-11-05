@@ -1,7 +1,7 @@
 
 import json
 import urllib2
-from math import sin, cos, degrees, atan2, sqrt, pi, radians
+from math import sin, cos, degrees, atan2, sqrt, pi, radians, fabs
 import sys
 from nodeinfo import NodeInfo
 from priodict import priorityDictionary
