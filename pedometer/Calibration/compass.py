@@ -42,6 +42,13 @@ def getHeading(compass_valx, compass_valy, compass_valz):
 
     return math.degrees(heading)
 
+def convertToXY(heading):
+    heading_angle = 90 - (heading + 315) % 360
+    if(heading_angle < 0):
+        heading_angle += 360
+
+    return heading_angle
+
 
 bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
@@ -61,7 +68,9 @@ while(True):
     compass_yout = read_word_2c(bus, hmc_address, 7) 
     compass_zout = read_word_2c(bus, hmc_address, 5) - COMPASS_Z_AXIS
 
-    print "Size:", size, "heading:", getHeading(compass_xout, compass_yout, compass_zout)
+    heading = getHeading(compass_xout, compass_yout, compass_zout)
+
+    print "Size:", size, "heading:", heading , "heading angle:", convertToXY(heading)
     size += 1
 
     time.sleep(0.5)
