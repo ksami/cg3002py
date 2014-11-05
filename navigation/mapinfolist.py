@@ -102,7 +102,7 @@ class MapInfoList:
 
 			if(self.mode == START_BUILDING):
 				self.mode = REACH_NODE
-				result.append({CURRENT_BUILDING : self.building[self.currentBuilding]})
+				result.update({CURRENT_BUILDING : self.building[self.currentBuilding]})
 				return result
 
 			elif(self.mode == REACH_DEST_BUILDING):
