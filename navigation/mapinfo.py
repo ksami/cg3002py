@@ -135,11 +135,13 @@ class MapInfo:
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
 
-			edge_angle = atan2((endY - startY),(endX - startX))
+			edge_angle = atan2((endY - coordY),(endX - coordX))
 			edge_angle = degrees(edge_angle)
 
 			if(edge_angle < 0):
 				edge_angle += 360
+
+			print "heading:", heading_angle, "edge angle:", edge_angle
 
 			if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
 				mode = GO_FORWARD
@@ -164,7 +166,7 @@ class MapInfo:
 			endX = self.mapList[self.path[self.current+1]].getX()
 			endY = self.mapList[self.path[self.current+1]].getY()
 			
-			edge_angle = atan2((endY - coordY),(endX - coordX))
+			edge_angle = atan2((endY - startY),(endX - startX))
 			edge_angle = degrees(edge_angle)
 
 			if(edge_angle < 0):
@@ -184,6 +186,8 @@ class MapInfo:
 					heading_angle = 90 - (heading + self.degree) % 360
 					if(heading_angle < 0):
 						heading_angle += 360
+
+					print "heading:", heading_angle, "edge angle:", edge_angle
 
 					if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
 						self.num_steps = 0
