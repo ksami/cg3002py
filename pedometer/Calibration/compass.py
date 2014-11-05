@@ -2,7 +2,6 @@ import smbus
 import math
 import time
 import sys
-from vector impo
 
 # Power management registers
 power_mgmt_1 = 0x6b
