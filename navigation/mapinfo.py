@@ -151,7 +151,11 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: fabs(edge_angle - heading_angle)}
+				angle = fabs(edge_angle - heading_angle)
+				if (angle > 180):
+					angle -= 180
+
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 
 		elif(mode == GO_FORWARD):
 
@@ -171,11 +175,11 @@ class MapInfo:
 			if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
 
 				# heading error detection while walking
-				if(self.numSteps <= NUM_STEPS_CHECK):
+				if(self.num_steps <= NUM_STEPS_CHECK):
 					mode = GO_FORWARD
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
-					self.numSteps = 0
+					self.num_steps = 0
 					heading_angle = 90 - (heading + self.degree) % 360
 					if(heading_angle < 0):
 						heading_angle += 360
@@ -190,7 +194,11 @@ class MapInfo:
 						if(cross_vector > 0):
 							turning = RIGHT
 
-						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : fabs(edge_angle - heading_angle)}	
+						angle = fabs(edge_angle - heading_angle)
+						if (angle > 180):
+							angle -= 180
+
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}	
 
 			else:	
 				self.current += 1
