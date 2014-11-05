@@ -93,7 +93,7 @@ class MapInfoList:
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
 			self.currentMap = 0
-			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building), COORDX, 0, COORDY : 0}
+			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building), COORDX : 0, COORDY : 0}
 
 		else:
 			result = self.mapinfoList[self.building[self.currentBuilding]].giveDirection(self.mode, distance, heading, coordX, coordY, numSteps)
