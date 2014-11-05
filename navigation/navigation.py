@@ -94,6 +94,7 @@ class Navigation:
         self.sample_new = Vector(0, 0, 0)
         self.time_window = 0
         self.peak_threshold = 0
+        self.steps = 0
 
         # used for calculating the distance (stride-length and total distance within update time)
         self.accel_list = []
@@ -213,6 +214,7 @@ class Navigation:
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
                                         # a maxima has been detected and a step is detected
                                         self.num_steps += 1
+                                        self.steps += 1
                                         self.peak_direction = MAXIMA
                                         self.accel_minima = self.accel_val
                                         self.time_window = time.time()
@@ -241,6 +243,7 @@ class Navigation:
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
                                         # a maxima has been detected and a step is detected
                                         self.num_steps += 1
+                                        self.steps += 1
                                         self.peak_direction = MINIMA
                                         self.accel_maxima = self.accel_val
                                         self.time_window = time.time()
@@ -268,8 +271,8 @@ class Navigation:
             self.heading_moving_index = (self.heading_moving_index + 1) % 4
 
             ##### check state machine #####
-            result = self.mapinfolist.giveDirection(self.distance, self.heading, self.coordX, self.coordY, self.num_steps)
-            self.num_steps = 0
+            result = self.mapinfolist.giveDirection(self.distance, self.heading, self.coordX, self.coordY, self.steps)
+            self.steps = 0
             self.distance = 0
             self.mode = result[MODE]
             self.coordX = result[COORDX]
