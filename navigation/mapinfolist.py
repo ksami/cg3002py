@@ -41,7 +41,7 @@ class MapInfoList:
 		# download three maps:
 		self.mapinfoList = []
 		self.currentBuilding = 0
-		self.mode = START_BUILDING
+		self.mode = START_JOURNEY
 		
 		for i in range(3) :
 			with open(cached_map[i], "r") as f:
@@ -93,7 +93,6 @@ class MapInfoList:
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
 			self.currentMap = 0
-			print "Start heyll ldofauofidsaou\n"
 			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building)}
 
 		else:
