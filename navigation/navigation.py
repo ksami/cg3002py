@@ -278,8 +278,8 @@ class Navigation:
 
             if(self.mode == START_JOURNEY):
                 numberBuildings = result[NUMBER_OF_BUILDINGS]
-                feedback = "You have to walk through " + str(numberBuildings) + " buildings"
-                print "MODE: START_JOURNEY ---\n\n" + feedback
+                feedback = "You have to walk through " + str(numberBuildings) + " building(s)"
+                print "\n\nMODE: START_JOURNEY ---\n" + feedback
 
             elif(self.mode == START_BUILDING):
                 numberNodes = result[NUMBER_NODES]
@@ -293,13 +293,13 @@ class Navigation:
                 elif(currentBuilding == 2):
                     building = "COM 2"
                     level = 3
-                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1\n\n"
-                print "\n\n--- MODE: START_BUILDING ---\n" + feedback
+                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1"
+                print "\n\n--- MODE: START_BUILDING ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == REACH_NODE):
                 currentNode = result[CURRENT_NODE]
                 feedback = "You have reached node " + str(currentNode)
-                print "\n\n--- MODE: REACH_NODE ---\n" + feedback
+                print "\n\n--- MODE: REACH_NODE ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif (self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
@@ -317,7 +317,7 @@ class Navigation:
                 if(time.time() - self.go_forward_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     feedback = "gf"
-                    print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward"
+                    print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward" + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
@@ -396,5 +396,5 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 31)
+    navi.getShortestPath(1, 2, 1, 1, 2, 2)
     navi.execute(queue)
