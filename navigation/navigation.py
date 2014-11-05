@@ -279,7 +279,7 @@ class Navigation:
             if(self.mode == START_JOURNEY):
                 numberBuildings = result[NUMBER_OF_BUILDINGS]
                 feedback = "You have to walk through " + str(numberBuildings) + " buildings"
-                print "MODE: START_JOURNEY ---\n\n" + feedback + "\n\n"
+                print "MODE: START_JOURNEY ---\n\n" + feedback
 
             elif(self.mode == START_BUILDING):
                 numberNodes = result[NUMBER_NODES]
