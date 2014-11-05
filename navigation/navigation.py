@@ -32,6 +32,7 @@ RIGHT = 1
 power_mgmt_1 = 0x6b # Power management registers
 mpu_address = 0x68  # MPU6050 i2c address
 hmc_address = 0x1e  # HMC5883l i2c address
+bmp_address = 0x77  # BMP180 i2c address
 
 # state machine mode
 START_JOURNEY = 0
