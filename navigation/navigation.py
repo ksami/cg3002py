@@ -13,8 +13,8 @@ PEAK_THRESHOLD = 10000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
 STRIDE_COEFFICIENT = 1.319148936
-COMPASS_X_AXIS = -130 # this was obtained with a laptop nearby. Ill do it again when i use wifi dongle
-COMPASS_Z_AXIS = -198.5 
+COMPASS_X_AXIS = -145 # this was obtained with a laptop nearby. Ill do it again when i use wifi dongle
+COMPASS_Z_AXIS = -135
 
 # Peak-to-peak detection modes
 MINIMA = 0
