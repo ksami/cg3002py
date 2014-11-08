@@ -156,8 +156,8 @@ class MapInfo:
 				angle = edge_angle - heading_angle
 				if (angle < 0):
 					angle += 360
-				if(angle > 360):
-					angle -= 360
+				if(angle > 180):
+					angle -= 180
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 
