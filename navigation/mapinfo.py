@@ -143,7 +143,7 @@ class MapInfo:
 
 			#print "heading:", heading_angle, "edge angle:", edge_angle
 
-			if( edge_angle - ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + ANGLE_THRESHOLD):
+			if( fabs(edge_angle - heading_angle) <= ANGLE_THRESHOLD):
 				mode = GO_FORWARD
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 			else:
