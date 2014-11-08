@@ -320,7 +320,7 @@ class Navigation:
                 if(time.time() - self.go_forward_time >= GO_FORWARD_UPDATE_TIME):
                     self.go_forward_time = time.time()
                     feedback = "gf"
-                    print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward" + g"\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
+                    print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward" + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"

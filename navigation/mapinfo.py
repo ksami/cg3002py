@@ -210,10 +210,6 @@ class MapInfo:
 
 				# 		return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}
 				mode = GO_FORWARD
-				if(time.time() - self.tcoord >= 5):
-					print "Node: ", self.maplist[self.path[self.current+1]].getName()
-					print "DISTANCE LEFT:", ((endX - coordX)**2 + (endY - coordY)**2)
-					self.tcoord = time.time()
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 
