@@ -1,0 +1,1 @@
+zbarcam --nodisplay --prescale=640x480 -Sdisable -Sqrcode.enable
