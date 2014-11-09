@@ -65,7 +65,7 @@ int main(void){
 
 			// extract results  
 			for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol) {  
-				cout << "symbol->get_data()" << endl;
+				cout << symbol->get_data() << endl;
 				// vector<Point> vp;  
 				// do something useful with results  
 				// cout << "decoded " << symbol->get_type_name()  
