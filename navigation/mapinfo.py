@@ -141,7 +141,7 @@ class MapInfo:
 			if(edge_angle < 0):
 				edge_angle += 360
 
-			print "heading:", heading_angle, "edge angle:", edge_angle
+			#print "heading:", heading_angle, "edge angle:", edge_angle
 
 			if( fabs(edge_angle - heading_angle) <= ANGLE_THRESHOLD):
 				mode = GO_FORWARD
@@ -154,7 +154,8 @@ class MapInfo:
 					turning = RIGHT
 
 				angle = fabs(edge_angle - heading_angle)
-				print "Difference angle:", angle
+				if(angle > 180):
+					angle = 360 - angle
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 
