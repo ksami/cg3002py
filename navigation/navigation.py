@@ -408,5 +408,5 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 2)
+    navi.getShortestPath(2, 3, 2, 2, 3, 5)
     navi.execute(queue)
