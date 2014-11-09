@@ -5,7 +5,7 @@ import sys
 from vector import Vector
 
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
-PEAK_THRESHOLD = 10000
+PEAK_THRESHOLD = 5500
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
 #STRIDE_COEFFICIENT = 
@@ -206,7 +206,7 @@ while(time.time() - time_elapsed <= 30):
 
     accel_filter_list.insert(moving_index, accel_val)
     moving_index = (moving_index + 1) % 4
-    accel_graph.write(size + "\t" + accel_val.x + "\t" + accel_val.y + "\t" + accel_val.z)
+    accel_graph.write(str(size) + "\t" + str(accel_val.x) + "\t" + str(accel_val.y) + "\t" + str(accel_val.z))
     
     # finding minima and maxima
     if(not first_time):
@@ -230,8 +230,8 @@ while(time.time() - time_elapsed <= 30):
                         print "total distance:", total_distance
                         accel_list = []
                         accel_graph.write("\t" + "maxima teehee")
-                        sum_diff += math.fabs(accel_maxima - accel_minima)
-                        num_dif += 1
+                        sum_diff += math.fabs(accel_maxima.y - accel_minima.y)
+                        num_diff += 1
                         calculate_distance = False
 
                     if( compare(most_active_axis, accel_maxima, accel_val) >= peak_threshold ):
@@ -261,7 +261,7 @@ while(time.time() - time_elapsed <= 30):
                         print "stride length", stride_length
                         print "total distance:", total_distance
                         accel_graph.write("\t" + "minima teehee")
-                        sum_diff += math.fabs(accel_maxima - accel_minima)
+                        sum_diff += math.fabs(accel_maxima.y - accel_minima.y)
                         num_diff += 1
                         accel_list = []
                         calculate_distance = False
