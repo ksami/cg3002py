@@ -27,7 +27,7 @@ TURN = 4
 REACH_DEST_BUILDING = 5
 
 ANGLE_THRESHOLD = 5
-WALKING_ANGLE_THRESHOLD = 90
+WALKING_ANGLE_THRESHOLD = 30
 CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 100
 NUM_STEPS_CHECK = 3
@@ -181,38 +181,33 @@ class MapInfo:
 
 			if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
 
-				# heading error detection while walking
-				# if(self.num_steps <= NUM_STEPS_CHECK):
-				# 	mode = GO_FORWARD
-				# 	return {MODE : mode, COORDX : coordX, COORDY : coordY}
-				# else:
-				# 	heading_angle = 90 - (heading + self.degree) % 360
-				# 	if(heading_angle < 0):
-				# 		heading_angle += 360
+				heading error detection while walking
+				if(self.num_steps <= NUM_STEPS_CHECK):
+					mode = GO_FORWARD
+					return {MODE : mode, COORDX : coordX, COORDY : coordY}
+				else:
+					heading_angle = 90 - (heading + self.degree) % 360
+					if(heading_angle < 0):
+						heading_angle += 360
 
-				# 	print "heading:", heading_angle, "edge angle:", edge_angle
+					print "heading:", heading_angle, "edge angle:", edge_angle
 
-				# 	if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
-				# 		self.num_steps = 0
-				# 		mode = GO_FORWARD
-				# 		return {MODE : mode, COORDX : coordX, COORDY : coordY}
-				# 	else:
-				# 		mode = TURN
-				# 		turning = LEFT
-				# 		cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
-				# 		if(cross_vector > 0):
-				# 			turning = RIGHT
+					if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
+						self.num_steps = 0
+						mode = GO_FORWARD
+						return {MODE : mode, COORDX : coordX, COORDY : coordY}
+					else:
+						mode = TURN
+						turning = LEFT
+						cross_vector = cos(radians(edge_angle)) * sin(radians(heading_angle)) - cos(radians(heading_angle)) * sin(radians(edge_angle))
+						if(cross_vector > 0):
+							turning = RIGHT
 
-				# 		angle = edge_angle - heading_angle
-				# 		if (angle < 0):
-				# 			angle += 360
-				# 		if(angle > 360):
-				# 			angle -= 360
+						angle = fabs(edge_angle - heading_angle)
+						if(angle > 180):
+							angle = 360 - angle
 
-				# 		return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}
-				mode = GO_FORWARD
-				return {MODE : mode, COORDX : coordX, COORDY : coordY}
-
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}
 			else:	
 				self.current += 1
 				if(self.current == len(self.path) - 1):
