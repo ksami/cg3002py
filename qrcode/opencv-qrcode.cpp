@@ -60,7 +60,7 @@ int main(void){
 		int n = scanner.scan(image);  
 
 		//cout<<"n: "<<n<<endl;
-
+		cout << " " << endl;
 		if(n>0){
 
 			// extract results  
