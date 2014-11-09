@@ -9,30 +9,23 @@
 #include <math.h>
 #include <time.h>
 
+#include "zbar.h"
+
 using namespace cv;
 using namespace std;
+using namespace zbar;  
 
 #define WIDTH 320
 #define HEIGHT 240
-//char rawWindow[] = "Raw Video";
-//char keyPressed;
-
-
-#include "zbar.h"  
-using namespace zbar;  
-
 
 int main(void){  
 	VideoCapture cap(0);
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
-	ImageScanner scanner;  
-	scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);  
-	// obtain image data  
-	//char file[256];  
-	//cin>>file;  
-	//Mat img = imread(file,0);  
+	ImageScanner scanner;
+	scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
+
 	Mat img;
 	Mat gray;
 
@@ -95,49 +88,3 @@ int main(void){
 		}  
 	}  
 }
-
-
-
-/*
-   int main() {
-   VideoCapture cap(0);
-   cap.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
-   cap.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
-
-   Mat frame, rgbFrames;
-   cout << "prop frame width is: " << cap.get(CV_CAP_PROP_FRAME_WIDTH) << endl;
-   cout << "prop frame height is: " << cap.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
-
-   time_t start, end;
-   double fps, sec;
-   int counter = 0;
-
-   Size subPixWinSize(10, 10), winSize(31, 31);
-//namedWindow(rawWindow, CV_WINDOW_AUTOSIZE);
-
-time(&start);
-
-while (1) {
-cap >> frame;
-
-// fps
-time(&end);
-counter++;
-sec = difftime(end, start);
-fps = counter / sec;
-cout << "FPS: " << fps << endl;
-
-frame.copyTo(rgbFrames);
-
-//imshow(rawWindow, rgbFrames);
-
-keyPressed = waitKey(10);
-if (keyPressed == 27) {
-break;
-}
-
-}
-}
- */
-
-
