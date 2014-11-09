@@ -191,7 +191,7 @@ class MapInfo:
 
 					#print "heading:", heading_angle, "edge angle:", edge_angle
 
-					if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
+					if( fabs(edge_angle - heading_angle) <= WALKING_ANGLE_THRESHOLD):
 						self.num_steps = 0
 						mode = GO_FORWARD
 						return {MODE : mode, COORDX : coordX, COORDY : coordY}
