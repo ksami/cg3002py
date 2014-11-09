@@ -115,6 +115,9 @@ class MapInfo:
 		for p in self.path:
 			print self.mapList[p].getName(), "----"
 
+	def giveCurrentCoordinates(self, nodeId):
+		return (self.mapList[nodeId].getX(), self.mapList[nodeId].getY())
+
 	def giveDirection (self, mode, distance, heading, coordX, coordY, numSteps):
 
 		if(mode == START_BUILDING):

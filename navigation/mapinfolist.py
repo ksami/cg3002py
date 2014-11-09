@@ -40,6 +40,7 @@ class MapInfoList:
 
 		# download three maps:
 		self.mapinfoList = []
+		self.building = []
 		self.currentBuilding = 0
 		self.mode = START_JOURNEY
 		
@@ -49,6 +50,15 @@ class MapInfoList:
 				jsondata = "".join(lines)
 			mapinfo = MapInfo(jsondata)
 			self.mapinfoList.append(mapinfo)
+
+	def updateCurrentCoordinates (self, buidlingId, nodeId):
+		# update building
+		while(self.building[self.currentBuilding] != buidlingId):
+			self.currentBuilding += 1
+
+		(x, y) = self.mapinfoList[buidlingId].giveCurrentCoordinates(nodeId)
+		return {COORDX : x , COORDY : y}
+
 
 	def shortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
 
@@ -67,7 +77,6 @@ class MapInfoList:
 
 		start = []
 		end = []
-		self.building = []
 
 		index = startMap
 		direction = 1
