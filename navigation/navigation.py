@@ -424,5 +424,5 @@ if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
     qr_queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 10)
+    navi.getShortestPath(1, 2, 1, 1, 2, 2)
     navi.execute(queue, qr_queue)
