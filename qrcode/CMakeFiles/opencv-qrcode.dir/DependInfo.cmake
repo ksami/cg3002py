@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/pi/opencv/qrcode/opencv-qrcode.cpp" "/home/pi/opencv/qrcode/CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o"
+  "/home/pi/cg3002py/qrcode/opencv-qrcode.cpp" "/home/pi/cg3002py/qrcode/CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

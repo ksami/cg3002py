@@ -35,10 +35,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pi/opencv/qrcode
+CMAKE_SOURCE_DIR = /home/pi/cg3002py/qrcode
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pi/opencv/qrcode
+CMAKE_BINARY_DIR = /home/pi/cg3002py/qrcode
 
 # Include any dependencies generated for this target.
 include CMakeFiles/opencv-qrcode.dir/depend.make
@@ -51,17 +51,17 @@ include CMakeFiles/opencv-qrcode.dir/flags.make
 
 CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o: CMakeFiles/opencv-qrcode.dir/flags.make
 CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o: opencv-qrcode.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/opencv/qrcode/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/cg3002py/qrcode/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o -c /home/pi/opencv/qrcode/opencv-qrcode.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o -c /home/pi/cg3002py/qrcode/opencv-qrcode.cpp
 
 CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/opencv/qrcode/opencv-qrcode.cpp > CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/cg3002py/qrcode/opencv-qrcode.cpp > CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.i
 
 CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/opencv/qrcode/opencv-qrcode.cpp -o CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/cg3002py/qrcode/opencv-qrcode.cpp -o CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.s
 
 CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o.requires:
 .PHONY : CMakeFiles/opencv-qrcode.dir/opencv-qrcode.cpp.o.requires
@@ -112,6 +112,6 @@ CMakeFiles/opencv-qrcode.dir/clean:
 .PHONY : CMakeFiles/opencv-qrcode.dir/clean
 
 CMakeFiles/opencv-qrcode.dir/depend:
-	cd /home/pi/opencv/qrcode && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pi/opencv/qrcode /home/pi/opencv/qrcode /home/pi/opencv/qrcode /home/pi/opencv/qrcode /home/pi/opencv/qrcode/CMakeFiles/opencv-qrcode.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/pi/cg3002py/qrcode && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pi/cg3002py/qrcode /home/pi/cg3002py/qrcode /home/pi/cg3002py/qrcode /home/pi/cg3002py/qrcode /home/pi/cg3002py/qrcode/CMakeFiles/opencv-qrcode.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/opencv-qrcode.dir/depend
 

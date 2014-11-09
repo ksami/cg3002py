@@ -10,6 +10,7 @@ import pedometer.test
 import comms.python.main
 import navigation.main
 import audio.main
+import qrcode.main
 from comms.python.comms import Comms
 from navigation.navigation import Navigation
 from audio.textspeech import Speak
@@ -45,11 +46,14 @@ q_navi = createQueue()
 q_xbee = createQueue()
 q_listen = createQueue()
 q_time = createQueue()
+q_qrcode = createQueue()
+q_kill_qr = createQueue()
 
 # Processes
 p_navi = None
 p_feedback = None
 p_listen = None
+p_qrscan = None
 p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
 
 # Start xbee receive
@@ -170,27 +174,32 @@ def getUserInput(cmd):
 
 def main():
 
-	while True:
-		currentState = _systemState.getCurrentState()
+	try:
+		while True:
+			currentState = _systemState.getCurrentState()
 
-		if currentState == State.STATE_OFF:
-			executeOff()
+			if currentState == State.STATE_OFF:
+				executeOff()
 
-		elif currentState == State.STATE_IDLE:
-			executeIdle()
+			elif currentState == State.STATE_IDLE:
+				executeIdle()
 
-		elif currentState == State.STATE_INIT:
-			executeInit()
+			elif currentState == State.STATE_INIT:
+				executeInit()
+			
+			elif currentState == State.STATE_NAVI:
+				executeNavi()
+			
+			elif currentState == State.STATE_WAIT:
+				executeWait()
+			
+			else:
+				pass
+
+	except KeyboardInterrupt:
+		print "cleaning up"
+		q_kill_qr.put(1)
 		
-		elif currentState == State.STATE_NAVI:
-			executeNavi()
-		
-		elif currentState == State.STATE_WAIT:
-			executeWait()
-		
-		else:
-			pass
-	
 
 def executeOff():
 	print "in off state"
@@ -235,26 +244,26 @@ def executeInit():
 		p_listen = createProcess(audio.main.listen, (q_listen,))
 		p_listen.start()
 
-	# inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
-	# 
-	# for key in inputs.keys():
-	# 	userInput = getUserInput(key)
-	# 	if userInput == -1:
-	# 		isCancel = True
-	# 		break
-	# 	else:
-	# 		inputs[key] = userInput
-
-	startpt = getUserInput("sp")
-	#startpt = "five"
-	if startpt == -1:
-		isCancel = True
+	inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
 	
-	if isCancel == False:
-		endpt = getUserInput("ep")
-		#endpt = "eight"
-		if endpt == -1:
+	for key in inputs.keys():
+		userInput = getUserInput(key)
+		if userInput == -1:
 			isCancel = True
+			break
+		else:
+			inputs[key] = userInput
+
+	# startpt = getUserInput("sp")
+	# #startpt = "five"
+	# if startpt == -1:
+	# 	isCancel = True
+	
+	# if isCancel == False:
+	# 	endpt = getUserInput("ep")
+	# 	#endpt = "eight"
+	# 	if endpt == -1:
+	# 		isCancel = True
 
 	
 	if p_listen.is_alive():
@@ -270,21 +279,22 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
-		# sb = strToInt(inputs["sb"])
-		# sl = strToInt(inputs["sl"])
-		# sn = strToInt(inputs["sn"])
-		# eb = strToInt(inputs["eb"])
-		# el = strToInt(inputs["el"])
-		# en = strToInt(inputs["en"])
+		sb = strToInt(inputs["sb"])
+		sl = strToInt(inputs["sl"])
+		sn = strToInt(inputs["sn"])
+		eb = strToInt(inputs["eb"])
+		el = strToInt(inputs["el"])
+		en = strToInt(inputs["en"])
 
-		istartpt = strToInt(startpt)
-		iendpt = strToInt(endpt)
+		# istartpt = strToInt(startpt)
+		# iendpt = strToInt(endpt)
 
 		# DONT CREATE NEW PROCESS FOR THIS
 		# p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
 		# p_navisp.start()
 		# p_navisp.join()
-		_navi.getShortestPath(istartpt, iendpt)
+		_navi.getShortestPath(sb, sl, sn, eb, el, en)
+		# _navi.getShortestPath(istartpt, iendpt)
 		print "navi id: ", id(_navi)
 		print "navi x: ", _navi.coordY
 		print "navi map: ", _navi.mapinfo.path
@@ -309,6 +319,7 @@ def executeNavi():
 
 	global p_navi
 	global p_feedback
+	global p_qrscan
 
 	#if process has not been created before
 	if p_navi == None:
@@ -322,6 +333,10 @@ def executeNavi():
 	if p_feedback == None:
 		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
 		p_feedback.start()
+
+	if p_qrscan == None:
+		p_qrscan = createProcess(qrcode.main.qrscan, (q_qrcode, q_kill_qr))
+		p_qrscan.start()
 
 	#TODO: obstacle detection feedback to user
 	hand = q_xbee.get(block=True)

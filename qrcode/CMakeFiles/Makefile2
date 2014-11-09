@@ -47,10 +47,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pi/opencv/qrcode
+CMAKE_SOURCE_DIR = /home/pi/cg3002py/qrcode
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pi/opencv/qrcode
+CMAKE_BINARY_DIR = /home/pi/cg3002py/qrcode
 
 #=============================================================================
 # Target rules for target CMakeFiles/opencv-qrcode.dir
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/pi/opencv/qrcode
 CMakeFiles/opencv-qrcode.dir/all:
 	$(MAKE) -f CMakeFiles/opencv-qrcode.dir/build.make CMakeFiles/opencv-qrcode.dir/depend
 	$(MAKE) -f CMakeFiles/opencv-qrcode.dir/build.make CMakeFiles/opencv-qrcode.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/opencv/qrcode/CMakeFiles  1
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/cg3002py/qrcode/CMakeFiles  1
 	@echo "Built target opencv-qrcode"
 .PHONY : CMakeFiles/opencv-qrcode.dir/all
 
@@ -69,9 +69,9 @@ all: CMakeFiles/opencv-qrcode.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/opencv-qrcode.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/opencv/qrcode/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/cg3002py/qrcode/CMakeFiles 1
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/opencv-qrcode.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/opencv/qrcode/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/cg3002py/qrcode/CMakeFiles 0
 .PHONY : CMakeFiles/opencv-qrcode.dir/rule
 
 # Convenience name for target.

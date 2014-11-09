@@ -320,6 +320,7 @@ recognize_from_microphone()
         //printf("Stopped listening, please wait...\n");
         fflush(stdout);
         /* Finish decoding, obtain and print result */
+        printf(" \n");   //for ken to escape the blocking call
         ps_end_utt(ps);
         hyp = ps_get_hyp(ps, NULL, &uttid);
         printf("%s\n", hyp);
