@@ -3,7 +3,7 @@ import sys
 import multiprocessing
 import time
 
-qrcode_exe = "exec /home/pi/cg3002py/qrcode/opencv-qrcode"
+qrcode_exe = "/home/pi/cg3002py/qrcode/opencv-qrcode"
 
 def qrscan(q_qrcode):
 	process = subprocess.Popen(qrcode_exe, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -24,7 +24,7 @@ def qrscan(q_qrcode):
 
 
 def qrscantest():
-	process = subprocess.Popen("opencv-qrcode", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	process = subprocess.Popen(qrcode_exe, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	print "qrscan running"
 
 	# Poll process for new output until finished
@@ -38,6 +38,13 @@ def qrscantest():
 
 	output = process.communicate()[0]
 	exitCode = process.returncode
+	print "process.poll():", process.poll()
+	process.terminate()
+	print "process.poll():", process.poll()
+	process.kill()
+	print "process.poll():", process.poll()
+	process.wait()
+	print "process.poll():", process.poll()
 
 
 if __name__ == "__main__":
