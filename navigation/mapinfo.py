@@ -154,7 +154,12 @@ class MapInfo:
 					turning = RIGHT
 
 				angle = fabs(edge_angle - heading_angle)
+<<<<<<< HEAD
 				print  "Difference Angle:", angle
+=======
+				if(angle > 180):
+					angle = 360 - angle
+>>>>>>> 6bc3cc0ad02a1c2576f92cbb24e58874271f27f4
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 
