@@ -26,7 +26,7 @@ GO_FORWARD = 3
 TURN = 4
 REACH_DEST_BUILDING = 5
 
-ANGLE_THRESHOLD = 10
+ANGLE_THRESHOLD = 5
 WALKING_ANGLE_THRESHOLD = 90
 CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 100
@@ -141,7 +141,7 @@ class MapInfo:
 			if(edge_angle < 0):
 				edge_angle += 360
 
-			#print "heading:", heading_angle, "edge angle:", edge_angle
+			print "heading:", heading_angle, "edge angle:", edge_angle
 
 			if( fabs(edge_angle - heading_angle) <= ANGLE_THRESHOLD):
 				mode = GO_FORWARD
@@ -153,11 +153,8 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				angle = edge_angle - heading_angle
-				if (angle < 0):
-					angle += 360
-				if(angle > 180):
-					angle -= 180
+				angle = fabs(edge_angle - heading_angle)
+				print  "Difference Angle:", angle
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 

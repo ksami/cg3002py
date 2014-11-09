@@ -394,8 +394,6 @@ def GetHeading(most_active_axis, compass_val):
     if(most_active_axis == 2): # z-axis 
         heading = math.atan2(compass_val.y, compass_val.x)
 
-    heading += 0.0404
-
     if(heading < 0):
         heading += 2*math.pi
 
