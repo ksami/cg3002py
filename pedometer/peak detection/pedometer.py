@@ -118,6 +118,10 @@ heading_moving_index = 0
 calibrate_threshold = True
 calculate_distance = False
 
+size = 0
+sum_diff = 0
+num_diff = 0
+
 # initialization stage
 
 most_active_axis = 1
@@ -167,7 +171,7 @@ accel_offset_z = 0
 # print "\nCALIBRATION SIZE: " , calibration_size  
 # print "OFFSET: ", accel_offset_x, accel_offset_y, accel_offset_z
 
-#accel_graph = open('accel_graph_stride-length.txt', 'w')
+accel_graph = open('accel_graph_teehee.txt', 'w')
 print "STRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
 print "START!!"
 
@@ -175,10 +179,11 @@ time.sleep(1)
 
 first_time = True
 
-# execution stage
 
 time_elapsed = time.time()
 while(time.time() - time_elapsed <= 30):
+
+    size += 1
 
     # filter accelerometer values
     accel_xout = read_word_2c(mpu_address, 0x3b) - accel_offset_x
@@ -201,6 +206,7 @@ while(time.time() - time_elapsed <= 30):
 
     accel_filter_list.insert(moving_index, accel_val)
     moving_index = (moving_index + 1) % 4
+    accel_graph.write(size + "\t" + accel_val.x + "\t" + accel_val.y + "\t" + accel_val.z)
     
     # finding minima and maxima
     if(not first_time):
@@ -220,12 +226,12 @@ while(time.time() - time_elapsed <= 30):
                     if(calculate_distance):
                         stride_length = getStrideLength(accel_list)
                         total_distance += stride_length
-                        #print "accel list", len(accel_list)
                         print "stride length", stride_length
-                        #print "min", accel_minima.y, "max", accel_maxima.y
                         print "total distance:", total_distance
-                        #accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
                         accel_list = []
+                        accel_graph.write("\t" + "maxima teehee")
+                        sum_diff += math.fabs(accel_maxima - accel_minima)
+                        num_dif += 1
                         calculate_distance = False
 
                     if( compare(most_active_axis, accel_maxima, accel_val) >= peak_threshold ):
@@ -252,11 +258,11 @@ while(time.time() - time_elapsed <= 30):
                     if(calculate_distance):
                         stride_length = getStrideLength(accel_list)
                         total_distance += stride_length
-                        #print "accel list", len(accel_list)
                         print "stride length", stride_length
-                        #print "min", accel_minima.y, "max", accel_maxima.y
                         print "total distance:", total_distance
-                        #accel_graph.write(str(num_steps) + "\t" + str(stride_length) + "\t" + str(accel_minima.y) + "\t" + str(accel_maxima.y) + "\t" + str(len(accel_list)) + "\n")
+                        accel_graph.write("\t" + "minima teehee")
+                        sum_diff += math.fabs(accel_maxima - accel_minima)
+                        num_diff += 1
                         accel_list = []
                         calculate_distance = False
 
@@ -276,9 +282,12 @@ while(time.time() - time_elapsed <= 30):
         peak_direction = MINIMA
         peak_threshold = PEAK_THRESHOLD / 2
         accel_maxima = accel_val
+        accel_graph.write("\t" + "maxima teehee")
         first_time = False
         sample_new = accel_val
         time_window = time.time()
 
-#accel_graph.close()
-print "total distance:", total_distance
+    accel_graph.write("\n")
+
+print "threshold ", sum_diff / num_diff
+accel_graph.close()
