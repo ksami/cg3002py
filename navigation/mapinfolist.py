@@ -56,7 +56,7 @@ class MapInfoList:
 		while(self.building[self.currentBuilding] != buidlingId):
 			self.currentBuilding += 1
 
-		(x, y) = self.mapinfoList[buidlingId].giveCurrentCoordinates(nodeId)
+		(x, y) = self.mapinfoList[buidlingId].giveCurrentCoordinates(nodeId-1)
 		return {COORDX : x , COORDY : y}
 
 

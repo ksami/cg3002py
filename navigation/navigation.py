@@ -156,20 +156,6 @@ class Navigation:
         print "START!!"
 
         while(True):
-        
-            # check qrcode updates
-            try:
-                qrstring = q_qrcode.get(block=False)
-                if qrstring != None:
-                        #mapid-nodeid eg. 3-02
-                        print qrstring
-                        ids = qrstring.split('-')
-                        mapid = int(ids[0])
-                        nodeid = int(ids[1])
-            # Queue.empty
-            except Exception:
-                #ignore
-                pass
 
             # mode GO_FORWARD will update the distance and heading
             if(self.mode == GO_FORWARD):
@@ -281,6 +267,23 @@ class Navigation:
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
             self.heading = GetHeading(self.most_active_axis, self.compass_val)
             self.heading_moving_index = (self.heading_moving_index + 1) % 4
+
+                        # check qrcode updates
+            try:
+                qrstring = q_qrcode.get(block=False)
+                if qrstring != None:
+                        #mapid-nodeid eg. 3-02
+                        print qrstring
+                        ids = qrstring.split('-')
+                        mapid = int(ids[0])
+                        nodeid = int(ids[1])
+                        dic = self.mapinfolist.updateCurrentCoordinates(mapid, nodeid)
+                        self.coordX = dic[COORDX]
+                        self.coordY = dic[COORDY]
+            # Queue.empty
+            except Exception:
+                #ignore
+                pass
 
             ##### check state machine #####
             result = self.mapinfolist.giveDirection(self.distance, self.heading, self.coordX, self.coordY, self.steps)
