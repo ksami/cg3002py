@@ -181,7 +181,6 @@ class MapInfo:
 
 			if((endX - coordX)**2 + (endY - coordY)**2 >= DISTANCE_THRESHOLD**2):
 
-				heading error detection while walking
 				if(self.num_steps <= NUM_STEPS_CHECK):
 					mode = GO_FORWARD
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
@@ -190,7 +189,7 @@ class MapInfo:
 					if(heading_angle < 0):
 						heading_angle += 360
 
-					print "heading:", heading_angle, "edge angle:", edge_angle
+					#print "heading:", heading_angle, "edge angle:", edge_angle
 
 					if( edge_angle - WALKING_ANGLE_THRESHOLD <= heading_angle and heading_angle <= edge_angle + WALKING_ANGLE_THRESHOLD):
 						self.num_steps = 0
