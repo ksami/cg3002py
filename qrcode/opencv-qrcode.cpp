@@ -47,7 +47,7 @@ int main(void){
 		counter++;
 		sec = difftime(end, start);
 		fps = counter / sec;
-		cout << "FPS: " << fps << endl;
+		//cout << "FPS: " << fps << endl;
 
 		//cout<<"image captured"<<endl;
 
@@ -59,27 +59,28 @@ int main(void){
 		// scan the image for barcodes  
 		int n = scanner.scan(image);  
 
-		cout<<"n: "<<n<<endl;
+		//cout<<"n: "<<n<<endl;
 
 		if(n>0){
 
 			// extract results  
 			for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol) {  
-				vector<Point> vp;  
+				cout << "symbol->get_data()" << endl;
+				// vector<Point> vp;  
 				// do something useful with results  
-				cout << "decoded " << symbol->get_type_name()  
-					<< " symbol \"" << symbol->get_data() << '"' <<" "<< endl;  
-				int n = symbol->get_location_size();  
-				for(int i=0;i<n;i++){  
-					vp.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i))); 
-				}  
-				RotatedRect r = minAreaRect(vp);  
-				Point2f pts[4];  
-				r.points(pts);  
-				//for(int i=0;i<4;i++){  
-				//     line(imgout,pts[i],pts[(i+1)%4],Scalar(255,0,0),3);  
-				//}  
-				cout<<"Angle: "<<r.angle<<endl;  
+				// cout << "decoded " << symbol->get_type_name()  
+				// << " symbol \"" << symbol->get_data() << '"' <<" "<< endl;  
+				// int n = symbol->get_location_size();  
+				// for(int i=0;i<n;i++){  
+				// 	vp.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i))); 
+				// }  
+				// RotatedRect r = minAreaRect(vp);  
+				// Point2f pts[4];  
+				// r.points(pts);  
+				// for(int i=0;i<4;i++){  
+				//      line(imgout,pts[i],pts[(i+1)%4],Scalar(255,0,0),3);  
+				// }  
+				// cout<<"Angle: "<<r.angle<<endl;  
 			}  
 			//imshow("imgout.jpg",imgout);  
 			// clean up  
