@@ -27,7 +27,7 @@ TURN = 4
 REACH_DEST_BUILDING = 5
 
 ANGLE_THRESHOLD = 5
-WALKING_ANGLE_THRESHOLD = 30
+WALKING_ANGLE_THRESHOLD = 20
 CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 100
 NUM_STEPS_CHECK = 3
@@ -144,9 +144,11 @@ class MapInfo:
 			if(edge_angle < 0):
 				edge_angle += 360
 
-			#print "heading:", heading_angle, "edge angle:", edge_angle
+			diff_angle = fabs(edge_angle - heading_angle)
+			if(diff_angle > 180):
+				diff_angle = 360 - diff_angle
 
-			if( fabs(edge_angle - heading_angle) <= ANGLE_THRESHOLD):
+			if( diff_angle <= ANGLE_THRESHOLD):
 				mode = GO_FORWARD
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 			else:
@@ -156,11 +158,7 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				angle = fabs(edge_angle - heading_angle)
-				if(angle > 180):
-					angle = 360 - angle
-
-				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: diff_angle}
 
 		elif(mode == GO_FORWARD):
 
@@ -189,9 +187,11 @@ class MapInfo:
 					if(heading_angle < 0):
 						heading_angle += 360
 
-					#print "heading:", heading_angle, "edge angle:", edge_angle
+					diff_angle = fabs(edge_angle - heading_angle)
+					if(diff_angle > 180):
+						diff_angle = 360 - diff_angle
 
-					if( fabs(edge_angle - heading_angle) <= WALKING_ANGLE_THRESHOLD):
+					if( diff_angle <= WALKING_ANGLE_THRESHOLD):
 						self.num_steps = 0
 						mode = GO_FORWARD
 						return {MODE : mode, COORDX : coordX, COORDY : coordY}
@@ -202,11 +202,7 @@ class MapInfo:
 						if(cross_vector > 0):
 							turning = RIGHT
 
-						angle = fabs(edge_angle - heading_angle)
-						if(angle > 180):
-							angle = 360 - angle
-
-						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}
+						return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : diff_angle}
 			else:	
 				self.current += 1
 				if(self.current == len(self.path) - 1):
