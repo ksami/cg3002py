@@ -1,0 +1,1 @@
+/home/pi/opencv/qrcode/CMakeFiles/opencv-qrcode.dir

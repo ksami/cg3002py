@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pi/opencv/qrcode/opencv-qrcode.cpp
+opencv2/highgui/highgui.hpp
+-
+opencv2/video/tracking.hpp
+-
+opencv2/imgproc/imgproc.hpp
+-
+iostream
+-
+ctype.h
+-
+stdlib.h
+-
+stdio.h
+-
+math.h
+-
+time.h
+-
+zbar.h
+/home/pi/opencv/qrcode/zbar.h
+
