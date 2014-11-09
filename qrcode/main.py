@@ -2,8 +2,9 @@ import subprocess
 import sys
 import multiprocessing
 import time
+import shlex
 
-qrcode_exe = "/home/pi/cg3002py/qrcode/opencv-qrcode"
+qrcode_exe = shlex.split("/home/pi/cg3002py/qrcode/opencv-qrcode")
 
 def qrscan(q_qrcode, q_kill):
 	process = subprocess.Popen(qrcode_exe, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -53,8 +54,8 @@ def qrscantest(q_kill):
 				print "process.poll():", process.poll()
 				process.terminate()
 				print "process.poll():", process.poll()
-				process.kill()
-				print "process.poll():", process.poll()
+				# process.kill()
+				# print "process.poll():", process.poll()
 				process.wait()
 				print "process.poll():", process.poll()
 		# Queue.empty
