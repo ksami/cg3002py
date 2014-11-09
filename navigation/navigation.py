@@ -9,10 +9,11 @@ from mapinfolist import MapInfoList
 
 # Calibration constants
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
-PEAK_THRESHOLD = 10000
+PEAK_THRESHOLD = 5500
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 1.319148936
+STRIDE_COEFFICIENT = 1.098441598502826
+#STRIDE_COEFFICIENT = 1.319148936
 COMPASS_X_AXIS = -145 # this was obtained with a laptop nearby. Ill do it again when i use wifi dongle
 COMPASS_Z_AXIS = -135
 
@@ -422,5 +423,5 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    navi.getShortestPath(2, 3, 2, 2, 3, 5)
+    navi.getShortestPath(1, 2, 1, 1, 2, 2)
     navi.execute(queue)
