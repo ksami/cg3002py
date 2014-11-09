@@ -144,7 +144,7 @@ class Navigation:
 
         while(True):
 
-            # mode GO_FORWARD will update the distance and heading
+            ### mode GO_FORWARD will update the distance and heading ###
             if(self.mode == GO_FORWARD):
 
                 time_exe = time.time()
@@ -254,6 +254,10 @@ class Navigation:
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
             self.heading = GetHeading(self.compass_val)
 
+            ### mode STAIRS will update barometer
+
+            
+
             # check qrcode updates
             try:
                 qrstring = q_qrcode.get(block=False)
@@ -334,6 +338,7 @@ class Navigation:
                     print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward" + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == ARRIVE_DESTINATION):
+                print "REACH DESTINATION"
                 feedback = "r"
                 print "\n\nMODE: ARRIVE DESTINATION ---"
                 queue.put(feedback)
