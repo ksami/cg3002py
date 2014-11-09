@@ -121,7 +121,7 @@ class MapInfo:
 			self.current = 0
 			coordX = self.mapList[self.path[self.current]].getX()
 			coordY = self.mapList[self.path[self.current]].getY()
-			return {MODE : mode , NUMBER_NODES : len(self.path), COORDX : coordX, COORDY : coordY}
+			return {MODE : mode , NUMBER_NODES : len(self.path), CURRENT_NODE : self.mapList[self.path[0]].getId() , COORDX : coordX, COORDY : coordY}
 
 		elif(mode == REACH_NODE):
 
@@ -210,7 +210,6 @@ class MapInfo:
 
 				# 		return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}
 				mode = GO_FORWARD
-
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 
 			else:	
@@ -220,7 +219,7 @@ class MapInfo:
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
 					mode = REACH_NODE
-					return {MODE : mode, COORDX : coordX, COORDY : coordY, CURRENT_NODE : (self.current+1)}
+					return {MODE : mode, COORDX : coordX, COORDY : coordY, CURRENT_NODE : self.mapList[self.path[self.current]].getId()}
 
 
 
