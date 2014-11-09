@@ -93,7 +93,7 @@ class MapInfoList:
 			index += direction
 		end.append(endNode)
 
-		for i in range(len(start)):
+		for i in range(len(self.building)):
 			print "\nBuilding: ", self.building[i], "\n"
 			self.mapinfoList[self.building[i]].shortestPath(start[i], end[i])
 
