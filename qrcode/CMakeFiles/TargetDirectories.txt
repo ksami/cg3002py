@@ -1,1 +1,1 @@
-/home/pi/opencv/qrcode/CMakeFiles/opencv-qrcode.dir
+/home/pi/cg3002py/qrcode/CMakeFiles/opencv-qrcode.dir

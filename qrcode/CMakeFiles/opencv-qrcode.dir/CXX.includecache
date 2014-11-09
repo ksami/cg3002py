@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/pi/opencv/qrcode/opencv-qrcode.cpp
+/home/pi/cg3002py/qrcode/opencv-qrcode.cpp
 opencv2/highgui/highgui.hpp
 -
 opencv2/video/tracking.hpp
@@ -26,5 +26,5 @@ math.h
 time.h
 -
 zbar.h
-/home/pi/opencv/qrcode/zbar.h
+/home/pi/cg3002py/qrcode/zbar.h
 
