@@ -26,7 +26,7 @@ GO_FORWARD = 3
 TURN = 4
 REACH_DEST_BUILDING = 5
 
-ANGLE_THRESHOLD = 10
+ANGLE_THRESHOLD = 5
 WALKING_ANGLE_THRESHOLD = 90
 CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 100
@@ -121,7 +121,7 @@ class MapInfo:
 			self.current = 0
 			coordX = self.mapList[self.path[self.current]].getX()
 			coordY = self.mapList[self.path[self.current]].getY()
-			return {MODE : mode , NUMBER_NODES : len(self.path), COORDX : coordX, COORDY : coordY}
+			return {MODE : mode , NUMBER_NODES : len(self.path), CURRENT_NODE : self.mapList[self.path[0]].getId() , COORDX : coordX, COORDY : coordY}
 
 		elif(mode == REACH_NODE):
 
@@ -153,11 +153,9 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				angle = edge_angle - heading_angle
-				if (angle < 0):
-					angle += 360
+				angle = fabs(edge_angle - heading_angle)
 				if(angle > 180):
-					angle -= 180
+					angle = 360 - angle
 
 				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: angle}
 
@@ -210,7 +208,6 @@ class MapInfo:
 
 				# 		return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE : angle}
 				mode = GO_FORWARD
-
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 
 			else:	
@@ -220,7 +217,7 @@ class MapInfo:
 					return {MODE : mode, COORDX : coordX, COORDY : coordY}
 				else:
 					mode = REACH_NODE
-					return {MODE : mode, COORDX : coordX, COORDY : coordY, CURRENT_NODE : (self.current+1)}
+					return {MODE : mode, COORDX : coordX, COORDY : coordY, CURRENT_NODE : self.mapList[self.path[self.current]].getId()}
 
 
 

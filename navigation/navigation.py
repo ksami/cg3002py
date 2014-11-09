@@ -281,12 +281,15 @@ class Navigation:
 
             if(self.mode == START_JOURNEY):
                 numberBuildings = result[NUMBER_OF_BUILDINGS]
-                feedback = "You have to walk through " + str(numberBuildings) + " building(s)"
+                
+                #feedback is "You have to walk through " + str(numberBuildings) + " building(s)"
+                feedback = "sj," + str(numberBuildings)
                 print "\n\nMODE: START_JOURNEY ---\n" + feedback
 
             elif(self.mode == START_BUILDING):
                 numberNodes = result[NUMBER_NODES]
                 currentBuilding = result[CURRENT_BUILDING]
+                currentNode = result[CURRENT_NODE]
                 building = "COM 1"
                 level = 2
 
@@ -296,12 +299,15 @@ class Navigation:
                 elif(currentBuilding == 2):
                     building = "COM 2"
                     level = 3
-                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1"
+
+                # feedback is "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node " + str(currentNode)                  
+                feedback = "sb," + str(building) + "," + str(level) + "," + str(numberNodes) + "," + str(currentNode)
                 print "\n\n--- MODE: START_BUILDING ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == REACH_NODE):
                 currentNode = result[CURRENT_NODE]
-                feedback = "You have reached node " + str(currentNode)
+                # feedback is "You have reached node " + str(currentNode)
+                feedback = "rn," + str(currentNode)
                 print "\n\n--- MODE: REACH_NODE ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif (self.mode == TURN):
@@ -310,9 +316,13 @@ class Navigation:
                     angle = result[ANGLE]
                     self.turn_time = time.time()
                     if(isLeft == LEFT):
-                        feedback = "Turn left by " + str(angle) + " degrees"
+
+                        # feedback is "Turn left by " + str(angle) + " degrees"
+                        feedback = "tl," + str(angle)
                     else:
-                        feedback = "Turn right by " + str(angle) + " degrees"
+                        
+                        # feedback is "Turn right by " + str(angle) + " degrees"
+                        feedback = "tr," + str(angle)
                     print "\n\n--- MODE: TURN ---\n" + feedback
 
 
@@ -324,7 +334,7 @@ class Navigation:
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
-                feedback = "r, "
+                feedback = "r"
                 print "\n\nMODE: ARRIVE DESTINATION ---"
                 queue.put(feedback)
                 break
@@ -384,8 +394,6 @@ def GetHeading(most_active_axis, compass_val):
     if(most_active_axis == 2): # z-axis 
         heading = math.atan2(compass_val.y, compass_val.x)
 
-    heading += 0.0404
-
     if(heading < 0):
         heading += 2*math.pi
 
@@ -399,5 +407,5 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 10)
+    navi.getShortestPath(2, 3, 2, 2, 3, 5)
     navi.execute(queue)
