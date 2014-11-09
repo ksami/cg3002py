@@ -12,17 +12,20 @@ class Speak:
 		"el": "State ending level",
 		"en": "State ending node",
 		"r": "You have reached your destination ",
-		"c": "Did you say ",
+		"c": "Did you say {confirm}",
 		"gf": "Go Forward",
-		"tl": "Turn Left",
-		"tr": "Turn Right",
+		"tl": "Turn Left by {angle}",
+		"tr": "Turn Right by {angle}",
 		"os": "System starting up",
 		"is": "Welcome. Clench your fist to start",
 		"ns": "Starting navigation",
-		"ws": "System paused"
+		"ws": "System paused",
+		"rn": "You have reached node {node}",
+		"sj": "You have to walk through {numBuildings} buildings",
+		"sb": "You are currently at building {building} level {level}. You have to walk pass {numNodes} nodes. Now starting at node {startNode}"
 	}
-	program = "exec espeak -s 155 \"{}\" > /dev/null 2>&1"
-
+	program = "exec espeak -s 155 "  #program to execute
+	dumpOutput = " > /dev/null 2>&1"
 	def __init__(self):
 		self.prevcmd = ""
 			
@@ -33,14 +36,40 @@ class Speak:
 		#	pass
 		#else:
 		#cmd = "c,stringtoconfirm" or "r,destination"
-		if cmd[0] == "c" or cmd[0] == "r":
+		if cmd[0] == "c":
 			#slice from comma to end
-			strtoconfirm = Speak.cmd_list[cmd[0]] + cmd[2:]
-			command = Speak.program.format(strtoconfirm)
+			a = Speak.cmd_list[cmd[0]] #a is the command (Change Later)
+			w = cmd[2:]			   	   #w is the stuff to add to the command (Change Later) 
+			command = (program + a).format(confirm = w) + dumpOutput
 			self.prevcmd = cmd[0]
+
+		elif cmd[0:2] == "tl" or cmd == "tr":
+			a = Speak.cmd_list[cmd[0:2]]
+			w = cmd[3:]
+			command = (program + a).format(angle = w) + dumpOutput
+
+		elif cmd[0:2] == "rn":
+			a = Speak.cmd_list[cmd[0:2]]
+			w = cmd[3:]
+			command = (program + a).format(node = w) + dumpOutput
+
+		elif cmd[0:2] == "sj":
+			a = Speak.cmd_list[cmd[0:2]]
+			w = cmd[3:]
+			command = (program + a).format(numBuildings = w) + dumpOutput
+
+		elif cmd[0:2] == "sb":
+			cmd = cmd.split(',')
+			a = Speak.cmd_list[cmd[0]]
+			w = cmd[1]
+			x = cmd[2]
+			y = cmd[3]
+			z = cmd[4]
+			command = (program + a).format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
+
 		else:
-			command = Speak.program.format(Speak.cmd_list[cmd])
-			self.prevcmd = cmd
+			a = Speak.cmd_list[cmd]
+			command = (program + a) + dumpOutput
 
 		os.system(command)
 
