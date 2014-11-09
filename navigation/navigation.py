@@ -9,7 +9,7 @@ from mapinfolist import MapInfoList
 
 # Calibration constants
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
-PEAK_THRESHOLD = 5500
+PEAK_THRESHOLD = 5000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
 STRIDE_COEFFICIENT = 1.098441598502826
@@ -423,5 +423,6 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 2)
-    navi.execute(queue)
+    qr_queue = multiprocessing.Queue()
+    navi.getShortestPath(1, 2, 1, 1, 2, 10)
+    navi.execute(queue, qr_queue)
