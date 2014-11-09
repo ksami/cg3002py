@@ -122,7 +122,7 @@ class Navigation:
     def getShortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
         tup = self.mapinfolist.shortestPath(startBuilding, startLevel, startNode, endBuilding, endLevel, endNode)
 
-    def execute(self, queue):
+    def execute(self, queue, q_qrcode):
         
         ##### initialization stage #####
 
@@ -157,6 +157,20 @@ class Navigation:
 
         while(True):
         
+            # check qrcode updates
+            try:
+                qrstring = q_qrcode.get(block=False)
+                if qrstring != None:
+                        #mapid-nodeid eg. 3-02
+                        print qrstring
+                        ids = qrstring.split('-')
+                        mapid = int(ids[0])
+                        nodeid = int(ids[1])
+            # Queue.empty
+            except Exception:
+                #ignore
+                pass
+
             # mode GO_FORWARD will update the distance and heading
             if(self.mode == GO_FORWARD):
 
