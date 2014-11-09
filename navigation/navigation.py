@@ -281,7 +281,9 @@ class Navigation:
 
             if(self.mode == START_JOURNEY):
                 numberBuildings = result[NUMBER_OF_BUILDINGS]
-                feedback = "You have to walk through " + str(numberBuildings) + " building(s)"
+                
+                #feedback is "You have to walk through " + str(numberBuildings) + " building(s)"
+                feedback = "sj," + str(numberBuildings)
                 print "\n\nMODE: START_JOURNEY ---\n" + feedback
 
             elif(self.mode == START_BUILDING):
@@ -296,12 +298,15 @@ class Navigation:
                 elif(currentBuilding == 2):
                     building = "COM 2"
                     level = 3
-                feedback = "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1"
+
+                # feedback is "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node 1"                    
+                feedback = "sb," + str(building) + "," + str(level) + "," + str(numberNodes)
                 print "\n\n--- MODE: START_BUILDING ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == REACH_NODE):
                 currentNode = result[CURRENT_NODE]
-                feedback = "You have reached node " + str(currentNode)
+                # feedback is "You have reached node " + str(currentNode)
+                feedback = "rn," + str(currentNode)
                 print "\n\n--- MODE: REACH_NODE ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif (self.mode == TURN):
@@ -310,9 +315,13 @@ class Navigation:
                     angle = result[ANGLE]
                     self.turn_time = time.time()
                     if(isLeft == LEFT):
-                        feedback = "Turn left by " + str(angle) + " degrees"
+
+                        # feedback is "Turn left by " + str(angle) + " degrees"
+                        feedback = "tl," + str(angle)
                     else:
-                        feedback = "Turn right by " + str(angle) + " degrees"
+                        
+                        # feedback is "Turn right by " + str(angle) + " degrees"
+                        feedback = "tr," + str(angle)
                     print "\n\n--- MODE: TURN ---\n" + feedback
 
 
@@ -324,7 +333,7 @@ class Navigation:
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
-                feedback = "r, "
+                feedback = "r"
                 print "\n\nMODE: ARRIVE DESTINATION ---"
                 queue.put(feedback)
                 break
