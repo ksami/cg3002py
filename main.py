@@ -244,26 +244,26 @@ def executeInit():
 		p_listen = createProcess(audio.main.listen, (q_listen,))
 		p_listen.start()
 
-	# inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
-	# 
-	# for key in inputs.keys():
-	# 	userInput = getUserInput(key)
-	# 	if userInput == -1:
-	# 		isCancel = True
-	# 		break
-	# 	else:
-	# 		inputs[key] = userInput
-
-	startpt = getUserInput("sp")
-	#startpt = "five"
-	if startpt == -1:
-		isCancel = True
+	inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
 	
-	if isCancel == False:
-		endpt = getUserInput("ep")
-		#endpt = "eight"
-		if endpt == -1:
+	for key in inputs.keys():
+		userInput = getUserInput(key)
+		if userInput == -1:
 			isCancel = True
+			break
+		else:
+			inputs[key] = userInput
+
+	# startpt = getUserInput("sp")
+	# #startpt = "five"
+	# if startpt == -1:
+	# 	isCancel = True
+	
+	# if isCancel == False:
+	# 	endpt = getUserInput("ep")
+	# 	#endpt = "eight"
+	# 	if endpt == -1:
+	# 		isCancel = True
 
 	
 	if p_listen.is_alive():
@@ -279,21 +279,22 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
-		# sb = strToInt(inputs["sb"])
-		# sl = strToInt(inputs["sl"])
-		# sn = strToInt(inputs["sn"])
-		# eb = strToInt(inputs["eb"])
-		# el = strToInt(inputs["el"])
-		# en = strToInt(inputs["en"])
+		sb = strToInt(inputs["sb"])
+		sl = strToInt(inputs["sl"])
+		sn = strToInt(inputs["sn"])
+		eb = strToInt(inputs["eb"])
+		el = strToInt(inputs["el"])
+		en = strToInt(inputs["en"])
 
-		istartpt = strToInt(startpt)
-		iendpt = strToInt(endpt)
+		# istartpt = strToInt(startpt)
+		# iendpt = strToInt(endpt)
 
 		# DONT CREATE NEW PROCESS FOR THIS
 		# p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
 		# p_navisp.start()
 		# p_navisp.join()
-		_navi.getShortestPath(istartpt, iendpt)
+		_navi.getShortestPath(sb, sl, sn, eb, el, en)
+		# _navi.getShortestPath(istartpt, iendpt)
 		print "navi id: ", id(_navi)
 		print "navi x: ", _navi.coordY
 		print "navi map: ", _navi.mapinfo.path
