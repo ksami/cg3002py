@@ -1,7 +1,7 @@
 from mapinfo import MapInfo
 
 # constants for map
-cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
+cached_map = ["/home/pi/Desktop/cg3002py/navigation/com1lvl2.json", "/home/pi/Desktop/cg3002py/navigation/com2lvl2.json", "/home/pi/Desktop/cg3002py/navigation/com2lvl3.json"]
 
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
