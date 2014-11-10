@@ -101,7 +101,7 @@ class MapInfoList:
 
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
-			self.currentMap = 0
+			self.currentBuilding = 0
 			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building), COORDX : 0, COORDY : 0}
 
 		else:
