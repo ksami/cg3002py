@@ -296,10 +296,6 @@ def executeInit():
 		#_navi.getShortestPath(sb, sl, sn, eb, el, en)
 		# _navi.getShortestPath(istartpt, iendpt)
 		_navi.getShortestPath(2,2,6, 2,2,2)
-		print "navi id: ", id(_navi)
-		print "navi x: ", _navi.coordY
-		print "navi map: ", _navi.mapinfo.path
-		print "navi map id: ", id(_navi.mapinfo.path)
 
 		# Change to NAVI state
 		# p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
