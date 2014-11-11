@@ -223,12 +223,13 @@ def executeIdle():
 	#nothing
 
 	#hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_CLOSE
-	print "hand: ", hand
-	if hand == comms.python.main.HAND_CLOSE:
-		_systemState.changeState()
-	else:
-		pass
+	# hand = comms.python.main.HAND_CLOSE
+	# print "hand: ", hand
+	# if hand == comms.python.main.HAND_CLOSE:
+	# 	_systemState.changeState()
+	# else:
+	# 	pass
+	_systemState.changeState()
 
 
 def executeInit():
@@ -304,7 +305,7 @@ def executeInit():
 
 
 def executeNavi():
-	print "in navi state"
+	#print "in navi state"
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
@@ -332,11 +333,11 @@ def executeNavi():
 
 	#TODO: obstacle detection feedback to user
 	# hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_CLOSE
-	if hand == comms.python.main.HAND_OPEN:
-		_systemState.changeState(isHandOpen=True)
-	else:
-		pass
+	# hand = comms.python.main.HAND_CLOSE
+	# if hand == comms.python.main.HAND_OPEN:
+	# 	_systemState.changeState(isHandOpen=True)
+	# else:
+	# 	pass
 
 
 def executeWait():
@@ -354,14 +355,14 @@ def executeWait():
 	
 	while (isTimeout == False) and (isResume == False):
 		# check for terminate
-		try:
-			hand = q_xbee.get(block=False)
-			if hand == comms.python.main.HAND_CLOSE:
-				isResume = True
-		# Queue.empty
-		except Exception:
-			#ignore
-			pass
+		# try:
+		# 	hand = q_xbee.get(block=False)
+		# 	if hand == comms.python.main.HAND_CLOSE:
+		# 		isResume = True
+		# # Queue.empty
+		# except Exception:
+		# 	#ignore
+		# 	pass
 			
 		try:
 			timerup = q_time.get(block=False)
