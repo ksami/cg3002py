@@ -305,7 +305,7 @@ def executeInit():
 
 
 def executeNavi():
-	print "in navi state"
+	# print "in navi state"
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
