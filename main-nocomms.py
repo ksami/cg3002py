@@ -296,10 +296,6 @@ def executeInit():
 		#_navi.getShortestPath(sb, sl, sn, eb, el, en)
 		# _navi.getShortestPath(istartpt, iendpt)
 		_navi.getShortestPath(2,2,6, 2,2,2)
-		print "navi id: ", id(_navi)
-		print "navi x: ", _navi.coordY
-		print "navi map: ", _navi.mapinfo.path
-		print "navi map id: ", id(_navi.mapinfo.path)
 
 		# Change to NAVI state
 		# p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
@@ -309,7 +305,7 @@ def executeInit():
 
 
 def executeNavi():
-	print "in navi state"
+	# print "in navi state"
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
@@ -325,10 +321,6 @@ def executeNavi():
 	#if process has not been created before
 	if p_navi == None:
 		p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode))
-		print "navi exe id: ", id(_navi)
-		print "navi exe x: ", _navi.coordY
-		print "navi exe map: ", _navi.mapinfo.path
-		print "navi exe map id: ", id(_navi.mapinfo.path)
 		p_navi.start()
 
 	# if p_feedback == None:
@@ -341,7 +333,7 @@ def executeNavi():
 
 	#TODO: obstacle detection feedback to user
 	# hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_OPEN
+	hand = comms.python.main.HAND_CLOSE
 	if hand == comms.python.main.HAND_OPEN:
 		_systemState.changeState(isHandOpen=True)
 	else:

@@ -15,8 +15,8 @@ using namespace cv;
 using namespace std;
 using namespace zbar;  
 
-#define WIDTH 320
-#define HEIGHT 240
+#define WIDTH 128
+#define HEIGHT 128
 
 int main(void){  
 	VideoCapture cap(0);
@@ -29,42 +29,55 @@ int main(void){
 	Mat img;
 	Mat gray;
 
-	time_t start, end;
-	double fps, sec;
-	int counter=0;
+	int width = img.cols;  
+	int height = img.rows;
+	int n = 0;
 
-	time(&start);  
+	Image image = Image(0, 0, "Y800", NULL, 0);
+	Image::SymbolIterator symbol;
+
+	uchar * raw = NULL; 
+
+	//time_t start, end;
+	//double fps, sec;
+	//int counter=0;
+
+	//time(&start);  
 
 	while(1){
 		cap >> img;
 		cvtColor(img,gray,CV_BGR2GRAY);  
-		int width = img.cols;  
-		int height = img.rows;  
-		uchar *raw = (uchar *)gray.data;  
+		
+		width = img.cols;  
+		height = img.rows;  
+
+		raw = (uchar *)gray.data;  
 
 		// fps
-		time(&end);
-		counter++;
-		sec = difftime(end, start);
-		fps = counter / sec;
+		//time(&end);
+		//counter++;
+		//sec = difftime(end, start);
+		//fps = counter / sec;
 		//cout << "FPS: " << fps << endl;
 
 		//cout<<"image captured"<<endl;
 
 		// wrap image data  
-		Image image(width, height, "Y800", raw, width * height);  
+		//Image image(width, height, "Y800", raw, width * height);
+		image.set_size(width, height);
+		image.set_data(raw, width*height);
 
 		//cout<<"scanning"<<endl;
 
 		// scan the image for barcodes  
-		int n = scanner.scan(image);  
+		n = scanner.scan(image);  
 
 		//cout<<"n: "<<n<<endl;
 		cout << " " << endl;
 		if(n>0){
 
 			// extract results  
-			for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol) {  
+			for(symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol) {  
 				cout << symbol->get_data() << endl;
 				// vector<Point> vp;  
 				// do something useful with results  
