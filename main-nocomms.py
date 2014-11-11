@@ -5,13 +5,15 @@ import time
 
 import timer
 import smwmap
-#import comms.python.main
-#import navigation.main
-#import audio.main
+import cpython
+import pedometer.test
+import comms.python.main
+import navigation.main
+import audio.main
 import qrcode.main
-#from comms.python.comms import Comms
-#from navigation.navigation import Navigation
-#from audio.textspeech import Speak
+from comms.python.comms import Comms
+from navigation.navigation import Navigation
+from audio.textspeech import Speak
 from state import State
 
 TIMEOUT_WAIT = 10
@@ -21,10 +23,10 @@ mapName = "COM1"
 mapFloor = "2"
 
 _systemState = State()
-#_comms = Comms()
-#_speak = Speak()
+_comms = Comms()
+_speak = Speak()
 #TODO: need to ask user for building and level, currently hardcoded in navigation.py
-#_navi = Navigation()
+_navi = Navigation()
 
 
 # Creates a new process
@@ -52,11 +54,10 @@ p_navi = None
 p_feedback = None
 p_listen = None
 p_qrscan = None
-#p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
-p_receive = None
+p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
 
 # Start xbee receive
-#p_receive.start()
+p_receive.start()
 
 
 
@@ -223,13 +224,12 @@ def executeIdle():
 	#nothing
 
 	#hand = q_xbee.get(block=True)
-	# hand = comms.python.main.HAND_CLOSE
-	# print "hand: ", hand
-	# if hand == comms.python.main.HAND_CLOSE:
-	# 	_systemState.changeState()
-	# else:
-	# 	pass
-	_systemState.changeState()
+	hand = comms.python.main.HAND_CLOSE
+	print "hand: ", hand
+	if hand == comms.python.main.HAND_CLOSE:
+		_systemState.changeState()
+	else:
+		pass
 
 
 def executeInit():
@@ -295,7 +295,7 @@ def executeInit():
 		# p_navisp.join()
 		#_navi.getShortestPath(sb, sl, sn, eb, el, en)
 		# _navi.getShortestPath(istartpt, iendpt)
-		#_navi.getShortestPath(2,2,6, 2,2,2)
+		_navi.getShortestPath(2,2,6, 2,2,2)
 
 		# Change to NAVI state
 		# p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
@@ -305,7 +305,7 @@ def executeInit():
 
 
 def executeNavi():
-	#print "in navi state"
+	# print "in navi state"
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
@@ -319,9 +319,9 @@ def executeNavi():
 	global p_qrscan
 
 	#if process has not been created before
-	# if p_navi == None:
-	# 	p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode))
-	# 	p_navi.start()
+	if p_navi == None:
+		p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode))
+		p_navi.start()
 
 	# if p_feedback == None:
 	# 	p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
@@ -333,11 +333,11 @@ def executeNavi():
 
 	#TODO: obstacle detection feedback to user
 	# hand = q_xbee.get(block=True)
-	# hand = comms.python.main.HAND_CLOSE
-	# if hand == comms.python.main.HAND_OPEN:
-	# 	_systemState.changeState(isHandOpen=True)
-	# else:
-	# 	pass
+	hand = comms.python.main.HAND_CLOSE
+	if hand == comms.python.main.HAND_OPEN:
+		_systemState.changeState(isHandOpen=True)
+	else:
+		pass
 
 
 def executeWait():
@@ -355,14 +355,14 @@ def executeWait():
 	
 	while (isTimeout == False) and (isResume == False):
 		# check for terminate
-		# try:
-		# 	hand = q_xbee.get(block=False)
-		# 	if hand == comms.python.main.HAND_CLOSE:
-		# 		isResume = True
-		# # Queue.empty
-		# except Exception:
-		# 	#ignore
-		# 	pass
+		try:
+			hand = q_xbee.get(block=False)
+			if hand == comms.python.main.HAND_CLOSE:
+				isResume = True
+		# Queue.empty
+		except Exception:
+			#ignore
+			pass
 			
 		try:
 			timerup = q_time.get(block=False)

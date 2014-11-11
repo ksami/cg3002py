@@ -1,7 +1,7 @@
 from mapinfo import MapInfo
 
 # constants for map
-cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
+cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
 
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
@@ -56,7 +56,7 @@ class MapInfoList:
 		while(self.building[self.currentBuilding] != buidlingId):
 			self.currentBuilding += 1
 
-		(x, y) = self.mapinfoList[buidlingId].giveCurrentCoordinates(nodeId)
+		(x, y) = self.mapinfoList[buidlingId].giveCurrentCoordinates(nodeId-1)
 		return {COORDX : x , COORDY : y}
 
 
@@ -93,7 +93,7 @@ class MapInfoList:
 			index += direction
 		end.append(endNode)
 
-		for i in range(len(start)):
+		for i in range(len(self.building)):
 			print "\nBuilding: ", self.building[i], "\n"
 			self.mapinfoList[self.building[i]].shortestPath(start[i], end[i])
 
@@ -101,7 +101,7 @@ class MapInfoList:
 
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
-			self.currentMap = 0
+			self.currentBuilding = 0
 			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building), COORDX : 0, COORDY : 0}
 
 		else:

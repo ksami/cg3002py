@@ -9,10 +9,11 @@ from mapinfolist import MapInfoList
 
 # Calibration constants
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
-PEAK_THRESHOLD = 10000
+PEAK_THRESHOLD = 5000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
-STRIDE_COEFFICIENT = 1.319148936
+STRIDE_COEFFICIENT = 1.098441598502826
+#STRIDE_COEFFICIENT = 1.319148936
 COMPASS_X_AXIS = -145 # this was obtained with a laptop nearby. Ill do it again when i use wifi dongle
 COMPASS_Z_AXIS = -135
 
@@ -63,7 +64,6 @@ class Navigation:
         self.bus = smbus.SMBus(1) # or bus = smbus.SMBus(1) for Revision 2 boards
 
         self.mode = START_JOURNEY
-        self.most_active_axis = 1
         self.coordX = 0
         self.coordY = 0
         self.destination = ""
@@ -112,8 +112,6 @@ class Navigation:
         # used for compass heading
         self.compass_val = Vector(0, 0, 0)
         self.heading = 0
-        self.heading_filter_list = []
-        self.heading_moving_index = 0
 
         # download map
         self.mapinfolist = MapInfoList()
@@ -130,8 +128,6 @@ class Navigation:
         accel_yout = read_word_2c(self.bus, mpu_address, 0x3d)
         accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
 
-        self.most_active_axis = 1
-
         for i in range(4) :
             accel_xout = read_word_2c(self.bus, mpu_address, 0x3b)
             accel_yout = read_word_2c(self.bus, mpu_address, 0x3d) 
@@ -140,15 +136,6 @@ class Navigation:
             self.accel_val = Vector(accel_xout, accel_yout, accel_zout)
             self.accel_filter_list.append(self.accel_val)
 
-            compass_xout = read_word_2c(self.bus, hmc_address, 3)
-            compass_yout = read_word_2c(self.bus, hmc_address, 7) 
-            compass_zout = read_word_2c(self.bus, hmc_address, 5)
-
-            self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
-            self.heading = GetHeading(self.most_active_axis, self.compass_val)
-
-            self.heading_filter_list.append(self.heading)
-
 
         print "\n\nSTRIDE_COEFFICIENT: ", STRIDE_COEFFICIENT
         print "PEAK THRESHOLD", PEAK_THRESHOLD
@@ -156,22 +143,8 @@ class Navigation:
         print "START!!"
 
         while(True):
-        
-            # check qrcode updates
-            try:
-                qrstring = q_qrcode.get(block=False)
-                if qrstring != None:
-                        #mapid-nodeid eg. 3-02
-                        print qrstring
-                        ids = qrstring.split('-')
-                        mapid = int(ids[0])
-                        nodeid = int(ids[1])
-            # Queue.empty
-            except Exception:
-                #ignore
-                pass
 
-            # mode GO_FORWARD will update the distance and heading
+            ### mode GO_FORWARD will update the distance and heading ###
             if(self.mode == GO_FORWARD):
 
                 time_exe = time.time()
@@ -203,14 +176,14 @@ class Navigation:
 
                 # step detection - peak-to-peak detection
                 if(not self.first_time):
-                    if( math.fabs( compare(self.most_active_axis, self.sample_new, self.accel_val)) >= ACCEL_THRESHOLD):
+                    if( math.fabs( self.sample_new.y - self.accel_val.y ) >= ACCEL_THRESHOLD):
                         self.sample_new = self.accel_val
                         self.accel_list.append(self.accel_val)
 
                         # looking for a minima peak
                         if(self.peak_direction == MINIMA):
 
-                            if(compare(self.most_active_axis, self.accel_val, self.accel_maxima) > 0):
+                            if(self.accel_val.y  > self.accel_maxima.y):
                                 self.accel_maxima = self.accel_val
                             
                             else:
@@ -224,7 +197,7 @@ class Navigation:
                                     self.calculate_distance = False
                                     #print "TOTAL DISTANCE", self.total_distance
 
-                                if( compare(self.most_active_axis, self.accel_maxima, self.accel_val) >= self.peak_threshold ):
+                                if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
                                         # a maxima has been detected and a step is detected
                                         self.num_steps += 1
@@ -240,7 +213,7 @@ class Navigation:
                         # looking for a maxima peak
                         if( self.peak_direction == MAXIMA ):
                             
-                            if(compare(self.most_active_axis, self.accel_val, self.accel_minima) < 0):
+                            if( self.accel_val.y < self.accel_minima.y):
                                 self.accel_minima = self.accel_val
 
                             else:
@@ -253,7 +226,7 @@ class Navigation:
                                     self.accel_list = []
                                     self.calculate_distance = False
 
-                                if(compare(self.most_active_axis, self.accel_val, self.accel_minima) >= self.peak_threshold ):
+                                if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
                                     if(time.time() - self.time_window >= TIME_THRESHOLD):
                                         # a maxima has been detected and a step is detected
                                         self.num_steps += 1
@@ -279,8 +252,28 @@ class Navigation:
             compass_zout = read_word_2c(self.bus, hmc_address, 5) - COMPASS_Z_AXIS
 
             self.compass_val = Vector(compass_xout, compass_yout, compass_zout)
-            self.heading = GetHeading(self.most_active_axis, self.compass_val)
-            self.heading_moving_index = (self.heading_moving_index + 1) % 4
+            self.heading = GetHeading(self.compass_val)
+
+            ### mode STAIRS will update barometer
+
+            
+
+            # check qrcode updates
+            try:
+                qrstring = q_qrcode.get(block=False)
+                if qrstring != None:
+                        #mapid-nodeid eg. 3-02
+                        print qrstring
+                        ids = qrstring.split('-')
+                        mapid = int(ids[0])
+                        nodeid = int(ids[1])
+                        dic = self.mapinfolist.updateCurrentCoordinates(mapid, nodeid)
+                        self.coordX = dic[COORDX]
+                        self.coordY = dic[COORDY]
+            # Queue.empty
+            except Exception:
+                #ignore
+                pass
 
             ##### check state machine #####
             result = self.mapinfolist.giveDirection(self.distance, self.heading, self.coordX, self.coordY, self.steps)
@@ -368,17 +361,6 @@ def read_word_2c(bus, sensor_address, adr):
     else:
         return val
 
-def compare(most_active_axis, accel_1, accel_2):
-
-    if( most_active_axis == 0 ) :
-        return accel_1.x - accel_2.x
-    
-    if( most_active_axis == 1 ) :
-        return accel_1.y - accel_2.y
-    
-    if( most_active_axis == 2 ) :
-        return accel_1.z - accel_2.z
-
 def getStrideLength(accel_list):
     accel_sum = 0
     for i in range(len(accel_list)):
@@ -389,22 +371,11 @@ def getStrideLength(accel_list):
         accel_sum += (accel_list[i].y - accel_avg)
     accel_sum /= len(accel_list)
 
-    #print "accel_sum", accel_sum
-
     return STRIDE_COEFFICIENT * math.pow(accel_sum, 1/3.0)
 
-def GetHeading(most_active_axis, compass_val):
+def GetHeading(compass_val):
 
-    heading = 0
-    
-    if(most_active_axis == 0): # x-axis 
-        heading = math.atan2(compass_val.z, compass_val.y)
-
-    if(most_active_axis == 1): # y-axis 
-        heading = math.atan2(compass_val.x, compass_val.z)
-
-    if(most_active_axis == 2): # z-axis 
-        heading = math.atan2(compass_val.y, compass_val.x)
+    heading = math.atan2(compass_val.x, compass_val.z)
 
     if(heading < 0):
         heading += 2*math.pi
@@ -419,5 +390,6 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    navi.getShortestPath(2, 3, 2, 2, 3, 5)
-    navi.execute(queue)
+    qr_queue = multiprocessing.Queue()
+    navi.getShortestPath(1, 2, 1, 1, 2, 2)
+    navi.execute(queue, qr_queue)
