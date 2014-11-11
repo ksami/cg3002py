@@ -48,7 +48,7 @@ int main(void){
 		cap >> img;
 		cvtColor(img,gray,CV_BGR2GRAY);  
 		
-		width = .cols;  
+		width = img.cols;  
 		height = img.rows;  
 
 		raw = (uchar *)gray.data;  
