@@ -15,8 +15,8 @@ using namespace cv;
 using namespace std;
 using namespace zbar;  
 
-#define WIDTH 320
-#define HEIGHT 240
+#define WIDTH 128
+#define HEIGHT 128
 
 int main(void){  
 	VideoCapture cap(0);
@@ -38,11 +38,11 @@ int main(void){
 
 	uchar * raw = NULL; 
 
-	time_t start, end;
-	double fps, sec;
-	int counter=0;
+	//time_t start, end;
+	//double fps, sec;
+	//int counter=0;
 
-	time(&start);  
+	//time(&start);  
 
 	while(1){
 		cap >> img;
@@ -54,10 +54,10 @@ int main(void){
 		raw = (uchar *)gray.data;  
 
 		// fps
-		time(&end);
-		counter++;
-		sec = difftime(end, start);
-		fps = counter / sec;
+		//time(&end);
+		//counter++;
+		//sec = difftime(end, start);
+		//fps = counter / sec;
 		//cout << "FPS: " << fps << endl;
 
 		//cout<<"image captured"<<endl;

@@ -57,6 +57,7 @@ class MapInfoList:
 			self.currentBuilding += 1
 
 		(x, y) = self.mapinfoList[buidlingId].giveCurrentCoordinates(nodeId-1)
+		print "----- Updated nodeId", nodeId
 		return {COORDX : x , COORDY : y}
 
 
