@@ -333,7 +333,7 @@ def executeNavi():
 
 	#TODO: obstacle detection feedback to user
 	# hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_OPEN
+	hand = comms.python.main.HAND_CLOSE
 	if hand == comms.python.main.HAND_OPEN:
 		_systemState.changeState(isHandOpen=True)
 	else:
