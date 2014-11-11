@@ -33,7 +33,7 @@ def qrscan(q_qrcode, q_kill):
 		if nextline == "" and process.poll() != None:
 			break
 
-		elif nextline[0] != ' ' or nextline[0] != '\n':
+		elif nextline[0] != ' ' and nextline[0] != '\n':
 			print "qr:", nextline
 			q_qrcode.put(nextline)
 
