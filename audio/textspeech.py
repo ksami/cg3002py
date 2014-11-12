@@ -87,12 +87,16 @@ class Speak:
 			myString = raw_input("Enter string to talk: ")
 			speak.speak(myString)
 
+	#Make a Tick sound if queue has a value
+	def stepTicker(self, q_stepTicker):
+		if(q_stepTicker(block=True)):
+			os.system("aplay losticks.wav")
+
+
 
 # for testing
 # call with python textspeech.py. Change test str to test accordingly
 if __name__ == "__main__":
 	speak = Speak()
-	#testStr = raw_input("Enter string to talk: ")
-	#print "speaking"
-	#speak.speak(testStr)
+	#speak.stepTicker()
 	speak.speakTest()
