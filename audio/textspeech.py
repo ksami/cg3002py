@@ -14,8 +14,8 @@ class Speak:
 		"r": "You have reached your destination ",
 		"c": "Did you say {confirm}",
 		"gf": "Go Forward",
-		"tl": "Turn Left by {angle}",
-		"tr": "Turn Right by {angle}",
+		"tl": "Turn Left by {angle} degrees",
+		"tr": "Turn Right by {angle} degrees",
 		"os": "System starting up",
 		"is": "Welcome. Clench your fist to start",
 		"ns": "Starting navigation",
@@ -31,32 +31,30 @@ class Speak:
 			
 
 	def speak(self, cmd):
-		#if self.prevcmd == "gf" and cmd == "gf":
-			#Do nothing
-		#	pass
-		#else:
-		#cmd = "c,stringtoconfirm" or "r,destination"
+		program = "exec espeak -s 155 "
+		dumpOutput = " > /dev/null 2>&1"
 		if cmd[0] == "c":
 			#slice from comma to end
 			a = Speak.cmd_list[cmd[0]] #a is the command (Change Later)
 			w = cmd[2:]			   	   #w is the stuff to add to the command (Change Later) 
-			command = (program + a).format(confirm = w) + dumpOutput
+			command = (program + "\"" + a + "\"").format(confirm = w) + dumpOutput
+			#print command for debugging
 			self.prevcmd = cmd[0]
 
-		elif cmd[0:2] == "tl" or cmd == "tr":
+		elif cmd[0:2] == "tl" or cmd[0:2] == "tr":
 			a = Speak.cmd_list[cmd[0:2]]
 			w = cmd[3:]
-			command = (program + a).format(angle = w) + dumpOutput
+			command = (program + "\"" + a + "\"").format(angle = w) + dumpOutput
 
 		elif cmd[0:2] == "rn":
 			a = Speak.cmd_list[cmd[0:2]]
 			w = cmd[3:]
-			command = (program + a).format(node = w) + dumpOutput
+			command = (program + "\"" + a + "\"").format(node = w) + dumpOutput
 
 		elif cmd[0:2] == "sj":
 			a = Speak.cmd_list[cmd[0:2]]
 			w = cmd[3:]
-			command = (program + a).format(numBuildings = w) + dumpOutput
+			command = (program + "\"" + a + "\"").format(numBuildings = w) + dumpOutput
 
 		elif cmd[0:2] == "sb":
 			cmd = cmd.split(',')
@@ -65,11 +63,14 @@ class Speak:
 			x = cmd[2]
 			y = cmd[3]
 			z = cmd[4]
-			command = (program + a).format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
+			command = (program + "\"" + a + "\"").format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
 
 		else:
-			a = Speak.cmd_list[cmd]
-			command = (program + a) + dumpOutput
+			try:
+				a = Speak.cmd_list[cmd]
+			except:
+				raise
+			command = (program + "\"" + a + "\"") + dumpOutput
 
 		os.system(command)
 
@@ -77,38 +78,25 @@ class Speak:
 	def speakq(self, q_tts):
 		while True:
 			cmd = q_tts.get(block=True)
-
-			#if self.prevcmd == "gf" and cmd == "gf":
-				#Do nothing
-			#	pass
-			#else:
-				#cmd = "c,stringtoconfirm" or "r,destination"
-			if cmd[0] == "c" or cmd[0] == "r":
-				#slice from comma to end
-				strtoconfirm = Speak.cmd_list[cmd[0]] + cmd[2:]
-				command = Speak.program.format(strtoconfirm)
-				self.prevcmd = cmd[0]
-			else:
-				command = Speak.program.format(Speak.cmd_list[cmd])
-				self.prevcmd = cmd
-
-			os.system(command)
+			speak(cmd)
 
 
-	#just for testing
-	def speakTest(self, myString):
-		command = Speak.program.format(myString)
-		print "running: ", command
-		os.system(command)
+	#just for testing can remove liao!
+	def speakTest(self):
+		while True:
+			myString = raw_input("Enter string to talk: ")
+			speak.speak(myString)
+
+	#Make a Tick sound if queue has a value
+	def stepTicker(self, q_stepTicker):
+		if(q_stepTicker(block=True)):
+			os.system("aplay losticks.wav")
+
 
 
 # for testing
-# call with python textspeech.py texttoreadout
+# call with python textspeech.py. Change test str to test accordingly
 if __name__ == "__main__":
-	if len(sys.argv) < 2:
-		print "call with python textspeech.py texttoreadout"
-	else:
-		speak = Speak()
-		myString = sys.argv[1]
-		print "speaking"
-		speak.speakTest(myString)
+	speak = Speak()
+	#speak.stepTicker()
+	speak.speakTest()
