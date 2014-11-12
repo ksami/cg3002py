@@ -145,106 +145,103 @@ class Navigation:
         while(True):
 
             ### mode GO_FORWARD will update the distance and heading ###
-            if(self.mode == GO_FORWARD):
 
-                time_exe = time.time()
+            ##### get accelermeter reading #####
 
-                ##### get accelermeter reading #####
+            # filter accelerometer values
+            accel_xout = read_word_2c(self.bus, mpu_address, 0x3b)
+            accel_yout = read_word_2c(self.bus, mpu_address, 0x3d)
+            accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
 
-                # filter accelerometer values
-                accel_xout = read_word_2c(self.bus, mpu_address, 0x3b)
-                accel_yout = read_word_2c(self.bus, mpu_address, 0x3d)
-                accel_zout = read_word_2c(self.bus, mpu_address, 0x3f)
+            self.accel_val = Vector(accel_xout, accel_yout, accel_zout)
 
-                self.accel_val = Vector(accel_xout, accel_yout, accel_zout)
+            self.gravity.x = HIGH_PASS * self.gravity.x + (1 - HIGH_PASS) * self.accel_val.x
+            self.gravity.y = 0
+            self.gravity.z = HIGH_PASS * self.gravity.z + (1 - HIGH_PASS) * self.accel_val.z
 
-                self.gravity.x = HIGH_PASS * self.gravity.x + (1 - HIGH_PASS) * self.accel_val.x
-                self.gravity.y = 0
-                self.gravity.z = HIGH_PASS * self.gravity.z + (1 - HIGH_PASS) * self.accel_val.z
+            self.accel_val.x = self.accel_val.x - self.gravity.x
+            self.accel_val.y = self.accel_val.y - self.gravity.y
+            self.accel_val.z = self.accel_val.z - self.gravity.z
+            
+            self.accel_val.x = (self.accel_filter_list[0].x + self.accel_filter_list[1].x + self.accel_filter_list[2].x + self.accel_filter_list[3].x + self.accel_val.x) / 5
+            self.accel_val.y = (self.accel_filter_list[0].y + self.accel_filter_list[1].y + self.accel_filter_list[2].y + self.accel_filter_list[3].y + self.accel_val.y) / 5
+            self.accel_val.z = (self.accel_filter_list[0].z + self.accel_filter_list[1].z + self.accel_filter_list[2].z + self.accel_filter_list[3].z + self.accel_val.z) / 5
 
-                self.accel_val.x = self.accel_val.x - self.gravity.x
-                self.accel_val.y = self.accel_val.y - self.gravity.y
-                self.accel_val.z = self.accel_val.z - self.gravity.z
-                
-                self.accel_val.x = (self.accel_filter_list[0].x + self.accel_filter_list[1].x + self.accel_filter_list[2].x + self.accel_filter_list[3].x + self.accel_val.x) / 5
-                self.accel_val.y = (self.accel_filter_list[0].y + self.accel_filter_list[1].y + self.accel_filter_list[2].y + self.accel_filter_list[3].y + self.accel_val.y) / 5
-                self.accel_val.z = (self.accel_filter_list[0].z + self.accel_filter_list[1].z + self.accel_filter_list[2].z + self.accel_filter_list[3].z + self.accel_val.z) / 5
+            self.accel_filter_list.insert(self.moving_index, self.accel_val)
 
-                self.accel_filter_list.insert(self.moving_index, self.accel_val)
+            self.moving_index = (self.moving_index + 1) % 4
 
-                self.moving_index = (self.moving_index + 1) % 4
-
-                # step detection - peak-to-peak detection
-                if(not self.first_time):
-                    if( math.fabs( self.sample_new.y - self.accel_val.y ) >= ACCEL_THRESHOLD):
-                        self.sample_new = self.accel_val
-                        self.accel_list.append(self.accel_val)
-
-                        # looking for a minima peak
-                        if(self.peak_direction == MINIMA):
-
-                            if(self.accel_val.y  > self.accel_maxima.y):
-                                self.accel_maxima = self.accel_val
-                            
-                            else:
-
-                                if(self.calculate_distance and self.mode == GO_FORWARD):
-                                    stride = getStrideLength(self.accel_list)
-                                    print "--------------- STRIDE", stride
-                                    self.distance += stride
-                                    self.total_distance += stride
-                                    self.accel_list = []
-                                    self.calculate_distance = False
-                                    #print "TOTAL DISTANCE", self.total_distance
-
-                                if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
-                                    if(time.time() - self.time_window >= TIME_THRESHOLD):
-                                        # a maxima has been detected and a step is detected
-                                        self.num_steps += 1
-                                        self.steps += 1
-                                        self.peak_direction = MAXIMA
-                                        self.accel_minima = self.accel_val
-                                        self.time_window = time.time()
-                                        print "\n--------------- PEAK DETECTED MINIMA", self.num_steps
-                                        self.peak_threshold = PEAK_THRESHOLD
-                                        self.calculate_distance = True
-
-
-                        # looking for a maxima peak
-                        if( self.peak_direction == MAXIMA ):
-                            
-                            if( self.accel_val.y < self.accel_minima.y):
-                                self.accel_minima = self.accel_val
-
-                            else:
-
-                                if(self.calculate_distance and self.mode == GO_FORWARD):
-                                    stride = getStrideLength(self.accel_list)
-                                    print "--------------- STRIDE", stride
-                                    self.distance += stride
-                                    self.total_distance += stride
-                                    self.accel_list = []
-                                    self.calculate_distance = False
-
-                                if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
-                                    if(time.time() - self.time_window >= TIME_THRESHOLD):
-                                        # a maxima has been detected and a step is detected
-                                        self.num_steps += 1
-                                        self.steps += 1
-                                        self.peak_direction = MINIMA
-                                        self.accel_maxima = self.accel_val
-                                        self.time_window = time.time()
-                                        print "\n--------------- PEAK DETECTED MAXIMA", self.num_steps
-                                        self.peak_threshold = PEAK_THRESHOLD
-                                        self.calculate_distance = True
-
-                else:
-                    self.peak_direction = MINIMA
-                    self.peak_threshold = PEAK_THRESHOLD / 2
-                    self.accel_maxima = self.accel_val
-                    self.first_time = False
+            # step detection - peak-to-peak detection
+            if(not self.first_time):
+                if( math.fabs( self.sample_new.y - self.accel_val.y ) >= ACCEL_THRESHOLD):
                     self.sample_new = self.accel_val
-                    self.time_window = time.time()   
+                    self.accel_list.append(self.accel_val)
+
+                    # looking for a minima peak
+                    if(self.peak_direction == MINIMA):
+
+                        if(self.accel_val.y  > self.accel_maxima.y):
+                            self.accel_maxima = self.accel_val
+                        
+                        else:
+
+                            if(self.calculate_distance and self.mode == GO_FORWARD):
+                                stride = getStrideLength(self.accel_list)
+                                print "--------------- STRIDE", stride
+                                self.distance += stride
+                                self.total_distance += stride
+                                self.accel_list = []
+                                self.calculate_distance = False
+                                #print "TOTAL DISTANCE", self.total_distance
+
+                            if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
+                                if(time.time() - self.time_window >= TIME_THRESHOLD):
+                                    # a maxima has been detected and a step is detected
+                                    self.num_steps += 1
+                                    self.steps += 1
+                                    self.peak_direction = MAXIMA
+                                    self.accel_minima = self.accel_val
+                                    self.time_window = time.time()
+                                    print "\n--------------- PEAK DETECTED MINIMA", self.num_steps
+                                    self.peak_threshold = PEAK_THRESHOLD
+                                    self.calculate_distance = True
+
+
+                    # looking for a maxima peak
+                    if( self.peak_direction == MAXIMA ):
+                        
+                        if( self.accel_val.y < self.accel_minima.y):
+                            self.accel_minima = self.accel_val
+
+                        else:
+
+                            if(self.calculate_distance and self.mode == GO_FORWARD):
+                                stride = getStrideLength(self.accel_list)
+                                print "--------------- STRIDE", stride
+                                self.distance += stride
+                                self.total_distance += stride
+                                self.accel_list = []
+                                self.calculate_distance = False
+
+                            if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
+                                if(time.time() - self.time_window >= TIME_THRESHOLD):
+                                    # a maxima has been detected and a step is detected
+                                    self.num_steps += 1
+                                    self.steps += 1
+                                    self.peak_direction = MINIMA
+                                    self.accel_maxima = self.accel_val
+                                    self.time_window = time.time()
+                                    print "\n--------------- PEAK DETECTED MAXIMA", self.num_steps
+                                    self.peak_threshold = PEAK_THRESHOLD
+                                    self.calculate_distance = True
+
+            else:
+                self.peak_direction = MINIMA
+                self.peak_threshold = PEAK_THRESHOLD / 2
+                self.accel_maxima = self.accel_val
+                self.first_time = False
+                self.sample_new = self.accel_val
+                self.time_window = time.time()   
 
             # reading compass values
             compass_xout = read_word_2c(self.bus, hmc_address, 3) - COMPASS_X_AXIS
@@ -256,7 +253,7 @@ class Navigation:
 
             ### mode STAIRS will update barometer
 
-            
+                
 
             # check qrcode updates
             try:
