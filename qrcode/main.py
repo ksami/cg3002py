@@ -3,6 +3,7 @@ import sys
 import multiprocessing
 import time
 import shlex
+import os
 
 qrcode_exe = shlex.split("/home/pi/cg3002py/qrcode/opencv-qrcode")
 
@@ -68,8 +69,9 @@ def qrscantest(q_kill):
 		if nextline == "" and process.poll() != None:
 			break
 
-		elif nextline != " ":
+		elif nextline[0] != ' ' and nextline[0] != '\n':
 			print nextline
+			os.system("aplay /home/pi/cg3002py/audio/tone.wav")
 
 	output = process.communicate()[0]
 	exitCode = process.returncode
@@ -80,11 +82,15 @@ if __name__ == "__main__":
 	p_qrscan = multiprocessing.Process(target=qrscantest, args=(q_kill,))
 	p_qrscan.start()
 
-	for i in xrange(1, 11):
-		time.sleep(1)
-		print i
+	try:
+		for i in xrange(1, 31):
+			time.sleep(1)
+			print i
 
-	q_kill.put(1)
+		q_kill.put(1)
+		
+	except KeyboardInterrupt:
+		q_kill.put(1)
 
 	# print "p_qrscan.is_alive():", p_qrscan.is_alive()
 	# p_qrscan.terminate()
