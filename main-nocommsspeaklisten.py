@@ -206,7 +206,6 @@ def executeOff():
 	# p_speak = createProcess(audio.main.speak, (_speak, "os"))
 	# p_speak.start()
 	# p_speak.join()
-	audio.main.speak(_speak, "os")
 	#send device ready to arduino
 	#handle timeout and repeated sending
 
@@ -222,7 +221,6 @@ def executeIdle():
 	# p_speak = createProcess(audio.main.speak, (_speak, "is"))
 	# p_speak.start()
 	# p_speak.join()
-	audio.main.speak(_speak, "is")
 	#nothing
 
 	#hand = q_xbee.get(block=True)
@@ -311,7 +309,6 @@ def executeNavi():
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
-	audio.main.speak(_speak, "ns")
 	#navigate
 	# if p_camera == None:
 	# 	p_camera = createProcess(camera, (q_cam))
@@ -326,9 +323,9 @@ def executeNavi():
 		p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode))
 		p_navi.start()
 
-	if p_feedback == None:
-		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
-		p_feedback.start()
+	# if p_feedback == None:
+	# 	p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
+	# 	p_feedback.start()
 
 	if p_qrscan == None:
 		p_qrscan = createProcess(qrcode.main.qrscan, (q_qrcode, q_kill_qr))
@@ -348,7 +345,6 @@ def executeWait():
 	# p_speak = createProcess(audio.main.speak, (_speak, "ws"))
 	# p_speak.start()
 	# p_speak.join()
-	audio.main.speak(_speak, "ws")
 	#do nothing
 		
 	p_timer = createProcess(function=timer.timer, args=(q_time, TIMEOUT_WAIT))
