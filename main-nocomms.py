@@ -201,6 +201,8 @@ def main():
 	except KeyboardInterrupt:
 		print "cleaning up"
 		q_kill_qr.put(1)
+		q_kill_listen.put(1)
+		q_kill_tts.put(1)
 		
 
 def executeOff():
