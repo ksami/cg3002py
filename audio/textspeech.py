@@ -75,10 +75,31 @@ class Speak:
 		os.system(command)
 
 
-	def speakq(self, q_tts):
+	def speakq(self, q_tts, q_kill):
 		while True:
-			cmd = q_tts.get(block=True)
-			speak(cmd)
+			# check for terminate
+			try:
+				kill = q_kill.get(block=False)
+				if kill == 1:
+					print "process.poll():", process.poll()
+					process.terminate()
+					print "process.poll():", process.poll()
+					# process.kill()
+					# print "process.poll():", process.poll()
+					process.wait()
+					print "process.poll():", process.poll()
+			# Queue.empty
+			except Exception:
+				#ignore
+				pass
+
+			try:
+				cmd = q_tts.get(block=False)
+				speak(cmd)
+			# Queue.empty
+			except Exception:
+				#ignore
+				pass
 
 
 	#just for testing can remove liao!

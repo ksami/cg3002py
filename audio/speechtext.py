@@ -12,13 +12,29 @@ class Listen:
 
 	#params:
 	#q_listen: output from pocketsphinx
-	def listen(self, q_listen):
+	def listen(self, q_listen, q_kill):
 		process = subprocess.Popen(Listen.program, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
 		self.pid = process.pid
 		print "listen running"
 		signal.signal(signal.SIGTERM, self.signal_term_handler)
 		# Poll process for new output until finished
 		while process.poll() == None:
+			# check for terminate
+			try:
+				kill = q_kill.get(block=False)
+				if kill == 1:
+					print "process.poll():", process.poll()
+					process.terminate()
+					print "process.poll():", process.poll()
+					# process.kill()
+					# print "process.poll():", process.poll()
+					process.wait()
+					print "process.poll():", process.poll()
+			# Queue.empty
+			except Exception:
+				#ignore
+				pass
+
 			# read output
 			nextline = process.stdout.readline()
 			if nextline == "" and process.poll() != None:
