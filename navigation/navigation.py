@@ -198,8 +198,10 @@ class Navigation:
                             if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
-                                    self.num_steps += 1
-                                    self.steps += 1
+                                    if(self.mode == GO_FORWARD):
+                                        self.num_steps += 1
+                                        self.steps += 1
+
                                     self.peak_direction = MAXIMA
                                     self.accel_minima = self.accel_val
                                     self.time_window = time.time()
@@ -227,8 +229,10 @@ class Navigation:
                             if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
-                                    self.num_steps += 1
-                                    self.steps += 1
+                                    if(self.mode == GO_FORWARD):
+                                        self.num_steps += 1
+                                        self.steps += 1
+
                                     self.peak_direction = MINIMA
                                     self.accel_maxima = self.accel_val
                                     self.time_window = time.time()
@@ -254,7 +258,6 @@ class Navigation:
 
             ### mode STAIRS will update barometer
 
-                
 
             # check qrcode updates
             try:
@@ -389,5 +392,5 @@ if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
     qr_queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 2)
+    navi.getShortestPath(1, 2, 1, 1, 2, 26)
     navi.execute(queue, qr_queue)

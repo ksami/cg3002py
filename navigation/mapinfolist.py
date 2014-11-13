@@ -1,8 +1,8 @@
 from mapinfo import MapInfo
 
 # constants for map
-cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
-#cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
+#cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
+cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
 
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
@@ -138,6 +138,6 @@ class MapInfoList:
 
 if __name__ == "__main__":
 	mapi = MapInfoList()
-	mapi.shortestPath(1, 2, 34, 2, 2, 17)
+	mapi.shortestPath(1, 2, 1, 1, 2, 26)
 
 
