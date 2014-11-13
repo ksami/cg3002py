@@ -2,6 +2,7 @@ from mapinfo import MapInfo
 
 # constants for map
 cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
+#cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
 
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
@@ -31,8 +32,9 @@ START_BUILDING = 1
 REACH_NODE = 2
 GO_FORWARD = 3
 TURN = 4
-REACH_DEST_BUILDING = 5
-ARRIVE_DESTINATION = 6
+STAIRS = 5
+REACH_DEST_BUILDING = 6
+ARRIVE_DESTINATION = 7
 
 class MapInfoList:
 
@@ -117,6 +119,8 @@ class MapInfoList:
 
 			elif(self.mode == REACH_DEST_BUILDING):
 
+				print "REACH END OF BUILDING: current building", self.currentBuilding
+
 				if(self.currentBuilding == len(self.building) - 1):
 					self.mode = ARRIVE_DESTINATION
 					for key in result.keys():
@@ -134,6 +138,6 @@ class MapInfoList:
 
 if __name__ == "__main__":
 	mapi = MapInfoList()
-	mapi.shortestPath(2, 3, 1, 1, 2, 1)
+	mapi.shortestPath(1, 2, 34, 2, 2, 17)
 
 
