@@ -81,13 +81,7 @@ class Speak:
 			try:
 				kill = q_kill.get(block=False)
 				if kill == 1:
-					print "process.poll():", process.poll()
-					process.terminate()
-					print "process.poll():", process.poll()
-					# process.kill()
-					# print "process.poll():", process.poll()
-					process.wait()
-					print "process.poll():", process.poll()
+					break
 			# Queue.empty
 			except Exception:
 				#ignore
@@ -109,9 +103,25 @@ class Speak:
 			speak.speak(myString)
 
 	#Make a Tick sound if queue has a value
-	def stepTicker(self, q_stepTicker):
-		if(q_stepTicker(block=True)):
-			os.system("aplay losticks.wav")
+	def stepTicker(self, q_stepTicker, q_kill):
+		while True:
+			# check for terminate
+			try:
+				kill = q_kill.get(block=False)
+				if kill == 1:
+					break
+			# Queue.empty
+			except Exception:
+				#ignore
+				pass
+
+			try:
+				step = q_stepTicker(block=False)
+				if step == 1:
+					os.system("aplay losticks.wav")
+			except Exception:
+				#ignore
+				pass
 
 
 

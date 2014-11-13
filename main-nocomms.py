@@ -47,13 +47,16 @@ q_xbee = createQueue()
 q_listen = createQueue()
 q_time = createQueue()
 q_qrcode = createQueue()
+q_step = createQueue()
 q_kill_qr = createQueue()
 q_kill_tts = createQueue()
 q_kill_listen = createQueue()
+q_kill_step = createQueue()
 
 # Processes
 p_navi = None
 p_feedback = None
+p_step = None
 p_listen = None
 p_qrscan = None
 p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
@@ -203,6 +206,7 @@ def main():
 		q_kill_qr.put(1)
 		q_kill_listen.put(1)
 		q_kill_tts.put(1)
+		q_kill_step.put(1)
 		
 
 def executeOff():
@@ -324,10 +328,11 @@ def executeNavi():
 	global p_navi
 	global p_feedback
 	global p_qrscan
+	global p_step
 
 	#if process has not been created before
 	if p_navi == None:
-		p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode))
+		p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode, q_step))
 		p_navi.start()
 
 	if p_feedback == None:
@@ -337,6 +342,10 @@ def executeNavi():
 	if p_qrscan == None:
 		p_qrscan = createProcess(qrcode.main.qrscan, (q_qrcode, q_kill_qr))
 		p_qrscan.start()
+
+	if p_step == None:
+		p_step = createProcess(audio.main.steps, (q_step, q_kill_step))
+		p_step.start()
 
 	#TODO: obstacle detection feedback to user
 	# hand = q_xbee.get(block=True)
@@ -404,6 +413,16 @@ def executeWait():
 			if p_feedback.is_alive():
 				p_feedback.terminate()
 				p_feedback.join()
+
+		if p_qrscan != None:
+			if p_qrscan.is_alive():
+				p_qrscan.terminate()
+				p_qrscan.join()
+
+		if p_step != None:
+			if p_step.is_alive():
+				p_step.terminate()
+				p_step.join()
 
 		# if p_camera != None:
 		# 	if p_camera.is_alive():

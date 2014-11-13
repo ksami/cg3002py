@@ -121,7 +121,7 @@ class Navigation:
     def getShortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
         tup = self.mapinfolist.shortestPath(startBuilding, startLevel, startNode, endBuilding, endLevel, endNode)
 
-    def execute(self, queue, q_qrcode):
+    def execute(self, queue, q_qrcode, q_step):
         
         ##### initialization stage #####
 
@@ -199,6 +199,9 @@ class Navigation:
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
                                     if(self.mode == GO_FORWARD):
+                                        #beep at every step
+                                        q_step.put(1)
+
                                         self.num_steps += 1
                                         self.steps += 1
 
@@ -230,6 +233,9 @@ class Navigation:
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
                                     if(self.mode == GO_FORWARD):
+                                        #beep at every step
+                                        q_step.put(1)
+                                        
                                         self.num_steps += 1
                                         self.steps += 1
 
