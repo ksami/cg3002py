@@ -118,6 +118,8 @@ class MapInfoList:
 
 			elif(self.mode == REACH_DEST_BUILDING):
 
+				print "REACH END OF BUILDING: current building", self.currentBuilding
+
 				if(self.currentBuilding == len(self.building) - 1):
 					self.mode = ARRIVE_DESTINATION
 					for key in result.keys():
