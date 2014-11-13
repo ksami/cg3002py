@@ -48,6 +48,8 @@ q_listen = createQueue()
 q_time = createQueue()
 q_qrcode = createQueue()
 q_kill_qr = createQueue()
+q_kill_tts = createQueue()
+q_kill_listen = createQueue()
 
 # Processes
 p_navi = None
@@ -199,6 +201,8 @@ def main():
 	except KeyboardInterrupt:
 		print "cleaning up"
 		q_kill_qr.put(1)
+		q_kill_listen.put(1)
+		q_kill_tts.put(1)
 		
 
 def executeOff():
@@ -243,7 +247,7 @@ def executeInit():
 	global p_listen
 	
 	# if p_listen == None:
-	# 	p_listen = createProcess(audio.main.listen, (q_listen,))
+	# 	p_listen = createProcess(audio.main.listen, (q_listen, q_kill_listen))
 	# 	p_listen.start()
 
 	# inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
@@ -327,7 +331,7 @@ def executeNavi():
 		p_navi.start()
 
 	if p_feedback == None:
-		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi))
+		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi, q_kill_tts))
 		p_feedback.start()
 
 	if p_qrscan == None:
