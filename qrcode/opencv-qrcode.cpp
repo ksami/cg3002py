@@ -15,8 +15,8 @@ using namespace cv;
 using namespace std;
 using namespace zbar;  
 
-#define WIDTH 128
-#define HEIGHT 128
+#define WIDTH 256
+#define HEIGHT 256
 
 int main(void){  
 	VideoCapture cap(0);

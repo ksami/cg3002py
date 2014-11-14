@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	p_qrscan.start()
 
 	try:
-		for i in xrange(1, 31):
+		for i in xrange(1, 3001):
 			time.sleep(1)
 			print i
 

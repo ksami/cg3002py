@@ -55,5 +55,5 @@ def email():
 	print "refused is ", refused
 	server.quit()
 
-if __name__ = "__main__":
+if __name__ == "__main__":
 	email()
