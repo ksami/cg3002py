@@ -1,8 +1,8 @@
 from mapinfo import MapInfo
 
 # constants for map
-#cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
-cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
+cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
+#cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
 
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
@@ -104,7 +104,7 @@ class MapInfoList:
 			print "\nBuilding: ", self.building[i], "\n"
 			self.mapinfoList[self.building[i]].shortestPath(start[i], end[i])
 
-	def giveDirection (self, distance, heading, coordX, coordY, numSteps):
+	def giveDirection (self, distance, heading, altitude, coordX, coordY, numSteps):
 
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
@@ -112,7 +112,7 @@ class MapInfoList:
 			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building), COORDX : 0, COORDY : 0}
 
 		else:
-			result = self.mapinfoList[self.building[self.currentBuilding]].giveDirection(self.mode, distance, heading, coordX, coordY, numSteps)
+			result = self.mapinfoList[self.building[self.currentBuilding]].giveDirection(self.mode, distance, heading, altitude, coordX, coordY, numSteps)
 			if(result[MODE] != TURN):
 				self.mode = result[MODE]
 
@@ -123,7 +123,7 @@ class MapInfoList:
 
 			elif(self.mode == REACH_NODE):
 				currentNode = result[CURRENT_NODE]
-				if(currentNode == STAIRS_NODE_ID && self.building[self.currentBuilding] == STAIRS_BUILDING_ID):
+				if(currentNode == STAIRS_NODE_ID and self.building[self.currentBuilding] == STAIRS_BUILDING_ID):
 					self.mode = STAIRS
 					for key in result.keys():
 						if key == MODE:
