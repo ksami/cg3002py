@@ -119,5 +119,9 @@ while(time.time() - time_elapsed <= 60):
 
     print size
 
+print "min x", minx
+print "max x", minx
+print "min z", minz
+print "max z", maxz
 print "COMPASS X OFFSET", (maxx + minx) / 2.0
 print "COMPASS Z OFFSET", (maxz + minz) / 2.0
