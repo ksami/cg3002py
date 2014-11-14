@@ -268,14 +268,14 @@ def executeInit():
 	inputs_keys = ["sb", "sl", "sn", "eb", "el", "en"]
 	inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
 	
-	for key in inputs_keys:
-		if key in inputs:
-			userInput = getUserInput(key)
-			if userInput == -1:
-				isCancel = True
-				break
-			else:
-				inputs[key] = userInput
+	#for key in inputs_keys:
+	#	if key in inputs:
+	#		userInput = getUserInput(key)
+	#		if userInput == -1:
+	#			isCancel = True
+	#			break
+	#		else:
+	#			inputs[key] = userInput
 	
 	if p_listen.is_alive():
 		p_listen.terminate()
@@ -290,12 +290,12 @@ def executeInit():
 		
 	else:
 		# Initialise and start navigation processes
-		sb = strToInt(inputs["sb"])
-		sl = strToInt(inputs["sl"])
-		sn = strToInt(inputs["sn"])
-		eb = strToInt(inputs["eb"])
-		el = strToInt(inputs["el"])
-		en = strToInt(inputs["en"])
+		#sb = strToInt(inputs["sb"])
+		#sl = strToInt(inputs["sl"])
+		#sn = strToInt(inputs["sn"])
+		#eb = strToInt(inputs["eb"])
+		#el = strToInt(inputs["el"])
+		#en = strToInt(inputs["en"])
 
 		# istartpt = strToInt(startpt)
 		# iendpt = strToInt(endpt)
@@ -304,9 +304,9 @@ def executeInit():
 		# p_navisp = createProcess(navigation.main.getShortestPath, (_navi, istartpt, iendpt))
 		# p_navisp.start()
 		# p_navisp.join()
-		_navi.getShortestPath(sb, sl, sn, eb, el, en)
+		#_navi.getShortestPath(sb, sl, sn, eb, el, en)
 		# _navi.getShortestPath(istartpt, iendpt)
-		# _navi.getShortestPath(2,2,6, 2,2,2)
+		_navi.getShortestPath(1,2,1, 1,2,10)
 
 		# Change to NAVI state
 		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))

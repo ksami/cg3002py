@@ -89,6 +89,7 @@ class Speak:
 
 			try:
 				cmd = q_tts.get(block=False)
+				print "espeaking:", cmd
 				program = "exec espeak -s 155 "
 				dumpOutput = " > /dev/null 2>&1"
 				if cmd[0] == "c":

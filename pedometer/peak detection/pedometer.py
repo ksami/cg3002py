@@ -5,7 +5,7 @@ import sys
 from vector import Vector
 
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
-PEAK_THRESHOLD = 5000
+PEAK_THRESHOLD = 7000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
 STRIDE_COEFFICIENT = 1
