@@ -23,7 +23,7 @@ class Speak:
 		"ws": "System paused",
 		"rn": "You have reached node {node}",
 		#"sj": "You have to walk through {numBuildings} buildings",
-		"cn": "Currently at building {building} and node {node}"
+		"bn": "Currently at building {building} and node {node}"
 	}
 	program = "exec espeak -s 155 "  #program to execute
 	dumpOutput = " > /dev/null 2>&1"

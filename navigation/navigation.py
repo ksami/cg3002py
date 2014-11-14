@@ -328,7 +328,7 @@ class Navigation:
 
                 # feedback is "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node " + str(currentNode)                  
                 # feedback = "sb," + str(building) + "," + str(level) + "," + str(numberNodes) + "," + str(currentNode)
-                feedback = "cn," + str(currentBuilding) + "," + str(currentNode)
+                feedback = "bn," + str(currentBuilding) + "," + str(currentNode)
                 print "\n\n--- MODE: START_BUILDING ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == REACH_NODE):
