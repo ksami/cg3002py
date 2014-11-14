@@ -66,31 +66,58 @@ bus.write_byte_data(hmc_address, 2, 0b00000000) # Continuous sampling
 
 size = 1
 
-calibrated = []
-uncalibrated = []
+# calibrated = []
+# uncalibrated = []
 
-while(True):
-    compass_xout = read_word_2c(bus, hmc_address, 3) - COMPASS_X_AXIS 
+# while(True):
+#     compass_xout = read_word_2c(bus, hmc_address, 3) - COMPASS_X_AXIS 
+#     compass_yout = read_word_2c(bus, hmc_address, 7) 
+#     compass_zout = read_word_2c(bus, hmc_address, 5) - COMPASS_Z_AXIS
+
+#     uncalibrated.insert(0, compass_xout)
+#     uncalibrated.insert(1, compass_yout)
+#     uncalibrated.insert(2, compass_zout)
+
+#     calibrated = [0] * 3
+
+#     for i in range(3):
+#         uncalibrated[i] = uncalibrated[i] - BIAS[i]
+
+#     for i in range(3):
+#         for j in range(3):
+#             calibrated[i] += CALIBRATION_MATRIX[i][j] * uncalibrated[j]
+
+#     print "---- Size:", size, "----"
+#     print "uncalibrated:", compass_xout, compass_yout, compass_zout
+#     print "calibrated:", calibrated[0], calibrated[1], calibrated[2], "\n\n"
+
+#     size += 1
+
+#     time.sleep(1)
+
+time_elapsed = time.time()
+minx = sys.maxint
+maxx = -sys.maxint
+minz = sys.maxint
+maxz = -sys.maxint
+
+while(time.time() - time_elapsed <= 60):
+    compass_xout = read_word_2c(bus, hmc_address, 3)
     compass_yout = read_word_2c(bus, hmc_address, 7) 
-    compass_zout = read_word_2c(bus, hmc_address, 5) - COMPASS_Z_AXIS
-
-    uncalibrated.insert(0, compass_xout)
-    uncalibrated.insert(1, compass_yout)
-    uncalibrated.insert(2, compass_zout)
-
-    calibrated = [0] * 3
-
-    for i in range(3):
-        uncalibrated[i] = uncalibrated[i] - BIAS[i]
-
-    for i in range(3):
-        for j in range(3):
-            calibrated[i] += CALIBRATION_MATRIX[i][j] * uncalibrated[j]
-
-    print "---- Size:", size, "----"
-    print "uncalibrated:", compass_xout, compass_yout, compass_zout
-    print "calibrated:", calibrated[0], calibrated[1], calibrated[2], "\n\n"
+    compass_zout = read_word_2c(bus, hmc_address, 5)
 
     size += 1
 
-    time.sleep(1)
+    if(maxx < compass_xout):
+        maxx = compass_xout
+    if(minx > compass_xout):
+        minx = compass_xout
+    if(minz > compass_zout):
+        minz = compass_zout
+    if(maxz < compass_zout):
+        maxz = compass_zout
+
+    print size
+
+print "COMPASS X OFFSET", (maxx + minx) / 2.0
+print "COMPASS Z OFFSET", (maxz + minz) / 2.0
