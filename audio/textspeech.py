@@ -22,8 +22,8 @@ class Speak:
 		"ns": "Starting navigation",
 		"ws": "System paused",
 		"rn": "You have reached node {node}",
-		"sj": "You have to walk through {numBuildings} buildings",
-		"sb": "You are currently at building {building} level {level}. You have to walk pass {numNodes} nodes. Now starting at node {startNode}"
+		#"sj": "You have to walk through {numBuildings} buildings",
+		"cn": "Currently at building {building} and node {node}"
 	}
 	program = "exec espeak -s 155 "  #program to execute
 	dumpOutput = " > /dev/null 2>&1"
@@ -57,14 +57,13 @@ class Speak:
 			w = cmd[3:]
 			command = (program + "\"" + a + "\"").format(numBuildings = w) + dumpOutput
 
-		elif cmd[0:2] == "sb":
+		#current node
+		elif cmd[0:2] == "cn":
 			cmd = cmd.split(',')
 			a = Speak.cmd_list[cmd[0]]
 			w = cmd[1]
 			x = cmd[2]
-			y = cmd[3]
-			z = cmd[4]
-			command = (program + "\"" + a + "\"").format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
+			command = (program + "\"" + a + "\"").format(building=w, node=x) + dumpOutput
 
 		else:
 			try:
