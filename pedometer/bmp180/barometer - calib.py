@@ -11,4 +11,3 @@ if __name__ == "__main__":
 
 	while(True):
 		print "Altitude:", bmp.read_altitude(SEA_LEVEL)
-		time.sleep(1)
