@@ -280,7 +280,7 @@ def executeInit():
 		p_listen.terminate()
 		p_listen.join()
 		
-		empty queue
+		# empty queue
 		while q_listen.empty() == False:
 			q_listen.get()
 
