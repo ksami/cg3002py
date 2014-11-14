@@ -1,8 +1,8 @@
 from mapinfo import MapInfo
 
 # constants for map
-#cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
-cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
+cached_map = ["/home/pi/cg3002py/navigation/com1lvl2.json", "/home/pi/cg3002py/navigation/com2lvl2.json", "/home/pi/cg3002py/navigation/com2lvl3.json"]
+#cached_map = ["com1lvl2.json", "com2lvl2.json", "com2lvl3.json"]
 
 NODE_ID_0_1 = 31
 NODE_ID_1_0 = 1
@@ -123,7 +123,7 @@ class MapInfoList:
 
 			elif(self.mode == REACH_NODE):
 				currentNode = result[CURRENT_NODE]
-				if(currentNode == STAIRS_NODE_ID && self.building[self.currentBuilding] == STAIRS_BUILDING_ID):
+				if(currentNode == STAIRS_NODE_ID and self.building[self.currentBuilding] == STAIRS_BUILDING_ID):
 					self.mode = STAIRS
 					for key in result.keys():
 						if key == MODE:

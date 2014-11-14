@@ -227,7 +227,7 @@ class MapInfo:
 				return {MODE : mode , NUMBER_NODES : len(self.path), CURRENT_NODE : self.mapList[self.path[0]].getId() , COORDX : coordX, COORDY : coordY}
 
 			else:
-				return {MODE : mode, COORDX, coordX, COORDY, coordY}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 
 
 
