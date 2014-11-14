@@ -33,8 +33,8 @@ CORRIDOR_THRESHOLD = 273 / 2.0
 DISTANCE_THRESHOLD = 100
 NUM_STEPS_CHECK = 3
 
-EXPECTED_ALTITUDE = 0
-ALTITUDE_THRESHOLD = 0
+EXPECTED_ALTITUDE = 65.7831416
+ALTITUDE_THRESHOLD = 0.3
 
 
 # string constants
@@ -220,11 +220,8 @@ class MapInfo:
 
 		elif(mode == STAIRS):
 			if(fabs(altitude - EXPECTED_ALTITUDE) <= ALTITUDE_THRESHOLD ):
-				mode = START_BUILDING
-				self.current = 0
-				coordX = self.mapList[self.path[self.current]].getX()
-				coordY = self.mapList[self.path[self.current]].getY()
-				return {MODE : mode , NUMBER_NODES : len(self.path), CURRENT_NODE : self.mapList[self.path[0]].getId() , COORDX : coordX, COORDY : coordY}
+				mode = REACH_DEST_BUILDING
+				return {MODE : mode , COORDX : coordX, COORDY : coordY}
 
 			else:
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}

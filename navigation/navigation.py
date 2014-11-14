@@ -309,10 +309,10 @@ class Navigation:
                 numberBuildings = result[NUMBER_OF_BUILDINGS]
                 
                 #feedback is "You have to walk through " + str(numberBuildings) + " building(s)"
-                feedback = "sj," + str(numberBuildings)
-                print "\n\nMODE: START_JOURNEY ---\n" + feedback
+                # feedback = "sj," + str(numberBuildings)
+                print "\n\nMODE: START_JOURNEY ---\n" + "sj," + str(numberBuildings)
 
-            elif(self.mode == START_BUILDING):
+            if(self.mode == START_BUILDING):
                 numberNodes = result[NUMBER_NODES]
                 currentBuilding = result[CURRENT_BUILDING]
                 currentNode = result[CURRENT_NODE]
@@ -327,7 +327,8 @@ class Navigation:
                     level = 3
 
                 # feedback is "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node " + str(currentNode)                  
-                feedback = "sb," + str(building) + "," + str(level) + "," + str(numberNodes) + "," + str(currentNode)
+                # feedback = "sb," + str(building) + "," + str(level) + "," + str(numberNodes) + "," + str(currentNode)
+                feedback = "cn," + str(currentBuilding) + "," + str(currentNode)
                 print "\n\n--- MODE: START_BUILDING ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == REACH_NODE):
@@ -339,7 +340,7 @@ class Navigation:
             elif (self.mode == TURN):
                 if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
                     isLeft = result[LEFTORRIGHT]
-                    angle = result[ANGLE]
+                    angle = int(result[ANGLE])
                     self.turn_time = time.time()
                     if(isLeft == LEFT):
 
@@ -365,7 +366,6 @@ class Navigation:
                     print "\n\n--- MODE: STAIRS ---\n" + "Stairs"
 
             elif(self.mode == ARRIVE_DESTINATION):
-                print "REACH DESTINATION"
                 feedback = "r"
                 print "\n\nMODE: ARRIVE DESTINATION ---"
                 queue.put(feedback)
