@@ -124,6 +124,13 @@ class Speak:
 					z = cmd[4]
 					command = (program + "\"" + a + "\"").format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
 
+				elif cmd[0:2] == "bn":
+					cmd = cmd.split(',')
+					a = Speak.cmd_list[cmd[0]]
+					w = cmd[1]
+					x = cmd[2]
+					command = (program + "\"" + a + "\"").format(building=w, node=x) + dumpOutput
+
 				else:
 					try:
 						a = Speak.cmd_list[cmd]
