@@ -58,7 +58,7 @@ class Speak:
 			command = (program + "\"" + a + "\"").format(numBuildings = w) + dumpOutput
 
 		#current node
-		elif cmd[0:2] == "cn":
+		elif cmd[0:2] == "bn":
 			cmd = cmd.split(',')
 			a = Speak.cmd_list[cmd[0]]
 			w = cmd[1]
