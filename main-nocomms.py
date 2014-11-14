@@ -254,16 +254,6 @@ def executeInit():
 	# 	p_listen = createProcess(audio.main.listen, (q_listen, q_kill_listen))
 	# 	p_listen.start()
 
-	# inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
-	
-	# for key in inputs.keys():
-	# 	userInput = getUserInput(key)
-	# 	if userInput == -1:
-	# 		isCancel = True
-	# 		break
-	# 	else:
-	# 		inputs[key] = userInput
-
 	# startpt = getUserInput("sp")
 	# #startpt = "five"
 	# if startpt == -1:
@@ -275,6 +265,15 @@ def executeInit():
 	# 	if endpt == -1:
 	# 		isCancel = True
 
+	# inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
+	
+	# for key in inputs.keys():
+	# 	userInput = getUserInput(key)
+	# 	if userInput == -1:
+	# 		isCancel = True
+	# 		break
+	# 	else:
+	# 		inputs[key] = userInput
 	
 	# if p_listen.is_alive():
 	# 	p_listen.terminate()
