@@ -361,7 +361,7 @@ class Navigation:
             elif(self.mode == STAIRS):
                 if(time.time() - self.stairs_time >= STAIRS_UPDATE_TIME):
                     self.stairs_time = time.time()
-                    feedback = "gup"
+                    feedback = "gu"
                     print "\n\n--- MODE: STAIRS ---\n" + "Stairs"
 
             elif(self.mode == ARRIVE_DESTINATION):

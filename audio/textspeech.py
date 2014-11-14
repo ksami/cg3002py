@@ -14,6 +14,7 @@ class Speak:
 		"r": "You have reached your destination ",
 		"c": "Did you say {confirm}",
 		"gf": "Go Forward",
+		"gu": "Go Up",
 		"tl": "Turn Left by {angle} degrees",
 		"tr": "Turn Right by {angle} degrees",
 		"os": "System starting up",
