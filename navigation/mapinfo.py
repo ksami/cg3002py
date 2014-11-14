@@ -155,7 +155,7 @@ class MapInfo:
 
 			if( diff_angle <= ANGLE_THRESHOLD):
 				mode = GO_FORWARD
-				return {MODE : mode, COORDX : coordX, COORDY : coordY}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, CURRENT_NODE : self.mapList[self.path[0]].getId()}
 			else:
 				mode = TURN
 				turning = LEFT
@@ -163,7 +163,7 @@ class MapInfo:
 				if(cross_vector > 0):
 					turning = RIGHT
 
-				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: diff_angle}
+				return {MODE : mode, COORDX : coordX, COORDY : coordY, LEFTORRIGHT : turning, ANGLE: diff_angle, CURRENT_NODE : self.mapList[self.path[0]].getId()}
 
 		elif(mode == GO_FORWARD):
 
