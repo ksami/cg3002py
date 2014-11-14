@@ -24,7 +24,7 @@ import logging
 
 import smbus
 
-import Adafruit_GPIO.Platform as Platform
+import Platform as Platform
 
 
 def reverseByteOrder(data):
