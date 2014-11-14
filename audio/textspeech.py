@@ -13,10 +13,10 @@ class Speak:
 		"en": "State ending node",
 		"r": "You have reached your destination ",
 		"c": "Did you say {confirm}",
-		"gf": "Go Forward",
+		"gf": "Forward",
 		"gu": "Go Up",
-		"tl": "Turn Left by {angle} degrees",
-		"tr": "Turn Right by {angle} degrees",
+		"tl": "Left",
+		"tr": "Right",
 		"os": "System starting up",
 		"is": "Welcome. Clench your fist to start",
 		"ns": "Starting navigation",
@@ -42,10 +42,10 @@ class Speak:
 			#print command for debugging
 			self.prevcmd = cmd[0]
 
-		elif cmd[0:2] == "tl" or cmd[0:2] == "tr":
-			a = Speak.cmd_list[cmd[0:2]]
-			w = cmd[3:]
-			command = (program + "\"" + a + "\"").format(angle = w) + dumpOutput
+		# elif cmd[0:2] == "tl" or cmd[0:2] == "tr":
+		# 	a = Speak.cmd_list[cmd[0:2]]
+		# 	#w = cmd[3:]
+		# 	command = (program + "\"" + a + "\"").format(angle = w) + dumpOutput
 
 		elif cmd[0:2] == "rn":
 			a = Speak.cmd_list[cmd[0:2]]
