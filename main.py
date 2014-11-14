@@ -233,8 +233,8 @@ def executeIdle():
 	audio.main.speak(_speak, "is")
 	#nothing
 
-	#hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_CLOSE
+	hand = q_xbee.get(block=True)
+	#hand = comms.python.main.HAND_CLOSE
 	print "hand: ", hand
 	if hand == comms.python.main.HAND_CLOSE:
 		_systemState.changeState()
@@ -345,8 +345,8 @@ def executeNavi():
 		p_step.start()
 
 	#TODO: obstacle detection feedback to user
-	# hand = q_xbee.get(block=True)
-	hand = comms.python.main.HAND_CLOSE
+	hand = q_xbee.get(block=True)
+	# hand = comms.python.main.HAND_CLOSE
 	if hand == comms.python.main.HAND_OPEN:
 		_systemState.changeState(isHandOpen=True)
 	else:
