@@ -320,7 +320,7 @@ def executeNavi():
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
-	audio.main.speak(_speak, "ns")
+	#audio.main.speak(_speak, "ns")
 	#navigate
 
 	global p_navi
