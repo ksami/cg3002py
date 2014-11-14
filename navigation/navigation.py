@@ -279,7 +279,7 @@ class Navigation:
 
             ### mode STAIRS will update barometer
             if(self.mode == STAIRS):
-                self.altitude = bmp180.read_altitude(SEA_LEVEL)
+                self.altitude = self.barometer.read_altitude(SEA_LEVEL)
 
             # check qrcode updates
             try:

@@ -224,6 +224,7 @@ class MapInfo:
 				return {MODE : mode , COORDX : coordX, COORDY : coordY}
 
 			else:
+				print "Altitude:", altitude
 				return {MODE : mode, COORDX : coordX, COORDY : coordY}
 
 
