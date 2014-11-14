@@ -104,7 +104,7 @@ class MapInfoList:
 			print "\nBuilding: ", self.building[i], "\n"
 			self.mapinfoList[self.building[i]].shortestPath(start[i], end[i])
 
-	def giveDirection (self, distance, heading, coordX, coordY, numSteps):
+	def giveDirection (self, distance, heading, altitude, coordX, coordY, numSteps):
 
 		if(self.mode == START_JOURNEY):
 			self.mode = START_BUILDING
@@ -112,7 +112,7 @@ class MapInfoList:
 			return {MODE : START_JOURNEY, NUMBER_OF_BUILDINGS : len(self.building), COORDX : 0, COORDY : 0}
 
 		else:
-			result = self.mapinfoList[self.building[self.currentBuilding]].giveDirection(self.mode, distance, heading, coordX, coordY, numSteps)
+			result = self.mapinfoList[self.building[self.currentBuilding]].giveDirection(self.mode, distance, heading, altitude, coordX, coordY, numSteps)
 			if(result[MODE] != TURN):
 				self.mode = result[MODE]
 

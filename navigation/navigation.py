@@ -6,6 +6,7 @@ import time
 import sys
 from vector import Vector
 from mapinfolist import MapInfoList
+from bmp180 import BMP085
 
 # Calibration constants
 ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
@@ -59,6 +60,11 @@ CURRENT_NODE = "CURRENT_NODE"
 NUMBER_OF_BUILDINGS = "NUMBER_OF_BUILDINGS"
 CURRENT_BUILDING = "CURRENT_BUILDING"
 
+# BMP085
+BMP085_I2CADDR = 0x77
+BMP085_STANDARD = 1
+SEA_LEVEL = 101325.0
+
 class Navigation:
 
     def __init__(self):
@@ -68,7 +74,6 @@ class Navigation:
         self.mode = START_JOURNEY
         self.coordX = 0
         self.coordY = 0
-        self.destination = ""
 
         # invoking hmc5833l i2c bus inside mpu6050
         self.bus.write_byte_data(mpu_address, 0x6A, 0)
@@ -116,8 +121,12 @@ class Navigation:
         self.compass_val = Vector(0, 0, 0)
         self.heading = 0
 
+        # used for barometer
+        self.barometer = BMP085(BMP085_STANDARD, BMP085_I2CADDR, 1)
+        self.altitude = 0
+
         # download map
-        self.mapinfolist = MapInfoList()
+        self.mapinfolist = MapInfoList(BMP085_STANDARD, BMP085_I2CADDR, 1)
 
     # call this method when receive start and destination id
     def getShortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
@@ -267,7 +276,8 @@ class Navigation:
             self.heading = GetHeading(self.compass_val)
 
             ### mode STAIRS will update barometer
-
+            if(self.mode == STAIRS):
+                self.altitude = bmp180.read_altitude(SEA_LEVEL)
 
             # check qrcode updates
             try:
@@ -287,7 +297,7 @@ class Navigation:
                 pass
 
             ##### check state machine #####
-            result = self.mapinfolist.giveDirection(self.distance, self.heading, self.coordX, self.coordY, self.steps)
+            result = self.mapinfolist.giveDirection(self.distance, self.heading, self.altitude, self.coordX, self.coordY, self.steps)
             self.steps = 0
             self.distance = 0
             self.mode = result[MODE]
