@@ -116,6 +116,7 @@ class Navigation:
 
         self.calculate_distance = False
         self.first_time = True
+        self.startNavi = True
 
         # used for compass heading
         self.compass_val = Vector(0, 0, 0)
@@ -313,22 +314,23 @@ class Navigation:
                 print "\n\nMODE: START_JOURNEY ---\n" + "sj," + str(numberBuildings)
 
             if(self.mode == START_BUILDING):
-                numberNodes = result[NUMBER_NODES]
+                # numberNodes = result[NUMBER_NODES]
                 currentBuilding = result[CURRENT_BUILDING]
                 currentNode = result[CURRENT_NODE]
-                building = "COM 1"
-                level = 2
+                # building = "COM 1"
+                # level = 2
 
-                if(currentBuilding == 1):
-                    building = "COM 2"
-                    level = 2
-                elif(currentBuilding == 2):
-                    building = "COM 2"
-                    level = 3
+                # if(currentBuilding == 1):
+                    # building = "COM 2"
+                    # level = 2
+                # elif(currentBuilding == 2):
+                    # building = "COM 2"
+                    # level = 3
 
                 # feedback is "You are currently at building " + str(building) + " level " + str(level) + "\nYou have to walk pass " + str(numberNodes) + " nodes" "\nNow starting at node " + str(currentNode)                  
                 # feedback = "sb," + str(building) + "," + str(level) + "," + str(numberNodes) + "," + str(currentNode)
                 feedback = "bn," + str(currentBuilding) + "," + str(currentNode)
+                self.startNavi = True
                 print "\n\n--- MODE: START_BUILDING ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif(self.mode == REACH_NODE):
@@ -338,19 +340,23 @@ class Navigation:
                 print "\n\n--- MODE: REACH_NODE ---\n" + feedback + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
 
             elif (self.mode == TURN):
-                if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
-                    isLeft = result[LEFTORRIGHT]
-                    angle = int(result[ANGLE])
-                    self.turn_time = time.time()
-                    if(isLeft == LEFT):
+                if(!self.startNavi):
+                    if(time.time() - self.turn_time >= TURN_UPDATE_TIME):
+                        isLeft = result[LEFTORRIGHT]
+                        angle = int(result[ANGLE])
+                        self.turn_time = time.time()
+                        if(isLeft == LEFT):
 
-                        # feedback is "Turn left by " + str(angle) + " degrees"
-                        feedback = "tl," + str(angle)
-                    else:
-                        
-                        # feedback is "Turn right by " + str(angle) + " degrees"
-                        feedback = "tr," + str(angle)
-                    print "\n\n--- MODE: TURN ---\n" + feedback
+                            # feedback is "Turn left by " + str(angle) + " degrees"
+                            feedback = "tl," + str(angle)
+                        else:
+                            
+                            # feedback is "Turn right by " + str(angle) + " degrees"
+                            feedback = "tr," + str(angle)
+                        print "\n\n--- MODE: TURN ---\n" + feedback
+                else:
+                    self.startNavi = false
+                    self.turn_time = time.time()
 
 
             elif(self.mode == GO_FORWARD):
