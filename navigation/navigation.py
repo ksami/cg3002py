@@ -425,5 +425,5 @@ if __name__ == "__main__":
     queue = multiprocessing.Queue()
     qr_queue = multiprocessing.Queue()
     beep_queue = multiprocessing.Queue()
-    navi.getShortestPath(1, 2, 1, 1, 2, 26)
+    navi.getShortestPath(2, 2, 14, 2, 3, 11)
     navi.execute(queue, qr_queue, beep_queue)
