@@ -90,7 +90,48 @@ class Speak:
 
 			try:
 				cmd = q_tts.get(block=False)
-				speak(cmd)
+				program = "exec espeak -s 155 "
+				dumpOutput = " > /dev/null 2>&1"
+				if cmd[0] == "c":
+					#slice from comma to end
+					a = Speak.cmd_list[cmd[0]] #a is the command (Change Later)
+					w = cmd[2:]			   	   #w is the stuff to add to the command (Change Later) 
+					command = (program + "\"" + a + "\"").format(confirm = w) + dumpOutput
+					#print command for debugging
+					self.prevcmd = cmd[0]
+
+				elif cmd[0:2] == "tl" or cmd[0:2] == "tr":
+					a = Speak.cmd_list[cmd[0:2]]
+					w = cmd[3:]
+					command = (program + "\"" + a + "\"").format(angle = w) + dumpOutput
+
+				elif cmd[0:2] == "rn":
+					a = Speak.cmd_list[cmd[0:2]]
+					w = cmd[3:]
+					command = (program + "\"" + a + "\"").format(node = w) + dumpOutput
+
+				elif cmd[0:2] == "sj":
+					a = Speak.cmd_list[cmd[0:2]]
+					w = cmd[3:]
+					command = (program + "\"" + a + "\"").format(numBuildings = w) + dumpOutput
+
+				elif cmd[0:2] == "sb":
+					cmd = cmd.split(',')
+					a = Speak.cmd_list[cmd[0]]
+					w = cmd[1]
+					x = cmd[2]
+					y = cmd[3]
+					z = cmd[4]
+					command = (program + "\"" + a + "\"").format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
+
+				else:
+					try:
+						a = Speak.cmd_list[cmd]
+					except:
+						raise
+					command = (program + "\"" + a + "\"") + dumpOutput
+
+				os.system(command)
 			# Queue.empty
 			except Exception:
 				#ignore
