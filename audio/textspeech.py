@@ -157,7 +157,7 @@ class Speak:
 				pass
 
 			try:
-				step = q_stepTicker(block=False)
+				step = q_stepTicker.get(block=False)
 				if step == 1:
 					os.system("aplay losticks.wav")
 			except Exception:

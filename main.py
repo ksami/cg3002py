@@ -342,7 +342,7 @@ def executeNavi():
 		p_qrscan.start()
 
 	if p_step == None:
-		p_step = createProcess(audio.main.steps, (q_step, q_kill_step))
+		p_step = createProcess(audio.soundForStep.stepTicker, (q_step, q_kill_step))
 		p_step.start()
 
 	#TODO: obstacle detection feedback to user
