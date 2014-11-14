@@ -318,7 +318,7 @@ def executeNavi():
 	# p_speak = createProcess(audio.main.speak, (_speak, "ns"))
 	# p_speak.start()
 	# p_speak.join()
-	audio.main.speak(_speak, "ns")
+	#audio.main.speak(_speak, "ns")
 	#navigate
 	# if p_camera == None:
 	# 	p_camera = createProcess(camera, (q_cam))
