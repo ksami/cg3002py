@@ -56,7 +56,7 @@ q_kill_step = createQueue()
 # Processes
 p_navi = None
 p_feedback = None
-p_step = None
+# p_step = None
 p_listen = None
 p_qrscan = None
 p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
@@ -326,7 +326,7 @@ def executeNavi():
 	global p_navi
 	global p_feedback
 	global p_qrscan
-	global p_step
+	# global p_step
 
 	#if process has not been created before
 	if p_navi == None:
@@ -337,13 +337,13 @@ def executeNavi():
 		p_feedback = createProcess(audio.main.speakq, (_speak, q_navi, q_kill_tts))
 		p_feedback.start()
 
-	if p_qrscan == None:
-		p_qrscan = createProcess(qrcode.main.qrscan, (q_qrcode, q_kill_qr))
-		p_qrscan.start()
+	# if p_qrscan == None:
+	# 	p_qrscan = createProcess(qrcode.main.qrscan, (q_qrcode, q_kill_qr))
+	# 	p_qrscan.start()
 
-	if p_step == None:
-		p_step = createProcess(audio.soundForStep.stepTicker, (q_step, q_kill_step))
-		p_step.start()
+	# if p_step == None:
+	# 	p_step = createProcess(audio.soundForStep.stepTicker, (q_step, q_kill_step))
+	# 	p_step.start()
 
 	#TODO: obstacle detection feedback to user
 	hand = q_xbee.get(block=True)
