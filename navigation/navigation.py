@@ -345,11 +345,11 @@ class Navigation:
                     if(isLeft == LEFT):
 
                         # feedback is "Turn left by " + str(angle) + " degrees"
-                        feedback = "tl," + str(angle)
+                        feedback = "tl"
                     else:
                         
                         # feedback is "Turn right by " + str(angle) + " degrees"
-                        feedback = "tr," + str(angle)
+                        feedback = "tr"
                     print "\n\n--- MODE: TURN ---\n" + feedback
 
 
