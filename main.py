@@ -265,16 +265,17 @@ def executeInit():
 	# 	if endpt == -1:
 	# 		isCancel = True
 
-
+	inputs_keys = ["sb", "sl", "sn", "eb", "el", "en"]
 	inputs = {"sb":"", "sl":"", "sn":"", "eb":"", "el":"", "en":""}
 	
-	for key in inputs.keys():
-		userInput = getUserInput(key)
-		if userInput == -1:
-			isCancel = True
-			break
-		else:
-			inputs[key] = userInput
+	for key in inputs_keys:
+		if key in inputs:
+			userInput = getUserInput(key)
+			if userInput == -1:
+				isCancel = True
+				break
+			else:
+				inputs[key] = userInput
 	
 	if p_listen.is_alive():
 		p_listen.terminate()
