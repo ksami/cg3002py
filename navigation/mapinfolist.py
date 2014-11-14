@@ -21,6 +21,10 @@ LEFTORRIGHT = "LEFTORRIGHT"
 DESTINATION = "DESTINATION"
 NUMBER_OF_BUILDINGS = "NUMBER_OF_BUILDINGS"
 CURRENT_BUILDING = "CURRENT_BUILDING"
+CURRENT_NODE = "CURRENT_NODE"
+
+STAIRS_NODE_ID = 16
+STAIRS_BUILDING_ID = 1
 
 # turning directions
 LEFT = 0
@@ -117,9 +121,16 @@ class MapInfoList:
 				result.update({CURRENT_BUILDING : self.building[self.currentBuilding]})
 				return result
 
-			elif(self.mode == REACH_DEST_BUILDING):
+			elif(self.mode == REACH_NODE):
+				currentNode = result[CURRENT_NODE]
+				if(currentNode == STAIRS_NODE_ID && self.building[self.currentBuilding] == STAIRS_BUILDING_ID):
+					self.mode = STAIRS
+					for key in result.keys():
+						if key == MODE:
+							result[key] = STAIRS
+				return result
 
-				print "REACH END OF BUILDING: current building", self.currentBuilding
+			elif(self.mode == REACH_DEST_BUILDING):
 
 				if(self.currentBuilding == len(self.building) - 1):
 					self.mode = ARRIVE_DESTINATION
@@ -138,6 +149,6 @@ class MapInfoList:
 
 if __name__ == "__main__":
 	mapi = MapInfoList()
-	mapi.shortestPath(1, 2, 1, 1, 2, 26)
+	mapi.shortestPath(1, 2, 1, 2, 3, 16)
 
 

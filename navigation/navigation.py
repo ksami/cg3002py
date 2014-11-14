@@ -24,6 +24,7 @@ MAXIMA = 1
 # Feedback time
 GO_FORWARD_UPDATE_TIME = 6
 TURN_UPDATE_TIME = 3
+STAIRS_UPDATE_TIME = 3
 
 # Turning directions
 LEFT = 0
@@ -82,6 +83,7 @@ class Navigation:
         # update time
         self.go_forward_time = 0
         self.turn_time = 0
+        self.stairs_time = 0
 
         # initializing variables needed for imu readings
 
@@ -186,14 +188,14 @@ class Navigation:
                         
                         else:
 
-                            if(self.calculate_distance and self.mode == GO_FORWARD):
-                                stride = getStrideLength(self.accel_list)
-                                print "--------------- STRIDE", stride
-                                self.distance += stride
-                                self.total_distance += stride
+                            if(self.calculate_distance):
+                                if(self.mode == GO_FORWARD):
+                                    stride = getStrideLength(self.accel_list)
+                                    print "--------------- STRIDE", stride
+                                    self.distance += stride
+                                    self.total_distance += stride
                                 self.accel_list = []
                                 self.calculate_distance = False
-                                #print "TOTAL DISTANCE", self.total_distance
 
                             if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -221,13 +223,15 @@ class Navigation:
 
                         else:
 
-                            if(self.calculate_distance and self.mode == GO_FORWARD):
-                                stride = getStrideLength(self.accel_list)
-                                print "--------------- STRIDE", stride
-                                self.distance += stride
-                                self.total_distance += stride
-                                self.accel_list = []
+                            if(self.calculate_distance):
+                                if(self.mode == GO_FORWARD):
+                                    stride = getStrideLength(self.accel_list)
+                                    print "--------------- STRIDE", stride
+                                    self.distance += stride
+                                    self.total_distance += stride
                                 self.calculate_distance = False
+                                self.accel_list = []
+
 
                             if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -343,6 +347,12 @@ class Navigation:
                     self.go_forward_time = time.time()
                     feedback = "gf"
                     print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward" + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
+
+            elif(self.mode == STAIRS):
+                if(time.time() - self.stairs_time >= STAIRS_UPDATE_TIME):
+                    self.stairs_time = time.time()
+                    feedback = "gup"
+                    print "\n\n--- MODE: STAIRS ---\n" + "Stairs"
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
