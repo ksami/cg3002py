@@ -126,7 +126,7 @@ class Navigation:
         self.altitude = 0
 
         # download map
-        self.mapinfolist = MapInfoList(BMP085_STANDARD, BMP085_I2CADDR, 1)
+        self.mapinfolist = MapInfoList()
 
     # call this method when receive start and destination id
     def getShortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
@@ -418,5 +418,6 @@ if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
     qr_queue = multiprocessing.Queue()
+    beep_queue = multiprocessing.Queue()
     navi.getShortestPath(1, 2, 1, 1, 2, 26)
-    navi.execute(queue, qr_queue)
+    navi.execute(queue, qr_queue, beep_queue)
