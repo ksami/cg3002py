@@ -24,6 +24,7 @@ MAXIMA = 1
 # Feedback time
 GO_FORWARD_UPDATE_TIME = 6
 TURN_UPDATE_TIME = 3
+STAIRS_UPDATE_TIME = 3
 
 # Turning directions
 LEFT = 0
@@ -82,6 +83,7 @@ class Navigation:
         # update time
         self.go_forward_time = 0
         self.turn_time = 0
+        self.stairs_time = 0
 
         # initializing variables needed for imu readings
 
@@ -345,6 +347,12 @@ class Navigation:
                     self.go_forward_time = time.time()
                     feedback = "gf"
                     print "\n\n--- MODE: GO_FORWARD ---\n" + "Go forward" + "\nCOORDX: " + str(self.coordX) + "   COORDY: " + str(self.coordY)
+
+            elif(self.mode == STAIRS):
+                if(time.time() - self.stairs_time >= STAIRS_UPDATE_TIME):
+                    self.stairs_time = time.time()
+                    feedback = "gup"
+                    print "\n\n--- MODE: STAIRS ---\n" + "Stairs"
 
             elif(self.mode == ARRIVE_DESTINATION):
                 print "REACH DESTINATION"
