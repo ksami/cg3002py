@@ -306,7 +306,7 @@ def executeInit():
 		# p_navisp.join()
 		#_navi.getShortestPath(sb, sl, sn, eb, el, en)
 		# _navi.getShortestPath(istartpt, iendpt)
-		_navi.getShortestPath(1,2,1, 1,2,10)
+		_navi.getShortestPath(1,2,16, 2,2,5)
 
 		# Change to NAVI state
 		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_READY}))
