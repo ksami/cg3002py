@@ -186,14 +186,14 @@ class Navigation:
                         
                         else:
 
-                            if(self.calculate_distance and self.mode == GO_FORWARD):
-                                stride = getStrideLength(self.accel_list)
-                                print "--------------- STRIDE", stride
-                                self.distance += stride
-                                self.total_distance += stride
+                            if(self.calculate_distance):
+                                if(self.mode == GO_FORWARD):
+                                    stride = getStrideLength(self.accel_list)
+                                    print "--------------- STRIDE", stride
+                                    self.distance += stride
+                                    self.total_distance += stride
                                 self.accel_list = []
                                 self.calculate_distance = False
-                                #print "TOTAL DISTANCE", self.total_distance
 
                             if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
@@ -221,13 +221,15 @@ class Navigation:
 
                         else:
 
-                            if(self.calculate_distance and self.mode == GO_FORWARD):
-                                stride = getStrideLength(self.accel_list)
-                                print "--------------- STRIDE", stride
-                                self.distance += stride
-                                self.total_distance += stride
-                                self.accel_list = []
+                            if(self.calculate_distance):
+                                if(self.mode == GO_FORWARD):
+                                    stride = getStrideLength(self.accel_list)
+                                    print "--------------- STRIDE", stride
+                                    self.distance += stride
+                                    self.total_distance += stride
                                 self.calculate_distance = False
+                                self.accel_list = []
+
 
                             if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
