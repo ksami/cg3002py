@@ -134,7 +134,7 @@ class Navigation:
     def getShortestPath(self, startBuilding, startLevel, startNode, endBuilding, endLevel, endNode):
         tup = self.mapinfolist.shortestPath(startBuilding, startLevel, startNode, endBuilding, endLevel, endNode)
 
-    def execute(self, queue, q_qrcode, q_step):
+    def execute(self, queue):
         
         ##### initialization stage #####
 
@@ -212,8 +212,8 @@ class Navigation:
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
                                     if(self.mode == GO_FORWARD):
-                                        #beep at every step
-                                        q_step.put(1)
+                                        # #beep at every step
+                                        # q_step.put(1)
 
                                         self.num_steps += 1
                                         self.steps += 1
@@ -248,8 +248,8 @@ class Navigation:
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
                                     if(self.mode == GO_FORWARD):
-                                        #beep at every step
-                                        q_step.put(1)
+                                        # #beep at every step
+                                        # q_step.put(1)
                                         
                                         self.num_steps += 1
                                         self.steps += 1
@@ -281,22 +281,22 @@ class Navigation:
             if(self.mode == STAIRS):
                 self.altitude = self.barometer.read_altitude(SEA_LEVEL)
 
-            # check qrcode updates
-            try:
-                qrstring = q_qrcode.get(block=False)
-                if qrstring != None:
-                        #mapid-nodeid eg. 3-02
-                        print qrstring
-                        ids = qrstring.split('-')
-                        mapid = int(ids[0])
-                        nodeid = int(ids[1])
-                        dic = self.mapinfolist.updateCurrentCoordinates(mapid, nodeid)
-                        self.coordX = dic[COORDX]
-                        self.coordY = dic[COORDY]
-            # Queue.empty
-            except Exception:
-                #ignore
-                pass
+            # # check qrcode updates
+            # try:
+            #     qrstring = q_qrcode.get(block=False)
+            #     if qrstring != None:
+            #             #mapid-nodeid eg. 3-02
+            #             print qrstring
+            #             ids = qrstring.split('-')
+            #             mapid = int(ids[0])
+            #             nodeid = int(ids[1])
+            #             dic = self.mapinfolist.updateCurrentCoordinates(mapid, nodeid)
+            #             self.coordX = dic[COORDX]
+            #             self.coordY = dic[COORDY]
+            # # Queue.empty
+            # except Exception:
+            #     #ignore
+            #     pass
 
             ##### check state machine #####
             result = self.mapinfolist.giveDirection(self.distance, self.heading, self.altitude, self.coordX, self.coordY, self.steps)
@@ -423,7 +423,7 @@ import multiprocessing
 if __name__ == "__main__":
     navi = Navigation()
     queue = multiprocessing.Queue()
-    qr_queue = multiprocessing.Queue()
-    beep_queue = multiprocessing.Queue()
+    # qr_queue = multiprocessing.Queue()
+    # beep_queue = multiprocessing.Queue()
     navi.getShortestPath(2, 2, 14, 2, 3, 11)
-    navi.execute(queue, qr_queue, beep_queue)
+    navi.execute(queue)

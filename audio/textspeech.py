@@ -40,7 +40,6 @@ class Speak:
 			w = cmd[2:]			   	   #w is the stuff to add to the command (Change Later) 
 			command = (program + "\"" + a + "\"").format(confirm = w) + dumpOutput
 			#print command for debugging
-			self.prevcmd = cmd[0]
 
 		# elif cmd[0:2] == "tl" or cmd[0:2] == "tr":
 		# 	a = Speak.cmd_list[cmd[0:2]]
@@ -98,28 +97,21 @@ class Speak:
 					w = cmd[2:]			   	   #w is the stuff to add to the command (Change Later) 
 					command = (program + "\"" + a + "\"").format(confirm = w) + dumpOutput
 					#print command for debugging
-					self.prevcmd = cmd[0]
 
 				elif cmd[0:2] == "tl" or cmd[0:2] == "tr":
-					if self.prevcmd == "tl" or self.prevcmd == "tr":
-						pass
-					else:
-						a = Speak.cmd_list[cmd[0:2]]
-						w = cmd[3:]
-						command = (program + "\"" + a + "\"").format(angle = w) + dumpOutput
-						self.prevcmd = cmd[0:2]
+					a = Speak.cmd_list[cmd[0:2]]
+					w = cmd[3:]
+					command = (program + "\"" + a + "\"").format(angle = w) + dumpOutput
 
 				elif cmd[0:2] == "rn":
 					a = Speak.cmd_list[cmd[0:2]]
 					w = cmd[3:]
 					command = (program + "\"" + a + "\"").format(node = w) + dumpOutput
-					self.prevcmd = cmd[0:2]
 
 				elif cmd[0:2] == "sj":
 					a = Speak.cmd_list[cmd[0:2]]
 					w = cmd[3:]
 					command = (program + "\"" + a + "\"").format(numBuildings = w) + dumpOutput
-					self.prevcmd = cmd[0:2]
 
 				elif cmd[0:2] == "sb":
 					cmd = cmd.split(',')
@@ -129,7 +121,6 @@ class Speak:
 					y = cmd[3]
 					z = cmd[4]
 					command = (program + "\"" + a + "\"").format(building=w, level=x, numNodes=y, startNode=z) + dumpOutput
-					self.prevcmd = cmd[0]
 
 				elif cmd[0:2] == "bn":
 					cmd = cmd.split(',')
@@ -137,7 +128,6 @@ class Speak:
 					w = cmd[1]
 					x = cmd[2]
 					command = (program + "\"" + a + "\"").format(building=w, node=x) + dumpOutput
-					self.prevcmd = cmd[0]
 
 				else:
 					try:
