@@ -13,9 +13,9 @@ ACCEL_THRESHOLD = 1000 # = 32767 - 31128 (max and min values when stabilized)
 PEAK_THRESHOLD = 7000
 TIME_THRESHOLD = 0.4
 HIGH_PASS = 0.8
+#STRIDE_COEFFICIENT = 1.484137931
 STRIDE_COEFFICIENT = 1.6868732000358262770692
 #STRIDE_COEFFICIENT = 1.098441598502826
-#STRIDE_COEFFICIENT = 1.319148936
 COMPASS_X_AXIS = -145 # this was obtained with a laptop nearby. Ill do it again when i use wifi dongle
 COMPASS_Z_AXIS = -135
 
@@ -200,23 +200,23 @@ class Navigation:
                         else:
 
                             if(self.calculate_distance):
-                                if(self.mode == GO_FORWARD):
-                                    stride = getStrideLength(self.accel_list)
-                                    print "--------------- STRIDE", stride
-                                    self.distance += stride
-                                    self.total_distance += stride
+                                #if(self.mode == GO_FORWARD):
+                                stride = getStrideLength(self.accel_list)
+                                print "--------------- STRIDE", stride
+                                self.distance += stride
+                                self.total_distance += stride
                                 self.accel_list = []
                                 self.calculate_distance = False
 
                             if( self.accel_maxima.y - self.accel_val.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
-                                    if(self.mode == GO_FORWARD):
+                                    #if(self.mode == GO_FORWARD):
                                         # #beep at every step
                                         # q_step.put(1)
 
-                                        self.num_steps += 1
-                                        self.steps += 1
+                                    self.num_steps += 1
+                                    self.steps += 1
 
                                     self.peak_direction = MAXIMA
                                     self.accel_minima = self.accel_val
@@ -235,11 +235,11 @@ class Navigation:
                         else:
 
                             if(self.calculate_distance):
-                                if(self.mode == GO_FORWARD):
-                                    stride = getStrideLength(self.accel_list)
-                                    print "--------------- STRIDE", stride
-                                    self.distance += stride
-                                    self.total_distance += stride
+                                #if(self.mode == GO_FORWARD):
+                                stride = getStrideLength(self.accel_list)
+                                print "--------------- STRIDE", stride
+                                self.distance += stride
+                                self.total_distance += stride
                                 self.calculate_distance = False
                                 self.accel_list = []
 
@@ -247,12 +247,12 @@ class Navigation:
                             if(self.accel_val.y - self.accel_minima.y >= self.peak_threshold ):
                                 if(time.time() - self.time_window >= TIME_THRESHOLD):
                                     # a maxima has been detected and a step is detected
-                                    if(self.mode == GO_FORWARD):
+                                    #if(self.mode == GO_FORWARD):
                                         # #beep at every step
                                         # q_step.put(1)
                                         
-                                        self.num_steps += 1
-                                        self.steps += 1
+                                    self.num_steps += 1
+                                    self.steps += 1
 
                                     self.peak_direction = MINIMA
                                     self.accel_maxima = self.accel_val
@@ -354,7 +354,7 @@ class Navigation:
                             
                             # feedback is "Turn right by " + str(angle) + " degrees"
                             feedback = "tr"
-                        print "\n\n--- MODE: TURN ---\n" + feedback
+                        print "\n\n--- MODE: TURN ---\n" + feedback + " " + str(angle)
                 else:
                     self.startNavi = False
                     self.turn_time = time.time()
