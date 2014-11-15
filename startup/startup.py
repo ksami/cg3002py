@@ -17,4 +17,4 @@ time.sleep(10)
 
 print "executing main"
 
-main = execute('python /home/pi/cg3002py/main-nocomms.py 2>&1 /home/pi/cg3002log')
+#main = execute('python /home/pi/cg3002py/main-nocomms.py 2>&1 /home/pi/cg3002log')
