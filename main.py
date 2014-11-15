@@ -330,7 +330,7 @@ def executeNavi():
 
 	#if process has not been created before
 	if p_navi == None:
-		p_navi = createProcess(navigation.main.execute, (_navi, q_navi, q_qrcode, q_step))
+		p_navi = createProcess(navigation.main.execute, (_navi, q_navi))
 		p_navi.start()
 
 	if p_feedback == None:
