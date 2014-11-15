@@ -149,6 +149,6 @@ class MapInfoList:
 
 if __name__ == "__main__":
 	mapi = MapInfoList()
-	mapi.shortestPath(1, 2, 1, 2, 3, 16)
+	mapi.shortestPath(1, 2, 40, 2, 3, 13)
 
 
