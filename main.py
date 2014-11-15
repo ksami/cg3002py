@@ -46,19 +46,19 @@ q_navi = createQueue()
 q_xbee = createQueue()
 q_listen = createQueue()
 q_time = createQueue()
-q_qrcode = createQueue()
-q_step = createQueue()
-q_kill_qr = createQueue()
+# q_qrcode = createQueue()
+# q_step = createQueue()
+# q_kill_qr = createQueue()
 q_kill_tts = createQueue()
 q_kill_listen = createQueue()
-q_kill_step = createQueue()
+# q_kill_step = createQueue()
 
 # Processes
 p_navi = None
 p_feedback = None
 # p_step = None
 p_listen = None
-p_qrscan = None
+# p_qrscan = None
 p_receive = createProcess(function=comms.python.main.receive, args=(q_xbee, _comms))
 
 # Start xbee receive
@@ -412,15 +412,15 @@ def executeWait():
 				p_feedback.terminate()
 				p_feedback.join()
 
-		if p_qrscan != None:
-			if p_qrscan.is_alive():
-				p_qrscan.terminate()
-				p_qrscan.join()
+		# if p_qrscan != None:
+		# 	if p_qrscan.is_alive():
+		# 		p_qrscan.terminate()
+		# 		p_qrscan.join()
 
-		if p_step != None:
-			if p_step.is_alive():
-				p_step.terminate()
-				p_step.join()
+		# if p_step != None:
+		# 	if p_step.is_alive():
+		# 		p_step.terminate()
+		# 		p_step.join()
 		
 		# End NAVI
 		p_send = createProcess(comms.python.main.send, (_comms, {"type": comms.python.main.NAVI_END}))
